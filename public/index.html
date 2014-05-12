@@ -1,0 +1,551 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Ruby on Rails: Welcome aboard</title>
+    <style type="text/css" media="screen">
+      body {
+        margin: 0;
+        margin-bottom: 25px;
+        padding: 0;
+        background-color: #f0f0f0;
+        font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
+        font-size: 13px;
+        color: #333;
+      }
+      
+      h1 {
+        font-size: 28px;
+        color: #000;
+      }
+      
+      a  {color: #03c}
+      a:hover {
+        background-color: #03c;
+        color: white;
+        text-decoration: none;
+      }
+      
+      
+      #page {
+        background-color: #f0f0f0;
+        width: 750px;
+        margin: 0;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      #content {
+        float: left;
+        background-color: white;
+        border: 3px solid #aaa;
+        border-top: none;
+        padding: 25px;
+        width: 500px;
+      }
+      
+      #sidebar {
+        float: right;
+        width: 175px;
+      }
+
+      #footer {
+        clear: both;
+      }
+      
+
+      #header, #about, #getting-started {
+        padding-left: 75px;
+        padding-right: 30px;
+      }
+
+
+      #header {
+        background-image: url("images/rails.png");
+        background-repeat: no-repeat;
+        background-position: top left;
+        height: 64px;
+      }
+      #header h1, #header h2 {margin: 0}
+      #header h2 {
+        color: #888;
+        font-weight: normal;
+        font-size: 16px;
+      }
+      
+      
+      #about h3 {
+        margin: 0;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+      
+      #about-content {
+        background-color: #ffd;
+        border: 1px solid #fc0;
+        margin-left: -11px;
+      }
+      #about-content table {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 11px;
+        border-collapse: collapse;
+      }
+      #about-content td {
+        padding: 10px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+      }
+      #about-content td.name  {color: #555}
+      #about-content td.value {color: #000}
+      
+      #about-content.failure {
+        background-color: #fcc;
+        border: 1px solid #f00;
+      }
+      #about-content.failure p {
+        margin: 0;
+        padding: 10px;
+      }
+      
+      
+      #getting-started {
+        border-top: 1px solid #ccc;
+        margin-top: 25px;
+        padding-top: 15px;
+      }
+      #getting-started h1 {
+        margin: 0;
+        font-size: 20px;
+      }
+      #getting-started h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: normal;
+        color: #333;
+        margin-bottom: 25px;
+      }
+      #getting-started ol {
+        margin-left: 0;
+        padding-left: 0;
+      }
+      #getting-started li {
+        font-size: 18px;
+        color: #888;
+        margin-bottom: 25px;
+      }
+      #getting-started li h2 {
+        margin: 0;
+        font-weight: normal;
+        font-size: 18px;
+        color: #333;
+      }
+      #getting-started li p {
+        color: #555;
+        font-size: 13px;
+      }
+      
+      
+      #search {
+        margin: 0;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        font-size: 11px;
+      }
+      #search input {
+        font-size: 11px;
+        margin: 2px;
+      }
+      #search-text {width: 170px}
+      
+      
+      #sidebar ul {
+        margin-left: 0;
+        padding-left: 0;
+      }
+      #sidebar ul h3 {
+        margin-top: 25px;
+        font-size: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ccc;
+      }
+      #sidebar li {
+        list-style-type: none;
+      }
+      #sidebar ul.links li {
+        margin-bottom: 5px;
+      }
+      
+    </style>
+    <script type="text/javascript" src="javascripts/prototype.js"></script>
+    <script type="text/javascript" src="javascripts/effects.js"></script>
+    <script type="text/javascript">
+      function about() {
+        if (Element.empty('about-content')) {
+          new Ajax.Updater('about-content', 'rails/info/properties', {
+            method:     'get',
+            onFailure:  function() {Element.classNames('about-content').add('failure')},
+            onComplete: function() {new Effect.BlindDown('about-content', {duration: 0.25})}
+          });
+        } else {
+          new Effect[Element.visible('about-content') ? 
+            'BlindUp' : 'BlindDown']('about-content', {duration: 0.25});
+        }
+      }
+      
+      window.onload = function() {
+        $('search-text').value = '';
+        $('search').onsubmit = function() {
+          $('search-text').value = 'site:rubyonrails.org ' + $F('search-text');
+        }
+      }
+    </script>
+  </head>
+  <body>
+	<style>
+	.btn1{
+		border:1px solid #d8d8d8;
+	}
+	.gradient{
+		background: -webkit-gradient(linear, 0 0, 0 100%, from(#eee), to(#aaa)); /** Chrome Safari **/
+		background: -moz-linear-gradient(top, #eee, #bbb); /** FireFox **/
+		background: -o-linear-gradient(top, #eee, #aaa);  /** Opear **/
+		background: -ms-linear-gradient(#eeeeee 0%,#aaaaaa 100%);  /** IE9 IE10 **/
+		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee',endColorstr='#aaaaaa',grandientType=1); /** IE7 **/
+		-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee',endColorstr='#aaaaaa',grandientType=1); /** IE8 **/	}
+	.gradient-lefttoright{
+		background: -webkit-gradient(linear, 0 0, 100%, 0, from(#eee), to(#aaa)); /** Chrome Safari **/
+		background: -moz-linear-gradient(left, #eee, #bbb); /** FireFox **/
+		background: -o-linear-gradient(left, #eee, #aaa);  /** Opear **/
+		background: -ms-linear-gradient(#eeeeee 0%,#aaaaaa 100%);  /** IE9 IE10 **/
+		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee',endColorstr='#aaaaaa',grandientType=1); /** IE7 **/
+		-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee',endColorstr='#aaaaaa',grandientType=1); /** IE8 **/	}
+	.round_border{
+		border-radius: 3px;  
+		-moz-border-radius: 3px;  
+		-webkit-border-radius: 3px;
+	}
+	.shadowed-border{
+		-webkit-box-shadow: inset  1px 1px 1px red;  
+		-moz-box-shadow: inset 1px 1px 1px blue;  
+		box-shadow: inset 1px 1px 1px gray;
+	}
+	</style>
+	<script>
+		var g_main_width = 1000;
+	</script>
+	<div id="main" style=" position: absolute;width: 1000px;height: 600px;margin-left:100px;">
+		
+		<div id="main_toolbar" class="gradient" style="width:100%;height:35px;border:1px solid #d8d8d8;border-bottom:0px;">
+			<center>
+			<div id="console" class="round_border shadowed-border" style="position:relative;top:10px;height:20px;width:300px;border:0px solid red;background:#f0f0f0;overflow:hidden;">
+				dd
+			</div>
+			</center>
+		</div>
+		
+		<div id="left_pane" style="position:relative;float:left;width:18%;height:600px;background:#f5f5f5;">
+			<div id="tree" style="margin:2px;font-size:18px;">
+				<ul>
+			      <li>Root node 1
+			        <ul>
+			          <li id="child_node_1">Child node 1</li>
+			          <li>Child node 2</li>
+			        </ul>
+			      </li>
+			      <li>Root node 2</li>
+			    </ul>
+			</div>
+		</div>
+		<div id="splitter" style="position:relative;float:left;height:600px;width:2px;border:0px solid red;z-index:100;" class="gradient-lefttoright" >
+		</div>
+		<div id='code_pane' style="margin-left:18.5%;width:81.5%;height:100%;border:1px solid #d8d8d8;border-top:0;">
+			<div class='cp_toolbar' style="width:100%;height:20px;border:1px solod blue;background:#f5f5f5">
+				file
+				<div id='cp_tb_btns' style="float:right;">
+					<button class='btn1' onclick="openvi();">vim</button>
+					<button class='btn1'>textmate</button>
+				</div>
+			</div>
+			<div id="editor" name="body" style="width:99%;height:580px;">
+				empty
+			</div>
+		</div>
+	</div> <!-- main -->
+
+	
+	
+	<!--script src="http://wh.joyqom.com/javascripts/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script-->
+	<!--script src="http://code.jquery.com/jquery-2.1.1.js"></script-->
+	<!--script src="http://wh.joyqom.com/javascripts/utils.js" type="text/javascript" charset="utf-8"></script-->
+	
+	<!--script src="/javascripts/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script-->
+	
+	<script src="/javascripts/jquery-2.1.1.js"></script>
+	<!--script src="/javascripts/utils.js" type="text/javascript" charset="utf-8"></script-->
+
+	<!-- code editor -->
+	<script src="/javascripts/ace.js" type="text/javascript" charset="utf-8"></script>
+	<!--script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="http://gpl.internetconnection.net/vi/vi.js"></script>
+	<link rel="stylesheet" href="http://gpl.internetconnection.net/vi/vi.css" type="text/css" /-->
+
+	
+	<!--script src="/javascripts/vi.js"></script>
+	<link rel="stylesheet" href="/stylesheets/vi.css" type="text/css" /-->
+	
+
+
+
+	<script>
+
+	function openvi(){
+		alert($("div#editor")[0]);
+		// editor($('body')[0]);
+		editor($("div#editor")[0]);
+		alert();
+		return false;
+	}
+	// var ace = require("lib/ace");
+	var editor = ace.edit("editor");
+	
+	// editor.setTheme("ace/theme/twilight");
+	
+	editor.getSession().setMode("ace/mode/javascript");
+	
+	 editor.getSession().setTabSize(4);
+	document.getElementById('editor').style.fontSize='18px';
+	
+	editor.getSession().setUseWrapMode(false);
+	
+	editor.setHighlightActiveLine(false);
+	
+	editor.setReadOnly(false);
+	
+	editor.setValue("the new text here");
+	
+
+	</script>
+	
+	<!-- acitree -->
+	<!--script src="jquery.aciTree.min.js"></script-->
+	<script>
+/*		alert(1);
+	// init tree
+	alert($('#tree')[0]);
+	$('#tree').aciTree({
+	    ajax: {
+	        url: '/sample.json'
+	    }
+	});
+
+		alert();*/
+	</script>
+	
+	<!-- jstree >
+	<link rel="stylesheet" href="/javascripts/jstree/themes/default/style.min.css" />
+	<script src="/javascripts/jstree/jstree.min.js"></script-->
+	<script>
+/*	function init_jstree(){
+		$('#tree').jstree();
+		alert(343);
+	
+		$('#tree').on("changed.jstree", function (e, data) {
+		  //console.log(data.selected);
+		});
+	
+		$('button').on('click', function () {
+		  $('#tree').jstree(true).select_node('child_node_1');
+		  $('#tree').jstree('select_node', 'child_node_1');
+		  $.jstree.reference('#tree').select_node('child_node_1');
+		});
+	}
+	alert("js done");*/
+	</script>
+	
+	<!-- jqtree -->
+	<script src="/javascripts/tree.jquery.js"></script>
+	<link rel="stylesheet" href="/stylesheets/jqtree.css">
+	<style>
+	div.jqtree-element span{
+		overflow-x:hidden;
+	} 
+	ul.jqtree-tree .jqtree-element{
+		height:30px;
+		overflow-x:hidden;
+		white-space:nowrap;
+
+	}
+	div.jqtree-element a{
+		float:left;
+		position:relative;
+		left:0;
+	}
+	div.jqtree-element img{
+		position:relative;
+		float:left;
+	}
+	ul.jqtree-tree  .jqtree-toggler {
+		float:left;
+		position:relative;
+		left:0;
+	}
+	</style>
+	<script>
+	var data = 
+	[
+	    {
+	        label: 'Business Objects',
+			type: 'folder',
+	        children: [
+	            { 
+					label: 'child1',
+					type: 'file',
+	 			},
+	            {
+		 			label: 'child2',
+					type: 'file', }
+	        ]
+	    },
+	    {
+	        label: 'Extensions',
+			type: 'extension',
+	        children: [
+	            { 
+					label: 'child3',
+					type: 'file', }
+	        ]
+	    }
+	];
+	var root = [
+		{
+			label: 'B1_project',
+			type: 'project',
+			children:data
+		}
+	]
+	$('#tree').tree({
+	        data: root,
+		  onCreateLi: function(node, $li) {
+		        // Add 'icon' span before title
+				icon = "/images/File-32.png";
+				style= "vertical-align:bottom;height:25px;border:0px solid red;";
+				if (node.type == 'folder')
+					icon = "/images/Folder-128.png";
+				if (node.type == 'project')
+					icon = "/images/apps-256.png";
+				if (node.type == "extension")
+					icon = "/images/Plugins-48.png";
+				if (node.type == 'file')
+					style= "vertical-align:bottom;height:25px;border:0px solid red;margin-left:20px;";
+
+		        $li.find('.jqtree-title').before('<img style="'+style+'" src="'+icon+'" />');
+		    }
+	    });
+
+		// bind 'tree.click' event
+		$('#tree').bind(
+		    'tree.click',
+		    function(event) {
+		        // The clicked node is 'event.node'
+		        var node = event.node;
+				if (node.type == 'file')
+					open_file(node);
+		    }
+		);
+		function open_file(node){
+			// TODO 
+		}
+	</script>
+	
+	<script>
+	var sp_stat = 0; // 0: normal, 1: over, 2: dragging
+	$("#splitter").mouseover(function(event){
+		if (sp_stat == 0)
+			sp_stat = 1;
+		$(this).css("cursor", "move");
+		// var x=event.clientX;
+		// var y=event.clientY;
+		// var msg = "";
+		// msg += "st:"+sp_stat;
+		// msg += "<br/>x:"+x;
+		// $("#console").html(msg);
+	});
+	$("#splitter").mouseout(function(event){
+	
+		if (sp_stat == 1){
+			sp_stat = 0;
+		//	$(this).css("cursor", "auto");
+		}
+		// var x=event.clientX;
+		// var y=event.clientY;
+		// var msg = "";
+		// msg += "st:"+sp_stat;
+		// msg += "<br/>x:"+x;
+		// $("#console").html(msg);
+		return true;
+	});
+	$("#splitter").mousedown(function(){
+		if (sp_stat != 1)
+			return true;
+		// console.log("mounsedown");
+		sp_stat = 2;
+		
+		// var x=event.clientX;
+		// var y=event.clientY;
+		// var msg = "";
+		// msg += "st:"+sp_stat;
+		// msg += "<br/>x:"+x;
+		// $("#console").html(msg);
+		return true;
+	});
+	$("#main").mouseup(function(event){
+		if (sp_stat != 2)
+			return;
+		// alert("up");
+		sp_stat = 0;
+		
+		// var x=event.clientX;
+		// var y=event.clientY;
+		// var msg = "";
+		// msg += "st:"+sp_stat;
+		// msg += "<br/>x:"+x;
+		// $("#console").html(msg);
+		return true;
+	});
+
+	$("#main").mousemove(function(event){
+		if (sp_stat != 2)
+			return;
+		// console.log("mounsedown");
+		// alert($("#main").offset().left);
+		var x= event.clientX - $("#main").offset().left;
+		// var y=event.clientY; 
+		if (x > 600)
+			x = 600;
+		if ( x < 150)
+			x = 150;
+
+		$("#left_pane").width(x+"px");
+		var w = g_main_width-x-2;
+		$("#code_pane").width(w+"px");
+		$("#code_pane").css("margin-left", x+"px");
+		
+		// $("#editor").width(w+"px");
+		var msg = "";
+		msg += "st:"+sp_stat;
+		msg += "<br/>x:"+x;
+		$("#console").html(msg);
+		// alert(x);
+		
+		sp_stat = 2;
+		return false;
+
+	});
+
+	</script>
+
+  </body>
+</html>
