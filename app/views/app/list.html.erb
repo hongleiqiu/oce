@@ -1,0 +1,7 @@
+<% @apps.each {|app|%>
+<div class="login-btn-panel" >
+    <a id="btn_open_app" class="login-btn" href="/index.html" style="width:100px;height:20px;padding:10 10 50 30;">
+			<%=app.name%>(<%=app.appid%>)
+    </a>
+</div>
+<% } %>
