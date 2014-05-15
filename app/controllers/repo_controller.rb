@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'settings.rb'
-require 'git'
+# require 'git'
+
 class RepoController < ApplicationController
     
     def createapp
@@ -8,6 +9,7 @@ class RepoController < ApplicationController
         name=params[:name]
         desc=params[:desc]
         
+        begin
         p "appid=>#{appid}"
         App.new({
             :appid=>appid,
@@ -15,6 +17,10 @@ class RepoController < ApplicationController
             :desc=>desc,
             :uid=>@user.id
         }).save!
+        rescue Exception=>e
+            error("create app failed #{e.inspect}")
+            return
+        end
         
         _create_repo(appid)
         
@@ -48,20 +54,13 @@ class RepoController < ApplicationController
     
     # clone repo for user
     def init(repo)       
-        p "===>#{@user.name}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}"  
         # = Git.clone("#{@user.name}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}",
         # repo, :path => './tmp/checkout')
          # g = Git.clone("#{@user.name}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}", repo)
         # g.config('user.name', @user.name)
         # g.config('user.email', @user.email)
         
-        command = "mkdir -p #{g_SETTINGS[:workspace_root]}/#{@user.id}\n
-                cd #{g_SETTINGS[:workspace_root]}/#{@user.id}\n 
-                git clone #{@user.name}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}"
-        p "command=>#{command}"
-        r = system(command)
-        # success('OK', {:ret=>r})
-        p "==>r=#{r}"
+        Git.clone(repo, @user.name)
                 
     end
     

@@ -115,8 +115,9 @@ function inspect(obj) {
 			props += "function "+p+"()\n";
          }else{
            	props+="["+typeof(obj[p])+"]" +  p + "=" + obj[p] + "\n";
-            if (typeof(obj[p])=="object")
-                    props+="[\n"+inspect(obj[p])+"\n]\n";
+			// the recursive may cause dead loop
+            // if (typeof(obj[p])=="object")
+                    // props+="[\n"+inspect(obj[p])+"\n]\n";
          }
      }
 
