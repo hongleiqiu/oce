@@ -35,11 +35,11 @@ class ApplicationController < ActionController::Base
   end
   
   def workspace_path
-      "#{g_SETTINGS[:workspace_root]}/#{@user.id}"
+      "#{g_SETTINGS[:workspace_root]}/#{@user.name}"
   end
   
   def repo_ws_path(repo)
-      "#{g_SETTINGS[:workspace_root]}/#{@user.id}/#{repo}"
+      "#{g_SETTINGS[:workspace_root]}/#{@user.name}/#{repo}"
       
   end
 end

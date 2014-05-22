@@ -107,12 +107,16 @@ function inspect(obj) {
 
 	
      var props = "";
-
-     for(var p in obj){
+	
+	var type = typeof(obj);
+	if (type == "string" || type == "number" || type == "boolean")
+		return obj+"["+typeof(obj)+"]";
+     
+	for(var p in obj){
 
          if(typeof(obj[p])=="function"){
           // obj[p]();
-			props += "function "+p+"()\n";
+			// props += "function "+p+"()\n";
          }else{
            	props+="["+typeof(obj[p])+"]" +  p + "=" + obj[p] + "\n";
 			// the recursive may cause dead loop
@@ -122,7 +126,7 @@ function inspect(obj) {
      }
 
     // alert(props);
-	return obj+":\n"+props;
+	return obj+"["+typeof(obj)+"]:\n"+props;
  }
 
 // get query string in url

@@ -37,46 +37,84 @@ class AppController < ApplicationController
         
     end
     
+    # save file
     def sf
         appid = params[:appid]
         fname = params[:fname]
         type = params[:type]
-        if type == 'extension'
+        content = params[:content]
+        isnew = params[:isnew]
+        
+        if type == 'code'
             
         elsif type == 'bo'
             
         end
         repo = appid
         begin
+            
             dir = repo_ws_path(repo)+"/app/#{type}"
             FileUtils.makedirs(dir)
             # logger.info("===========>#{dir}/#{id}<====")
+            p "===>save to file #{dir}/#{fname}"
+            
             aFile = File.new("#{dir}/#{fname}","w")
             aFile.puts content
             aFile.close
+            p "===>save to file #{dir}/#{fname} ok"
+            relative_path = "app/#{type}/#{fname}"
+            if isnew == 'true'
+                Git2.add_and_commit(repo, @user.name, relative_path)
+            else
+                Git2.commit(repo, @user.name, relative_path)
+            end
           rescue Exception=>e
             # logger.error e
             p e.inspect
+            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
           end
           
-          update_to_appinfo(app, fname, type)
-          save_appinfo
+          if isnew == 'true'
+              r,m = update_to_appinfo(appid, fname, type, "add")
+          else
+              r,m = update_to_appinfo(appid, fname, type)
+          end
+                 
+            if r == false
+                error(m)
+                return
+            end
+          
+          # save_appinfo(appid)
+          
+          Git2.push(repo, @user.name)
           success()
     end
     
-    def update_to_appinfo(appid, fname, type)
+    def update_to_appinfo(appid, fname, type, op_type="update")
+        p "===>update app #{appid}"
         json = load_appinfo(appid)
         if type == "bo"
-            bo_list = json.bo_list
+            bo_list = json['bo_list']
             if bo_list.include?(fname) == false
                 bo_list.push(fname)
+            else 
+                if op_type == 'add'
+                    return [false, "Cannot add file #{fname}, file already exists"]
+                end
             end
-        elsif type=='extension'
+        elsif type=='code'
+            ext_list = json['ext_list']
             if ext_list.include?(fname) == false
                 ext_list.push(fname)
+            else 
+                if op_type == 'add'
+                    return [false, "Cannot add file #{fname}, file already exists"]
+                end    
             end
         end
-        save_appinfo(appid)
+        save_appinfo(appid, json.to_json)
+        return [true, "ok"]
     end
     def load_appinfo(appid)
         fname = repo_ws_path(appid)+"/.appinfo"
@@ -86,7 +124,8 @@ class AppController < ApplicationController
                     data= nil  
                     open(fname, "r+") {|f|
                            data = f.read
-                       
+                           
+                       p "===>data(#{fname}):#{data}"
                              if data
                                  json = JSON.parse(data)
                                  # yield f, json if block_given?
@@ -99,6 +138,8 @@ class AppController < ApplicationController
             end
         rescue Exception=>e
              p e.inspect
+             p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+             
         end
         
         if json == nil
@@ -111,14 +152,19 @@ class AppController < ApplicationController
         
     end
     
-    def save_appinfo(appid)
+    def save_appinfo(appid, content)
          begin
-                dir = repo_ws_path(repo)
+                dir = repo_ws_path(appid)
                 FileUtils.makedirs(dir)
                 # logger.info("===========>#{dir}/#{id}<====")
-                aFile = File.new("#{dir}/#{".appinfo"}","w")
+                p "===>save to file #{dir}/.appinfo"
+                p "===>content #{content}"
+                aFile = File.new("#{dir}/.appinfo","w")
                 aFile.puts content
                 aFile.close
+                relative_path = ".appinfo"
+                
+                Git2.add_and_commit(appid, @user.name, relative_path, "user change")
               rescue Exception=>e
                 # logger.error e
                 p e.inspect

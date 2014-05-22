@@ -231,7 +231,9 @@
 			</div>
 			</center>
 			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-10px;border:0px solid red;">
-				<a href="javascript:save();" style="display:block;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+
 			</div>
 		</div>
 		
@@ -276,9 +278,12 @@
 			<img src="/images/wait3.gif" style="width:50px;margin-top:230px;"/>
 		</center>
 	</div>
-	<div id="popup" class="round_border_m" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:250px;top:180px;z-index:800;width:200px;height:128px;font-size:13pt;min-height:37px;max-height:200px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
+	<div id="popup" class="round_border_m" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:350px;top:180px;z-index:800;width:200px;height:128px;font-size:13pt;min-height:37px;max-height:200px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
 	</div>
 	
+	<div id="edit_box"  style="display:none;background-color:white;color:black;text-align:left;position:absolute;z-index:800;font-size:18pt;overflow:auto;word-wrap: break-word;word-break: normal;border:0px red solid;">
+		<input id="edit_value" style="font-size:18pt;min-width:300px;"></input>
+	</div>
 	<!--script src="http://wh.joyqom.com/javascripts/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script-->
 	<!--script src="http://code.jquery.com/jquery-2.1.1.js"></script-->
 	<!--script src="http://wh.joyqom.com/javascripts/utils.js" type="text/javascript" charset="utf-8"></script-->
@@ -343,7 +348,12 @@
 		content = editor.getValue(); 
 		type = g_selected_node.type;
 		fname = g_selected_node.name;
-		alert(content);
+		isnew = g_selected_node.isNew;
+		// alert(isnew);
+		// alert(content);
+		if (type != 'bo' && type !='code')
+			return;
+		//alert(content);
 		$.ajax({
 			type: "post",
 			url: "/app/sf?t="+ new Date().getTime(),
@@ -352,7 +362,9 @@
 			data: {
 				appid:g_appid,
 				fname:fname,
-				type:type
+				type:type,
+				content:content,
+				isnew:isnew
 				// sid: '<%=@sid%>',
 				// authenticity_token:window._token
 			}, 
@@ -363,6 +375,7 @@
 				if (data.error){
 					popup(data.error);
 				}else{
+					g_selected_node.isNew = "false";
 					// $("#applist").html(data);
 					popup('Save successfully');
 					
@@ -383,6 +396,9 @@
 	    
 	}
 
+	function gitlist(){
+		window.location.href='http://mygithub/'+g_appid+".git";
+	}
 	</script>
 	
 	<!-- acitree -->
@@ -475,7 +491,7 @@
 					if (data.error){
 						popup(data.error);
 					}else{
-						// $("#applist").html(data);
+						// popup(data.data_root);
 						init_tree(data.data_root);
 						
 					}
@@ -496,11 +512,40 @@
 		var $tree = null;
 		var g_root_node = null;
 		var g_selected_node = null;
+
 		function init_tree(data_root){
-				if (data_root == null)
-				data_root = root;
+			// alert(inspect(data_root.bo_list));
+			
+			// alert(inspect(data_root));
+			if (data_root != null){
+				
+				if (data_root.bo_list != null && data_root.bo_list.lenght>0)
+				var i = 0;
+				for (i = 0;i <  data_root.bo_list.length; i++){
+					item = data_root.bo_list[i];
+					// alert("bo:"+inspect(item));
+					// alert("root:" + inspect(root.children));
+					root[0].children[0].children.push({
+						label:item,
+						type:"bo"
+					});
+				}
+				if (data_root.ext_list != null)
+				for (i = 0;i <  data_root.ext_list.length; i++){
+					item = data_root.ext_list[i];
+					// alert("code:"+inspect(item));
+					
+					root[0].children[1].children.push({
+						label:item,
+						type:"code"
+					});
+				}
+			}
+			// alert();
+			
+			
 			 $tree = $('#tree').tree({
-			      data: data_root,
+			    data: root,
 			 	dragAndDrop: true,
 				  onCreateLi: function(node, $li) {
 				        // Add 'icon' span before title
@@ -530,7 +575,7 @@
 				        // The clicked node is 'event.node'
 				        var node = event.node;
 						g_selected_node = node;
-						if (node.type == 'file')
+						if (node.type == 'code')
 							open_file(node);
 						else if (node.type == 'bo')
 							open_bo(node);
@@ -541,6 +586,13 @@
 				    function(event) {
 				        // event.node is the clicked node
 				        // console.log(event.node);
+				        var node = event.node;
+						g_editing_node = node;
+				        if (node.type == 'code')
+							pre_rename_node(event)
+						else if (node.type == 'bo')
+							pre_rename_node(event)
+						else 
 						$tree.tree(
 							'openNode',
 							event.node,
@@ -556,14 +608,73 @@
 				        // 		        console.log('previous_parent', event.move_info.previous_parent);
 						if (event.move_info.target_node == g_root_node)
 							return false;
-						if ( (event.move_info.moved_node.type == 'file' && event.move_info.target_node.type=='bo_root') 
+						if ( (event.move_info.moved_node.type == 'code' && event.move_info.target_node.type=='bo_root') 
 						||  (event.move_info.moved_node.type == 'bo' && event.move_info.target_node.type=='extension'))
 							return false;
 						return true;
 				    }
 				);
 		}
+		function pre_rename_node(event){
+			var node = event.node;
+			// alert(node.name);
+	        $("#edit_box").css("display", "block");
+			// alert(inspect(event.click_event));
+			t = $(event.click_event.target);
+			tt = $(event.target);
+			// alert(tt.offset().left);
+			// alert(inspect(event.click_event.target));
+			// alert(t.position().left);
+			// alert(event.click_event.target.offsetLeft);
+			// alert(t.width());
+			$("#edit_box").css("left", t.offset().left);
+			$("#edit_box").css("top", t.offset().top);
+			// $("#edit_box").css("width", t.width());
+			tw = t.width();
+			if (tw<50)
+				tw=50;
+				// alert(tw);
+			$("#edit_value").width(tw);
+			$("#edit_value").val(node.name);
+			
+			// $("#edit_box").top(event.click_event.clientY);
+			
+		}
+		$("#edit_value").keydown(function(event){
+			if (g_editing_node == null){
+				$("#edit_box").css("display", "none");
+				$("#edit_value").val("");
+			}else{
+				// alert(event.keyCode);
+				if (event.keyCode==27){
+						$("#edit_box").css("display", "none");
 
+						$("#edit_value").val("");
+						g_editing_node = null;
+				}
+				else if (event.keyCode==13){
+					// alert("keydown");
+					var v = $("#edit_value").val();
+					// alert("v="+v);
+				
+					// alert(g_selected_node.name);
+					// alert($tree[0]);
+					va = {
+						type:g_editing_node.type,
+						isNew:g_editing_node.isNew,
+						label:v
+						};
+				
+					$tree.tree('updateNode', g_editing_node, va);
+					$("#edit_box").css("display", "none");
+				
+					$("#edit_value").val("");
+					g_editing_node = null;
+					
+					// alert(v);
+				};
+			}; // 	if (g_editing_node == null) else {
+		});
 	//////
 	var data = 
 	[
@@ -586,7 +697,7 @@
 	        children: [
 	 					//            { 
 	 					// label: 'child3',
-	 					// type: 'file', }
+	 					// type: 'code', }
 	        ]
 	    }
 	];
@@ -599,7 +710,7 @@
 			type: 'project',
 			children:data
 		}
-	]
+	];	
 
 
 		function open_file(node){
@@ -625,7 +736,8 @@
 					    'appendNode',
 					    {
 					        label: 'New BO',
-					        type: 'bo'
+					        type: 'bo',
+							isNew: 'true'
 					    },
 					    g_selected_node
 					);
@@ -637,7 +749,8 @@
 					    'addNodeAfter',
 					    {
 					        label: 'New BO',
-					        type:'bo'
+					        type:'bo',
+							isNew: 'true'
 					    },
 					    g_selected_node
 					);
@@ -645,12 +758,13 @@
 			}
 			// alert(g_selected_node.type);
 			
-			if (g_selected_node.type == 'extension' || g_selected_node.type == 'file'  ){
+			if (g_selected_node.type == 'extension' || g_selected_node.type == 'code'  ){
 				$('#tree').tree(
 				    'appendNode',
 				    {
 				        label: 'New File',
-				        type:'file'
+				        type:'code',
+						isNew: 'true'
 				    },
 				    g_selected_node
 				);
