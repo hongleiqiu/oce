@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  appid: 1
+  name: MyString
+  desc: MyString
+
+two:
+  appid: 1
+  name: MyString
+  desc: MyString

@@ -1,0 +1,94 @@
+diff --git a/public/index.html b/public/index.html
+index eb0622f..882592c 100644
+--- a/public/index.html
++++ b/public/index.html
+@@ -226,13 +226,13 @@
+ 		
+ 		<div id="main_toolbar" class="gradient" style="width:100%;height:50px;border:1px solid #d8d8d8;border-bottom:0px;">
+ 			<center>
+-			<div id="console" class="round_border shadowed-border" style="position:relative;top:20px;height:20px;width:300px;border:0px solid red;background:#f0f0f0;overflow:hidden;">
+-				dd
++			<div id="console" class="round_border shadowed-border" style="overflow:scroll;position:relative;top:20px;height:20px;width:300px;border:1px solid red;background:#f0f0f0;">
++				<div>Ready</div>
+ 			</div>
+ 			</center>
+ 			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-10px;border:0px solid red;">
+ 				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+-				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
++				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+ 
+ 			</div>
+ 		</div>
+@@ -493,7 +493,7 @@
+ 					}else{
+ 						// popup(data.data_root);
+ 						init_tree(data.data_root);
+-						
++						appendToConsole("project ready");
+ 					}
+ 
+ 				},
+@@ -714,10 +714,48 @@
+ 
+ 
+ 		function open_file(node){
+-			// TODO 
++			type = g_selected_node.type;
++			fname = g_selected_node.name;
++			$.ajax({
++				type: "post",
++				url: "/app/of?t="+ new Date().getTime(),
++				dataType: 'json',
++
++				data: {
++					appid:g_appid,
++					fname:fname,
++					type:type,
++			
++					// sid: '<%=@sid%>',
++					// authenticity_token:window._token
++				}, 
++				success: function(data, textStatus){
++					// alert( "Data Saved: " + data +","+ textStatus);
++
++					showWaiting(false);
++					if (data.error){
++						popup(data.error);
++					}else{
++						// alert(data.data);
++						editor.setValue(data.data);
++						// $("#applist").html(data);
++						appendToConsole('load successfully');
++
++					}
++
++				},
++				error: function(xhr, textStatus, errorThrow){
++					// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
++					popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
++
++					showWaiting(false);
++
++				}
++			}); // $ajax 
+ 		}
+ 		function open_bo(node){
+ 			// TODO
++			open_file(node);
+ 		}
+ 		function add_node(){
+ 			
+@@ -861,6 +899,13 @@
+ 		return false;
+ 
+ 	});
++	
++	function appendToConsole(msg){
++		return;
++		h = $("#console").html();
++		$("#console").html(h+"<div>"+msg+"</div><br/>");
++		$("#console").attr("scrollTop", $("#console").attr('scrollHeight'));
++	}
+ 
+ 	</script>
+ 
