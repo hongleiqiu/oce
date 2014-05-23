@@ -91,6 +91,39 @@ class AppController < ApplicationController
           success()
     end
     
+    # open file
+    def of
+        appid = params[:appid]
+        fname = params[:fname]
+        type = params[:type]
+        repo = appid
+        dir = repo_ws_path(repo)+"/app/#{type}"
+        
+        fname = "#{dir}/#{fname}"
+        data = ""
+        begin
+            if FileTest::exists?(fname) 
+                    open(fname, "r+") {|f|
+                           data = f.read
+                           
+                       p "===>data(#{fname}):#{data}"
+                            data = "" if data == nil
+                                
+                       }
+                  
+                   
+            end
+        rescue Exception=>e
+             p e.inspect
+             p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+             
+        end
+        
+   
+        success("ok", {:data=>data})
+        return 
+        
+    end
     def update_to_appinfo(appid, fname, type, op_type="update")
         p "===>update app #{appid}"
         json = load_appinfo(appid)

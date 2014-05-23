@@ -221,18 +221,20 @@
 	</style>
 	<script>
 		var g_main_width = 1000;
+		var g_main_height = 600;
+		var g_main_tb_height = 50;
 	</script>
-	<div id="main" style=" position: absolute;width: 1000px;height: 600px;margin-left:100px;">
+	<div id="main" class="draggable" style=" position: absolute;width: 1000px;height: 600px;margin-left:100px;">
 		
-		<div id="main_toolbar" class="gradient" style="width:100%;height:50px;border:1px solid #d8d8d8;border-bottom:0px;">
+		<div id="main_toolbar" class="gradient draghandle" style="width:100%;height:50px;border:1px solid #d8d8d8;border-bottom:0px;">
 			<center>
-			<div id="console" class="round_border shadowed-border" style="position:relative;top:20px;height:20px;width:300px;border:0px solid red;background:#f0f0f0;overflow:hidden;">
-				dd
+			<div id="console" class="round_border shadowed-border" style="line-height:27px;padding:0;overflow-y:hidden;position:relative;top:13px;height:27px;width:300px;border:0px solid red;background:#f0f0f0;">
+				<div>Ready</div>
 			</div>
 			</center>
-			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-10px;border:0px solid red;">
+			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
 				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
-				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
 
 			</div>
 		</div>
@@ -240,13 +242,13 @@
 		<div id="left_pane" style="position:relative;float:left;width:18%;height:600px;background:#f5f5f5;">
 			<div id="tree" style="margin:2px;font-size:18px;height:560px;">
 				<ul>
-			      <li>Root node 1
-			        <ul>
-			          <li id="child_node_1">Child node 1</li>
-			          <li>Child node 2</li>
-			        </ul>
-			      </li>
-			      <li>Root node 2</li>
+			      <!-- <li>Root node 1
+			      			        <ul>
+			      			          <li id="child_node_1">Child node 1</li>
+			      			          <li>Child node 2</li>
+			      			        </ul>
+			      			      </li>
+			      			      <li>Root node 2</li> -->
 			    </ul>
 			</div><!-- tree -->
 			<div class='left_toolbar' style="position:static;bottom:0px;float:bottom;width:100%;height:20px;border:1px solod blue;background:#eeeeee;">
@@ -261,14 +263,19 @@
 		</div>
 		<div id='code_pane' style="margin-left:18.5%;width:81.5%;height:100%;border:1px solid #d8d8d8;border-top:0;">
 			<div class='cp_toolbar' style="width:100%;height:20px;border:1px solod blue;background:#f5f5f5">
-				file
+				<div id="filenav" style="color:#666666;float:left;">
+					
+				</div>
 				<div id='cp_tb_btns' style="float:right;">
 					<button class='btn1' onclick="openvi();">vim</button>
 					<button class='btn1'>textmate</button>
 				</div>
 			</div>
-			<div id="editor" name="body" style="width:99%;height:580px;">
-				empty
+			<div id="editor" name="body" style="display:none;width:99%;height:580px;">
+				
+			</div>
+			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:black;">
+			aaa
 			</div>
 		</div><!-- code_pane -->
 	</div> <!-- main -->
@@ -283,6 +290,153 @@
 	
 	<div id="edit_box"  style="display:none;background-color:white;color:black;text-align:left;position:absolute;z-index:800;font-size:18pt;overflow:auto;word-wrap: break-word;word-break: normal;border:0px red solid;">
 		<input id="edit_value" style="font-size:18pt;min-width:300px;"></input>
+	</div>
+	
+	<div id="float" class="draggable" style=" position: absolute;width: 300px;height: 600px;left:1100px;">
+		
+		<div id="float_handle" class="gradient draghandle" style="width:100%;height:50px;border:1px solid #d8d8d8;border-bottom:0px;">
+			<center>
+			<!-- <div id="console" class="round_border shadowed-border" style="line-height:27px;padding:0;overflow-y:hidden;position:relative;top:13px;height:27px;width:300px;border:0px solid red;background:#f0f0f0;">
+						<div>Ready</div>
+					</div> -->
+			</center>
+			<!-- <div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
+					<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+					<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				</div> -->
+		</div>
+		<div id="pane1" style="position:relative;float:none;width:100%;height:300px;background:#f5f5f5;">
+			
+		</div>
+		<div id="splitter2" style="position:relative;float:none;height:5px;width:100%;border:0px solid red;z-index:100;" class="gradient-toptobottom" >
+		</div>
+		<div id="pane2" style="position:relative;float:none;width:100%;height:300px;background:#f5f5f5;">
+			<div class='pane2_toolbar' style="width:100%;height:20px;border:1px solod blue;background:#f5f5f5">
+				<center>
+				<div id='cp_tb_btns' style="padding:3px;">
+					<a href="javascript:show_list(1);" style="margin-right:3px;"> <img src="/images/dropbox-icon.png" class="toolbar_btn"></a>
+					<a href="javascript:show_list(2);"> <img src="/images/brackets-icon.png" class="toolbar_btn" style="margin-right:3px;"></a>
+					<a href="javascript:show_list(3);"> <img src="/images/feedly-icon.png" class="toolbar_btn" style="margin-right:3px;"></a>
+					<a href="javascript:show_list(4);"> <img src="/images/lastfm-icon.png" class="toolbar_btn" style="margin-right:3px;"></a>
+					<script>
+						function show_list(l){
+							// alert($("#pane2_content div.p2_c").length);
+							// alert("#p2_content"+l);
+							// alert($("#p2_content"+l).length);
+							$("#pane2_content div.p2_c").css("display", "none");
+							$("#p2_content"+l).css("display", "block");
+						}
+					</script>
+				</div>
+				</center>
+			</div>
+			
+			<div id="pane2_content">
+				<div id="p2_content1" class='p2_c' style="display:none;">
+					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+						<div style="float:left;height:100%;width:50px;border:0px solid red;">
+							<img src="/images/Plugins-48.png" style="height:100%;" />
+						</div>
+						<div style="float:left;margin-left:5px;">
+							<span style="font-size:13pt;font-weight:300;">Price Calculator</span><br>
+							<span>a</span>
+						</div>
+					</div>
+					<!-- <div class="draggable_element revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+									</div> -->
+					
+					<div class="draggable_element"  style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+						<div style="float:left;height:100%;width:50px;border:0px solid red;">
+							<img src="/images/Plugins-48.png" style="height:100%;" />
+						</div>
+						<div style="float:left;margin-left:5px;">
+							<span style="font-size:13pt;font-weight:300;">Price Calculator</span><br>
+							<span>a</span>
+						</div>
+					</div>
+					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+									</div> -->
+				</div>
+				
+				<div id="p2_content2"  class='p2_c' style="display:none">
+					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+						<div style="float:left;height:100%;width:50px;border:0px solid red;">
+							<img src="/images/bracket.png" style="height:100%;" />
+						</div>
+						<div style="float:left;margin-left:5px;width:230px;">
+							<div style="font-size:13pt;font-weight:300;">After Commit</div>
+							<div style="font-size:10pt;">Called after saving the business object</div>
+						</div>
+					</div>
+					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+										</div> -->
+										
+					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+						<div class="draggable_element" style="float:left;height:100%;width:50px;border:0px solid red;">
+							<img src="/images/bracket.png" style="height:100%;" />
+						</div>
+						<div style="float:left;margin-left:5px;width:230px;">
+							<div style="font-size:13pt;font-weight:300;">After Commit</div>
+							<div style="font-size:10pt;">Called after saving the business object</div>
+						</div>
+					</div>
+					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+										</div> -->					
+				</div>	
+				<div id="p2_content3"  class='p2_c' style="display:none">
+					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+						<div style="float:left;height:100%;width:50px;border:0px solid red;">
+							<img src="/images/block2.png" style="height:100%;" />
+						</div>
+						<div style="float:left;margin-left:5px;width:230px;">
+							<div style="font-size:13pt;font-weight:300;">Entity</div>
+							<div style="font-size:10pt;"></div>
+						</div>
+					</div>
+					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+										</div> -->
+										
+					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+						<div class="draggable_element" style="float:left;height:100%;width:50px;border:0px solid red;">
+							<img src="/images/block2.png" style="height:100%;" />
+						</div>
+						<div style="float:left;margin-left:5px;width:230px;">
+							<div style="font-size:13pt;font-weight:300;">111After Commit</div>
+							<div style="font-size:10pt;">Called after saving the business object</div>
+						</div>
+					</div>
+					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+										</div> -->					
+				</div>
+				
+				<div id="p2_content4"  class='p2_c' style="display:none">
+					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+						<div style="float:left;height:100%;width:50px;border:0px solid red;">
+							<img src="/images/bracket.png" style="height:100%;" />
+						</div>
+						<div style="float:left;margin-left:5px;width:230px;">
+							<div style="font-size:13pt;font-weight:300;">After Commit</div>
+							<div style="font-size:10pt;">Called after saving the business object</div>
+						</div>
+					</div>
+					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+										</div> -->
+										
+					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+						<div style="float:left;height:100%;width:50px;border:0px solid red;">
+							<img src="/images/bracket.png" style="height:100%;" />
+						</div>
+						<div style="float:left;margin-left:5px;width:230px;">
+							<div style="font-size:13pt;font-weight:300;">After Commit</div>
+							<div style="font-size:10pt;">Called after saving the business object</div>
+						</div>
+					</div>
+					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+										</div> -->					
+				</div>
+									
+			</div>
+		</div>
 	</div>
 	<!--script src="http://wh.joyqom.com/javascripts/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script-->
 	<!--script src="http://code.jquery.com/jquery-2.1.1.js"></script-->
@@ -310,10 +464,12 @@
 	<script src="/javascripts/common.js" ></script>
 	<link rel="stylesheet" href="/stylesheets/common.css" type="text/css" />
 
+	<!-- for dragable -->
+	<script src="/javascripts/jquery-ui-1.10.4.js"></script>
+	
+	
+	
 	<script>
-
-
-
 
 //////// editor ///////////
 
@@ -493,7 +649,7 @@
 					}else{
 						// popup(data.data_root);
 						init_tree(data.data_root);
-						
+						appendToConsole("project ready");
 					}
 
 				},
@@ -714,10 +870,66 @@
 
 
 		function open_file(node){
-			// TODO 
+			$("#editor").css("display", "block");	
+			$("#bo_designer").css("display", "none");
+			
+			type = g_selected_node.type;
+			fname = g_selected_node.name;
+			$.ajax({
+				type: "post",
+				url: "/app/of?t="+ new Date().getTime(),
+				dataType: 'json',
+
+				data: {
+					appid:g_appid,
+					fname:fname,
+					type:type,
+			
+					// sid: '<%=@sid%>',
+					// authenticity_token:window._token
+				}, 
+				success: function(data, textStatus){
+					// alert( "Data Saved: " + data +","+ textStatus);
+
+					showWaiting(false);
+					if (data.error){
+						popup(data.error);
+					}else{
+						// alert(data.data);
+						editor.setValue(data.data);
+						
+						nav = "";
+						if (type == 'bo')
+							nav = "Business Objects > ";
+						else if	(type == "code")
+							nav = "Extensions > ";
+						$("#filenav").html(nav+fname);
+						
+						$("#editor").css("display", "block");
+						$("#bo_designer").css("display", "none");
+						
+						// $("#applist").html(data);
+						appendToConsole('load successfully');
+
+					}
+
+				},
+				error: function(xhr, textStatus, errorThrow){
+					// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+					popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+					showWaiting(false);
+
+				}
+			}); // $ajax 
 		}
 		function open_bo(node){
-			// TODO
+			
+			
+			$("#editor").css("display", "none");	
+			$("#bo_designer").css("display", "block");		
+				
+			
 		}
 		function add_node(){
 			
@@ -778,6 +990,7 @@
 	</script>
 	
 	<script>
+	var g_moving_sp = -1; // 0: moving main splitter, 1: moving splitter2
 	var sp_stat = 0; // 0: normal, 1: over, 2: dragging
 	$("#splitter").mouseover(function(event){
 		if (sp_stat == 0)
@@ -809,7 +1022,7 @@
 			return true;
 		// console.log("mounsedown");
 		sp_stat = 2;
-		
+		g_moving_sp = 0;
 		// var x=event.clientX;
 		// var y=event.clientY;
 		// var msg = "";
@@ -823,7 +1036,7 @@
 			return;
 		// alert("up");
 		sp_stat = 0;
-		
+		g_moving_sp =-1;
 		// var x=event.clientX;
 		// var y=event.clientY;
 		// var msg = "";
@@ -838,17 +1051,22 @@
 			return;
 		// console.log("mounsedown");
 		// alert($("#main").offset().left);
-		var x= event.clientX - $("#main").offset().left;
-		// var y=event.clientY; 
-		if (x > 600)
-			x = 600;
-		if ( x < 150)
-			x = 150;
+		if (g_moving_sp == 0){
+			
+			var x= event.clientX - $("#main").offset().left;
+			// var y=event.clientY; 
+			if (x > 600)
+				x = 600;
+			if ( x < 150)
+				x = 150;
 
-		$("#left_pane").width(x+"px");
-		var w = g_main_width-x-2;
-		$("#code_pane").width(w+"px");
-		$("#code_pane").css("margin-left", x+"px");
+			$("#left_pane").width(x+"px");
+			var w = g_main_width-x-2;
+			$("#code_pane").width(w+"px");
+			$("#code_pane").css("margin-left", x+"px");
+		}else if (g_moving_sp == 1){
+		
+		}
 		
 		// $("#editor").width(w+"px");
 		var msg = "";
@@ -860,8 +1078,151 @@
 		sp_stat = 2;
 		return false;
 
+	});	
+	
+	$("#splitter2").mouseover(function(event){
+		if (sp_stat == 0)
+			sp_stat = 1;
+		$(this).css("cursor", "move");
+		// var x=event.clientX;
+		// var y=event.clientY;
+		// var msg = "";
+		// msg += "st:"+sp_stat;
+		// msg += "<br/>x:"+x;
+		// $("#console").html(msg);
+	});
+	$("#splitter2").mouseout(function(event){
+	
+		if (sp_stat == 1){
+			sp_stat = 0;
+		}
+
+		return true;
+	});
+	$("#splitter2").mousedown(function(){
+		if (sp_stat != 1)
+			return true;
+		sp_stat = 2;
+		g_moving_sp=1;
+		return true;
+	});
+	
+
+	$("#float").mousemove(function(event){
+		if (sp_stat != 2)
+			return;
+		// console.log("mounsedown");
+		// alert($("#main").offset().left);
+		// alert(g_moving_sp);
+		if (g_moving_sp == 0){
+			
+			
+		}else if (g_moving_sp == 1){
+			// alert($("#pane1"));
+			var y= event.clientY - $("#float").offset().top-g_main_tb_height;
+			$("#pane1").height(y+"px");
+			$("#pane2").height(g_main_height-y);
+			
+			// alert(y);
+			// var w = g_main_width-x-2;
+			// $("#code_pane").width(w+"px");
+			// $("#code_pane").css("margin-left", x+"px");
+			
+			
+		}
+		
+		
+		
+		// $("#editor").width(w+"px");
+		var msg = "";
+		msg += "st:"+sp_stat;
+		msg += "<br/>x:"+y;
+		// $("#console").html(msg);
+		// alert(x);
+		
+		sp_stat = 2;
+		return false;
+
+	});
+	$("#float").mouseup(function(event){
+		if (sp_stat != 2)
+			return;
+		// alert("up");
+		sp_stat = 0;
+		g_moving_sp =-1;
+		// var x=event.clientX;
+		// var y=event.clientY;
+		// var msg = "";
+		// msg += "st:"+sp_stat;
+		// msg += "<br/>x:"+x;
+		// $("#console").html(msg);
+		return true;
 	});
 
+	
+	var g_scroll_timer = null;
+	function _scroll(){
+		h = $("#console").prop('scrollHeight');
+		t = $("#console").prop("scrollTop");
+		// alert(h+">>"+t);
+		
+		var s = 6;
+		if (h > t){
+			if (h-t<s)
+				a = h;
+			else
+				a = t+s;
+				// alert(s);
+			$("#console").prop("scrollTop", a);
+		}
+		else{
+			clearInterval(g_scroll_timer);
+			g_scroll_timer = null;
+		}
+		// alert(1);
+		
+	}
+	function appendToConsole(msg){
+		h = $("#console").html();
+		// alert(h);
+		$("#console").html(h+"<div>"+msg+"</div>");
+		h = $("#console").prop('scrollHeight');
+		t = $("#console").prop("scrollTop");
+		// alert(h+">>"+t);
+		// alert(g_scroll_timer);
+		if (g_scroll_timer == null)
+			g_scroll_timer = setInterval("_scroll();", 100);
+		// alert();
+		// $("#console").attr("scrollTop", $("#console").prop('scrollHeight'));
+	}
+	
+	/* init dragable pane */
+	$(".draggable" ).draggable({
+		handle: ".draghandle"
+		// start:function(){
+		// 		
+		// 	}
+	});
+	// $(".revertable" ).draggable({
+	// 	revert: true,
+	// 	 stop: function() {
+	// 		// alert($(this));
+	// 		$(this).draggable({revert:false});
+	// 	}
+	// });
+	
+	// $("#left_pane").draggable({ disabled: true });
+	// $("#main_toolbar").draggable({ disabled: true });
+	$(".draggable_element" ).draggable({
+		opacity: 0.7, helper: "clone" 
+	});
+	
+	 $( ".droppable" ).droppable({
+		drop: function( event, ui ) {
+			alert("dropped");
+			// $( this ).addClass( "ui-state-highlight" ).find( "p" ).html( "Dropped!" );
+		}
+	});
 	</script>
 
   </body>
