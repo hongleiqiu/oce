@@ -283,8 +283,8 @@
 			</div>
 			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:#dddddd;">
 				<div id="canvas">
-					<div id="canvas_end">
-					</div>
+					<!-- <div id="canvas_end">
+									</div> -->
 				</div>
 			</div>
 		</div><!-- code_pane -->
@@ -322,13 +322,13 @@
 				</div>
 				<div id="props" style="float:right;">
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">Name</div><div class="prop_v"><input id="obj_name"></input></div>
+						<div class="prop_name">Name</div><div class="prop_v"><input id="prop_v_name"></input></div>
 					</div>
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">Type</div><div class="prop_v"><input id="obj_type"></input></div>
+						<div class="prop_name">Type</div><div class="prop_v"><input id="prop_v_type"></input></div>
 					</div>
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="obj_readonly"></input></div>
+						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly"></input></div>
 					</div>
 				</div>
 			</div>
@@ -364,7 +364,7 @@
 						</div>
 						<div style="float:left;margin-left:5px;">
 							<span style="font-size:13pt;font-weight:300;">Price Calculator</span><br>
-							<span>a</span>
+							<span>Help calculating price</span>
 						</div>
 					</div>
 					<!-- <div class="draggable_element revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
@@ -377,8 +377,8 @@
 							<img src="/images/Plugins-48.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;">
-							<span style="font-size:13pt;font-weight:300;">Price Calculator</span><br>
-							<span>a</span>
+							<span style="font-size:13pt;font-weight:300;">Foreign Exchange</span><br>
+							<span>Money exchange</span>
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
@@ -435,6 +435,12 @@ end
 							<div class="draggable_content " t="obj">
 								<div class="draggable_obj">
 									<img src="/images/block2.png" style="height:50px;" />
+									<div class="draggable_obj_name">
+									New Entity
+									</div>
+									<div class="draggable_obj_prop" n="">
+										
+									</div>
 								</div>
 							</div>
 						</div>
@@ -448,8 +454,19 @@ end
 							<img src="/images/block2.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
-							<div style="font-size:13pt;font-weight:300;">111After Commit</div>
-							<div style="font-size:10pt;">Called after saving the business object</div>
+							<div style="font-size:13pt;font-weight:300;">Single Table</div>
+							<div style="font-size:10pt;">Table </div>
+							<div class="draggable_content " t="obj">
+								<div class="draggable_obj">
+									<img src="/images/block2.png" style="height:50px;" />
+									<div class="draggable_obj_name">
+									New Table
+									</div>
+									<div class="draggable_obj_prop" n="">
+										
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
@@ -703,7 +720,7 @@ end
 					}else{
 						// popup(data.data_root);
 						init_tree(data.data_root);
-						appendToConsole("project ready");
+						appendToConsole("Project Ready");
 					}
 
 				},
@@ -982,8 +999,10 @@ end
 			
 			$("#editor").css("display", "none");	
 			$("#bo_designer").css("display", "block");		
-			
-			appendToConsole("Load BO Successfully")
+			$("#prop_pad").css("display", "none");
+			$("#canvas").empty();
+			// $("#props").empty();
+			appendToConsole("Load BO Successfully");
 			
 		}
 		function add_node(){
@@ -1320,7 +1339,7 @@ end
 						// alert($(inserted[inserted.length-1]).attr("id"));
 						// alert(inserted.html());
 						inserted.click(function(event){
-							show_props();
+							show_props(inserted);
 						})
 										
 						// alert(inspect(inserted));
@@ -1333,8 +1352,14 @@ end
 		}
 	});
 	
-	function show_props(){
+	function show_props(t){
+		// alert(t.find("div.draggable_obj_name").html());
+		a =  t.find("div.draggable_obj_name").html();
+		// alert($("#props input#prop_name").html());
+		// alert(a);
+		$("#props input#prop_v_name").html(a);
 		$("#prop_pad").css("display", "block");
+		// alert(0);
 	}
 	</script>
 
