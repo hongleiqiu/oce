@@ -178,6 +178,8 @@
       }
       
     </style>
+	<link rel="stylesheet" href="/stylesheets/index.css" type="text/css" />
+
     <script type="text/javascript" src="javascripts/prototype.js"></script>
     <script type="text/javascript" src="javascripts/effects.js"></script>
     <script type="text/javascript">
@@ -232,9 +234,14 @@
 				<div>Ready</div>
 			</div>
 			</center>
+			<div id='main_tb_left' style="position:relatvie;float:left;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
+				<a href="javascript:save();" style="display:block;float:left;margin-left:5px;"> <img src="/images/Lightning.png" title="App Store" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:gitlist();" style="display:block;float:left;margin-left:5px;"> <img src="/images/deploy.png" title="Deploy" class="toolbar_btn" style="width:35px;height:35px;"></a>
+
+			</div>
 			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
-				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
-				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" title="Save" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" title="Git" class="toolbar_btn" style="width:35px;height:35px;"></a>
 
 			</div>
 		</div>
@@ -271,11 +278,14 @@
 					<button class='btn1'>textmate</button>
 				</div>
 			</div>
-			<div id="editor" name="body" style="display:none;width:99%;height:580px;">
+			<div id="editor" name="body" class="droppable" style="display:none;width:99%;height:580px;">
 				
 			</div>
-			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:black;">
-			aaa
+			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:#dddddd;">
+				<div id="canvas">
+					<div id="canvas_end">
+					</div>
+				</div>
 			</div>
 		</div><!-- code_pane -->
 	</div> <!-- main -->
@@ -306,7 +316,22 @@
 				</div> -->
 		</div>
 		<div id="pane1" style="position:relative;float:none;width:100%;height:300px;background:#f5f5f5;">
-			
+			<div id="prop_pad" style="margin:3px;margin-left:5px;display:none;">
+				<div style="width:100%;height:20px;border:1px solod blue;background:#f5f5f5">
+					Properties
+				</div>
+				<div id="props" style="float:right;">
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Name</div><div class="prop_v"><input id="obj_name"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Type</div><div class="prop_v"><input id="obj_type"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="obj_readonly"></input></div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div id="splitter2" style="position:relative;float:none;height:5px;width:100%;border:0px solid red;z-index:100;" class="gradient-toptobottom" >
 		</div>
@@ -333,7 +358,7 @@
 			
 			<div id="pane2_content">
 				<div id="p2_content1" class='p2_c' style="display:none;">
-					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+					<div class="draggable_element  component_line" >	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
 							<img src="/images/Plugins-48.png" style="height:100%;" />
 						</div>
@@ -344,8 +369,10 @@
 					</div>
 					<!-- <div class="draggable_element revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
 									</div> -->
+									<div class="line_splitter">
+									</div>
 					
-					<div class="draggable_element"  style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+					<div class="draggable_element  component_line"  >	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
 							<img src="/images/Plugins-48.png" style="height:100%;" />
 						</div>
@@ -356,48 +383,68 @@
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
 									</div> -->
+									<div class="line_splitter">
+									</div>
 				</div>
 				
 				<div id="p2_content2"  class='p2_c' style="display:none">
-					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+					<div class="draggable_element component_line" style="">	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
 							<img src="/images/bracket.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
-							<div style="font-size:13pt;font-weight:300;">After Commit</div>
+							<div style="font-size:13pt;font-weight:300;">Before Commit</div>
 							<div style="font-size:10pt;">Called after saving the business object</div>
+							<div class="draggable_content draggable_source" t="code">
+def before_commit
+end
+							</div>
 						</div>
+					</div>
+					<div class="line_splitter">
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
 										</div> -->
 										
-					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
-						<div class="draggable_element" style="float:left;height:100%;width:50px;border:0px solid red;">
+					<div class="draggable_element component_line" >	
+						<div  style="float:left;height:100%;width:50px;border:0px solid red;">
 							<img src="/images/bracket.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
 							<div style="font-size:13pt;font-weight:300;">After Commit</div>
 							<div style="font-size:10pt;">Called after saving the business object</div>
+							<div class="draggable_content draggable_source" t="code">
+def after_commit
+end
+							</div>
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
-										</div> -->					
+										</div> -->	
+					<div class="line_splitter">
+					</div>				
 				</div>	
 				<div id="p2_content3"  class='p2_c' style="display:none">
-					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+					<div class="draggable_element  component_line" >	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
 							<img src="/images/block2.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
 							<div style="font-size:13pt;font-weight:300;">Entity</div>
 							<div style="font-size:10pt;"></div>
+							<div class="draggable_content " t="obj">
+								<div class="draggable_obj">
+									<img src="/images/block2.png" style="height:50px;" />
+								</div>
+							</div>
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
 										</div> -->
-										
-					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
-						<div class="draggable_element" style="float:left;height:100%;width:50px;border:0px solid red;">
+										<div class="line_splitter">
+										</div>										
+					<div class="draggable_element  component_line" >	
+						<div style="float:left;height:100%;width:50px;border:0px solid red;">
 							<img src="/images/block2.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
@@ -406,11 +453,13 @@
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
-										</div> -->					
+										</div> -->	
+										<div class="line_splitter">
+										</div>				
 				</div>
 				
 				<div id="p2_content4"  class='p2_c' style="display:none">
-					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+					<div class="draggable_element  component_line" >	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
 							<img src="/images/bracket.png" style="height:100%;" />
 						</div>
@@ -421,8 +470,10 @@
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
 										</div> -->
+										<div class="line_splitter">
+										</div>
 										
-					<div class="draggable_element" style="height:50px;width:100%-6;border-bottom:1px solid grey;padding:6px;">	
+					<div class="draggable_element  component_line" >	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
 							<img src="/images/bracket.png" style="height:100%;" />
 						</div>
@@ -432,7 +483,9 @@
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
-										</div> -->					
+										</div> -->	
+										<div class="line_splitter">
+										</div>				
 				</div>
 									
 			</div>
@@ -448,7 +501,7 @@
 	<script src="/javascripts/utils.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- code editor -->
-	<script src="/javascripts/ace.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/javascripts/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 	<!--script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js" type="text/javascript" charset="utf-8"></script-->
 	
 	<!--script src="http://gpl.internetconnection.net/vi/vi.js"></script>
@@ -485,7 +538,8 @@
 	
 	// editor.setTheme("ace/theme/twilight");
 	
-	editor.getSession().setMode("ace/mode/javascript");
+	// editor.getSession().setMode("ace/mode/javascript");
+	editor.getSession().setMode("ace/mode/ruby");
 	
 	 editor.getSession().setTabSize(4);
 	document.getElementById('editor').style.fontSize='18px';
@@ -909,7 +963,7 @@
 						$("#bo_designer").css("display", "none");
 						
 						// $("#applist").html(data);
-						appendToConsole('load successfully');
+						appendToConsole('Load successfully');
 
 					}
 
@@ -928,7 +982,8 @@
 			
 			$("#editor").css("display", "none");	
 			$("#bo_designer").css("display", "block");		
-				
+			
+			appendToConsole("Load BO Successfully")
 			
 		}
 		function add_node(){
@@ -1219,10 +1274,68 @@
 	
 	 $( ".droppable" ).droppable({
 		drop: function( event, ui ) {
-			alert("dropped");
+			// alert(inspect(ui.draggable.attr("class")));
+			content = ui.draggable.find("div.draggable_content");
+			// alert(content.attr("t"));
+			
+			content_type = content.attr("t");
+			id = $(event.target).attr("id");
+			// if (content.attr("inserted") != 1){
+			if (content.length != 0){
+				if (id == "editor" ){
+					if (content_type != "code"){
+						alert("not allow");
+					}else{
+					
+						source = content.html();
+						editor.insert(source);
+					}
+				}
+				else if (id == "bo_designer"){
+					// insert object in canvas
+					if (content_type != "obj"){
+						alert("not allow");
+					}else{
+						cloned = content.clone();
+						// alert(inspect(event));
+						x = event.clientX-$("#bo_designer").offset().left;
+						y = event.clientY-$("#bo_designer").offset().top;
+						_id = Math.random();
+						// alert(_id);
+						cloned.attr("id", _id+"");
+						// alert(x+","+y);
+						// alert(cloned.html());
+						cloned.attr("id", _id+"");
+				
+						inserted = $("#canvas").append(cloned.html());
+						// alert(inserted.html());
+						inserted = inserted.find("div.draggable_obj");
+						// alert(inserted.length);
+						// inserted.attr("inserted", "1");
+						inserted = $(inserted[inserted.length-1]);
+						inserted.draggable();
+						inserted.attr("id", _id);
+						inserted.css("left", x);
+						inserted.css("top", y);
+						// alert($(inserted[inserted.length-1]).attr("id"));
+						// alert(inserted.html());
+						inserted.click(function(event){
+							show_props();
+						})
+										
+						// alert(inspect(inserted));
+					}
+				
+				} // if (id == "editor" ){ else if (id == "bo_designer"){
+			} // if (content.attr("inserted") != 1){
+		
 			// $( this ).addClass( "ui-state-highlight" ).find( "p" ).html( "Dropped!" );
 		}
 	});
+	
+	function show_props(){
+		$("#prop_pad").css("display", "block");
+	}
 	</script>
 
   </body>
