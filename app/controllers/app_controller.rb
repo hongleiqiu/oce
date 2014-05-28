@@ -37,13 +37,42 @@ class AppController < ApplicationController
         
     end
     
+    def fileInfoFromPath(path)
+        p "===>path #{path}"
+        b = path.split('/')
+        fname = b[b.size-1]
+        if path.start_with?("/")
+            b = b[1..b.size-1]
+        end
+            prj = b[0]
+         p "===>prj=#{prj} #{b.size}"
+         cat = b[1]
+         cat2 = nil
+         if (b.size > 2)
+             cat2 = b[2]
+         end
+        
+        return {
+            :path=>path,
+            :project=>prj,
+            :fname=>fname,
+            :cat1=>cat,
+            :cat2=>cat2,
+            :relative_path=>b[1..b.size-1].join("/"),
+            :relative_dir=>b[1..b.size-2].join("/")
+            
+        }
+    end
     # save file
     def sf
         appid = params[:appid]
-        fname = params[:fname]
+        path = params[:fname]
         type = params[:type]
         content = params[:content]
         isnew = params[:isnew]
+        
+        fi= fileInfoFromPath(path)
+        fname = fi[:fname]
         
         if type == 'code'
             
@@ -53,7 +82,7 @@ class AppController < ApplicationController
         repo = appid
         begin
             
-            dir = repo_ws_path(repo)+"/app/#{type}"
+            dir = repo_ws_path(repo)+"/app/#{fi[:relative_dir]}"
             FileUtils.makedirs(dir)
             # logger.info("===========>#{dir}/#{id}<====")
             p "===>save to file #{dir}/#{fname}"
@@ -62,7 +91,7 @@ class AppController < ApplicationController
             aFile.puts content
             aFile.close
             p "===>save to file #{dir}/#{fname} ok"
-            relative_path = "app/#{type}/#{fname}"
+            relative_path = "app/#{fi[:relative_path]}"
             if isnew == 'true'
                 Git2.add_and_commit(repo, @user.name, relative_path)
             else
@@ -75,9 +104,9 @@ class AppController < ApplicationController
           end
           
           if isnew == 'true'
-              r,m = update_to_appinfo(appid, fname, type, "add")
+              r,m = update_to_appinfo(appid, fi, "add")
           else
-              r,m = update_to_appinfo(appid, fname, type)
+              r,m = update_to_appinfo(appid, fi)
           end
                  
             if r == false
@@ -94,12 +123,15 @@ class AppController < ApplicationController
     # open file
     def of
         appid = params[:appid]
-        fname = params[:fname]
+        path = params[:fname]
         type = params[:type]
         repo = appid
-        dir = repo_ws_path(repo)+"/app/#{type}"
+        fi= fileInfoFromPath(path)
+        fname = fi[:fname]
         
-        fname = "#{dir}/#{fname}"
+        # dir = repo_ws_path(repo)+"/app/#{fi[:relative_dir]}"
+        
+        fname = "#{repo_ws_path(repo)}/app/#{fi[:relative_path]}"
         data = ""
         begin
             if FileTest::exists?(fname) 
@@ -124,26 +156,47 @@ class AppController < ApplicationController
         return 
         
     end
-    def update_to_appinfo(appid, fname, type, op_type="update")
-        p "===>update app #{appid}"
-        json = load_appinfo(appid)
-        if type == "bo"
-            bo_list = json['bo_list']
-            if bo_list.include?(fname) == false
-                bo_list.push(fname)
-            else 
-                if op_type == 'add'
-                    return [false, "Cannot add file #{fname}, file already exists"]
-                end
+    
+    def updateJSonList(json, list_name, path, op_type ="add")
+        p "updateJSonList1(#{list_name}): #{json}"
+        bo_list = json[list_name]
+        if bo_list == nil
+            bo_list =[]
+            json[list_name] = bo_list
+        end
+        if bo_list.include?(path) == false
+            bo_list.push(path)
+        else 
+            if op_type == 'add'
+                return [false, "Cannot add file #{path}, file already exists"]
             end
-        elsif type=='code'
-            ext_list = json['ext_list']
-            if ext_list.include?(fname) == false
-                ext_list.push(fname)
-            else 
-                if op_type == 'add'
-                    return [false, "Cannot add file #{fname}, file already exists"]
-                end    
+        end
+        p "updateJSonList2: #{json}"
+        
+    end
+    
+    def update_to_appinfo(appid, fi, op_type="update")
+        p "===>update app #{appid}, fname #{fi[:fname]}, cat #{fi[:cat1]}"
+        fname = fi[:fname]
+        path = fi[:path]
+        cat = fi[:cat1]
+        cat2 = fi[:cat2]
+        json = load_appinfo(appid)
+        p "cat=>#{cat}"
+        if cat == "bo_root"
+            updateJSonList(json, "bo_list", path, op_type)
+        elsif cat=='extension'
+            updateJSonList(json, "ext_list", path, op_type)
+            
+            
+        elsif cat == "service_root"
+            updateJSonList(json, "service_list", path, op_type)
+            
+        elsif cat == "ui_root" && cat2 != nil
+            if cat2 == "ui_root_m"
+                updateJSonList(json, "ui_mobile", path, op_type)
+            elsif cat2== "ui_root_u"
+                updateJSonList(json, "ui_universal", path, op_type)
             end
         end
         save_appinfo(appid, json.to_json)
@@ -178,7 +231,10 @@ class AppController < ApplicationController
         if json == nil
             json ={
                 "bo_list"=>[],
-                "ext_list"=>[]
+                "ext_list"=>[],
+                "sevice_list"=>[],
+                "ui_mobile"=>[],
+                "ui_universal"=>[]
             }
         end
         return json
