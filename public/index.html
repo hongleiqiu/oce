@@ -211,15 +211,7 @@
 		border:1px solid #d8d8d8;
 	}
 
-	.shadowed-border{
-		-webkit-box-shadow: inset  1px 1px 1px red;  
-		-moz-box-shadow: inset 1px 1px 1px blue;  
-		box-shadow: inset 1px 1px 1px gray;
-	}
-	.toolbar_btn{
-		height:18px;
-		border-width:0px;
-	}
+
 	</style>
 	<script>
 		var g_main_width = 1000;
@@ -235,8 +227,8 @@
 			</div>
 			</center>
 			<div id='main_tb_left' style="position:relatvie;float:left;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
-				<a href="javascript:save();" style="display:block;float:left;margin-left:5px;"> <img src="/images/Lightning.png" title="App Store" class="toolbar_btn" style="width:35px;height:35px;"></a>
-				<a href="javascript:gitlist();" style="display:block;float:left;margin-left:5px;"> <img src="/images/deploy.png" title="Deploy" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:alert('click this will publish this app to App Store');" style="display:block;float:left;margin-left:5px;"> <img src="/images/Lightning.png" title="App Store" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:alert('click this to deploy app to sandbox environment');" style="display:block;float:left;margin-left:5px;"> <img src="/images/deploy.png" title="Deploy" class="toolbar_btn" style="width:35px;height:35px;"></a>
 
 			</div>
 			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
@@ -274,15 +266,27 @@
 					
 				</div>
 				<div id='cp_tb_btns' style="float:right;">
+					<button class='btn1' onclick="openvi();">Log</button>
+					
 					<button class='btn1' onclick="openvi();">vim</button>
 					<button class='btn1'>textmate</button>
 				</div>
 			</div>
 			<div id="editor" name="body" class="droppable" style="display:none;width:99%;height:580px;">
-				
 			</div>
-			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:#dddddd;">
-				<div id="canvas">
+			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:#fefefe;">
+				<div id="bod_tb" style="float:left;width:50px;height:100%;border-right:1px solid grey;margin-right:5px;">
+					<div class="bod_tb_btn" style="margin-top:50px;">
+						<a href="javascript:void();"><img src="/images/plus.png" class="toolbar_btn_m"></a>
+					</div>
+					<div class="bod_tb_btn" >
+						<a href=""> <img src="/images/minus.png" class="toolbar_btn_m"></a>
+					</div>
+					<div class="bod_tb_btn" >
+						<a href=""> <img src="/images/edit.png" class="toolbar_btn_m"></a>
+					</div>
+				</div>
+				<div id="canvas" class="grid_background" style="float:left;border:0px solid red;height:100%;width:90%;">
 					<!-- <div id="canvas_end">
 									</div> -->
 				</div>
@@ -295,9 +299,26 @@
 			<img src="/images/wait3.gif" style="width:50px;margin-top:230px;"/>
 		</center>
 	</div>
-	<div id="popup" class="round_border_m" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:350px;top:180px;z-index:800;width:200px;height:128px;font-size:13pt;min-height:37px;max-height:200px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
+	<div id="popup" class="round_border_m" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:500px;top:180px;z-index:800;width:200px;height:128px;font-size:13pt;min-height:37px;max-height:200px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
 	</div>
-	
+	<div id="balloon" style="display:none;left:200px;top:200px;width:300px;height:300px;position:absolute;z-index:200;">
+		<img style="float:right;width:20px;" src="/images/close.png" onclick="show_balloon(false);" />
+		<div id="field_list" style="margin-top:10px;scroll:auto;">
+			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
+				Id <span style="color:grey">(Integer)</span>
+			</div>
+			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
+				username <span style="color:grey">(String)</span>
+			</div>
+			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
+				company <span style="color:grey">(String)</span>
+			</div>
+			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
+				<img src="/images/button-add.png" class="toolbar_btn">
+			</div>
+		</div><!-- field_list -->
+	</div>
+
 	<div id="edit_box"  style="display:none;background-color:white;color:black;text-align:left;position:absolute;z-index:800;font-size:18pt;overflow:auto;word-wrap: break-word;word-break: normal;border:0px red solid;">
 		<input id="edit_value" style="font-size:18pt;min-width:300px;"></input>
 	</div>
@@ -322,13 +343,47 @@
 				</div>
 				<div id="props" style="float:right;">
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">Name</div><div class="prop_v"><input id="prop_v_name"></input></div>
+						<div class="prop_name">Name</div><div class="prop_v"><input id="boprop_v_name"></input></div>
 					</div>
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">Type</div><div class="prop_v"><input id="prop_v_type"></input></div>
+						<div class="prop_name">Type</div><div class="prop_v"><input id="boprop_v_type"></input></div>
 					</div>
 					<div class="prop_line" style="height:30px;">
 						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly"></input></div>
+					</div>
+				</div>
+			</div>
+			<div id="field_prop_pad" style="display:none;margin:3px;margin-left:5px;display:none;">
+				<div style="width:100%;height:20px;border:1px solod blue;background:#f5f5f5">
+					Field Properties
+				</div>
+				<div id="fprops" style="float:right;">
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Name</div><div class="prop_v"><input id="fprop_v_name"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Type</div><div class="prop_v"><input id="fprop_v_type"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Default value</div><div class="prop_v"><input id="fprop_v_name"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Length</div><div class="prop_v"><input id="fprop_v_type"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Enabled</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Encoding</div><div class="prop_v"><input id="fprop_v_name"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Type</div><div class="prop_v"><input id="fprop_v_type"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">unique</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly"></input></div>
 					</div>
 				</div>
 			</div>
@@ -336,13 +391,13 @@
 		<div id="splitter2" style="position:relative;float:none;height:5px;width:100%;border:0px solid red;z-index:100;" class="gradient-toptobottom" >
 		</div>
 		<div id="pane2" style="position:relative;float:none;width:100%;height:300px;background:#f5f5f5;">
-			<div class='pane2_toolbar' style="width:100%;height:20px;border:1px solod blue;background:#f5f5f5">
+			<div class='pane2_toolbar' style="width:100%;height:35px;border:1px solod blue;background:#f5f5f5">
 				<center>
 				<div id='cp_tb_btns' style="padding:3px;">
-					<a href="javascript:show_list(1);" style="margin-right:3px;"> <img src="/images/dropbox-icon.png" class="toolbar_btn"></a>
-					<a href="javascript:show_list(2);"> <img src="/images/brackets-icon.png" class="toolbar_btn" style="margin-right:3px;"></a>
-					<a href="javascript:show_list(3);"> <img src="/images/feedly-icon.png" class="toolbar_btn" style="margin-right:3px;"></a>
-					<a href="javascript:show_list(4);"> <img src="/images/lastfm-icon.png" class="toolbar_btn" style="margin-right:3px;"></a>
+					<a href="javascript:show_list(1);" style="margin-right:3px;" title="Extension"> <img src="/images/dropbox-icon.png" class="toolbar_btn_m"></a>
+					<a href="javascript:show_list(2);" title="Code"> <img src="/images/brackets-icon.png" class="toolbar_btn_m" style="margin-right:3px;"></a>
+					<a href="javascript:show_list(3);" title="Object"> <img src="/images/feedly-icon.png" class="toolbar_btn_m" style="margin-right:3px;"></a>
+					<a href="javascript:show_list(4);" title="OpenAPI"> <img src="/images/lastfm-icon.png" class="toolbar_btn_m" style="margin-right:3px;"></a>
 					<script>
 						function show_list(l){
 							// alert($("#pane2_content div.p2_c").length);
@@ -438,8 +493,11 @@ end
 									<div class="draggable_obj_name">
 									New Entity
 									</div>
-									<div class="draggable_obj_prop" n="">
-										
+									<div class="draggable_obj_prop" n="type">
+										Entity
+									</div>
+									<div class="draggable_obj_prop" n="xx">
+										yy
 									</div>
 								</div>
 							</div>
@@ -462,8 +520,8 @@ end
 									<div class="draggable_obj_name">
 									New Table
 									</div>
-									<div class="draggable_obj_prop" n="">
-										
+									<div class="draggable_obj_prop" n="type">
+										Table
 									</div>
 								</div>
 							</div>
@@ -478,11 +536,11 @@ end
 				<div id="p2_content4"  class='p2_c' style="display:none">
 					<div class="draggable_element  component_line" >	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
-							<img src="/images/bracket.png" style="height:100%;" />
+							<img src="/images/api.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
-							<div style="font-size:13pt;font-weight:300;">After Commit</div>
-							<div style="font-size:10pt;">Called after saving the business object</div>
+							<div style="font-size:13pt;font-weight:300;">LogIn</div>
+							<div style="font-size:10pt;">Login and get session</div>
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
@@ -492,11 +550,11 @@ end
 										
 					<div class="draggable_element  component_line" >	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
-							<img src="/images/bracket.png" style="height:100%;" />
+							<img src="/images/api.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
-							<div style="font-size:13pt;font-weight:300;">After Commit</div>
-							<div style="font-size:10pt;">Called after saving the business object</div>
+							<div style="font-size:13pt;font-weight:300;">QueryCompanyInfo</div>
+							<div style="font-size:10pt;">Query company Info</div>
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
@@ -571,10 +629,23 @@ end
 	
     // editor.getValue(); // or session.getValue
 	
+	function getNodePath(node){
+		fname = node.name;
+		parent = node.parent;
+		while (parent != null && parent != undefined && parent.name != null){
+			// alert(parent.name);
+			fname = parent.type +"/"+fname;
+			parent = parent.parent;
+		}
+		fname = "/"+fname;
+		return fname;
+	}
 	function save(){
+		// alert(getNodePath(g_selected_node));
 		content = editor.getValue(); 
 		type = g_selected_node.type;
-		fname = g_selected_node.name;
+		// fname = g_selected_node.name;
+		fname = getNodePath(g_selected_node);
 		isnew = g_selected_node.isNew;
 		// alert(isnew);
 		// alert(content);
@@ -624,7 +695,8 @@ end
 	}
 
 	function gitlist(){
-		window.location.href='http://mygithub/'+g_appid+".git";
+		// window.location.href='http://mygithub/'+g_appid+".git";
+		window.open('http://mygithub/'+g_appid+".git");
 	}
 	</script>
 	
@@ -750,6 +822,7 @@ end
 				var i = 0;
 				for (i = 0;i <  data_root.bo_list.length; i++){
 					item = data_root.bo_list[i];
+					item=item.substr(item.lastIndexOf('/')+1);
 					// alert("bo:"+inspect(item));
 					// alert("root:" + inspect(root.children));
 					root[0].children[0].children.push({
@@ -761,12 +834,46 @@ end
 				for (i = 0;i <  data_root.ext_list.length; i++){
 					item = data_root.ext_list[i];
 					// alert("code:"+inspect(item));
+					item=item.substr(item.lastIndexOf('/')+1);
 					
 					root[0].children[1].children.push({
 						label:item,
 						type:"code"
 					});
 				}
+				if (data_root.service_list != null)
+						for (i = 0;i <  data_root.service_list.length; i++){
+								item = data_root.service_list[i];
+								// alert("code:"+inspect(item));
+								item=item.substr(item.lastIndexOf('/')+1);
+								
+								root[0].children[2].children.push({
+									label:item,
+									type:"code"
+								});
+							}
+					if (data_root.ui_universal != null)
+						for (i = 0;i <  data_root.ui_universal.length; i++){
+							item = data_root.ui_universal[i];
+							// alert("code:"+inspect(item));
+							item=item.substr(item.lastIndexOf('/')+1);
+							// alert(root[0].children[3]);
+							root[0].children[3].children[0].children.push({
+														label:item,
+														type:"code"
+													});
+						}
+					if (data_root.ui_mobile != null)
+					for (i = 0;i <  data_root.ui_mobile.length; i++){
+						item = data_root.ui_mobile[i];
+						// alert("code:"+inspect(item));
+						item=item.substr(item.lastIndexOf('/')+1);
+						
+						root[0].children[3].children[1].children.push({
+							label:item,
+							type:"code"
+						});
+					}
 			}
 			// alert();
 			
@@ -786,6 +893,14 @@ end
 							icon = "/images/apps-256.png";
 						if (node.type == "extension")
 							icon = "/images/Plugins-48.png";
+						if (node.type == "ui_root_u" )
+							icon = "/images/Apps-48.png";
+						if (node.type == "ui_root" )
+							icon = "/images/Apps-48.png";	
+						if (node.type == "ui_root_m" )
+							icon = "/images/mobile.png";
+						if (node.type == "service_root")
+							icon = "/images/service.png";
 						if (node.children == null  || node.children.length == 0)
 							style= "vertical-align:bottom;height:25px;border:0px solid red;margin-left:20px;";
 
@@ -927,6 +1042,34 @@ end
 	 					// type: 'code', }
 	        ]
 	    }
+		,
+	    {
+	        label: 'Service',
+			type: 'service_root',
+	        children: [
+	 					//            { 
+	 					// label: 'child3',
+	 					// type: 'code', }
+	        ]
+	    }	,
+		    {
+		        label: 'UI',
+				type: 'ui_root',
+		        children: [
+		 		            { 
+		 					label: 'Universal',
+		 					type: 'ui_root_u',
+							children: []
+							},
+							 { 
+			 					label: 'Mobile',
+			 					type: 'ui_root_m',
+								children: []
+							}
+						
+							
+		        ]
+		    }
 	];
 	// var g_bo_root = data[0];
 	// var g_extion_root = data[1];
@@ -945,7 +1088,9 @@ end
 			$("#bo_designer").css("display", "none");
 			
 			type = g_selected_node.type;
-			fname = g_selected_node.name;
+			// fname = g_selected_node.name;
+			fname = getNodePath(g_selected_node);
+			
 			$.ajax({
 				type: "post",
 				url: "/app/of?t="+ new Date().getTime(),
@@ -994,16 +1139,26 @@ end
 				}
 			}); // $ajax 
 		}
+		function update_nav(fname, type){
+				nav = "";
+				if (type == 'bo')
+					nav = "Business Objects > ";
+				else if	(type == "code")
+					nav = "Extensions > ";
+			$("#filenav").html(nav+fname);
+		}
 		function open_bo(node){
 			
-			
+			type = g_selected_node.type;
+			fname = g_selected_node.name;
 			$("#editor").css("display", "none");	
 			$("#bo_designer").css("display", "block");		
 			$("#prop_pad").css("display", "none");
 			$("#canvas").empty();
 			// $("#props").empty();
 			appendToConsole("Load BO Successfully");
-			
+			update_nav(fname, type);
+		
 		}
 		function add_node(){
 			
@@ -1029,7 +1184,7 @@ end
 					);
 					
 				}
-				else{
+				else {
 					
 					$('#tree').tree(
 					    'addNodeAfter',
@@ -1060,6 +1215,41 @@ end
 				// 	type: 'bo', 
 				// });
 			}
+			
+			if (g_selected_node.type == 'service_root' || g_selected_node.type == 'code'  ){
+				$('#tree').tree(
+				    'appendNode',
+				    {
+				        label: 'New Service',
+				        type:'code',
+						isNew: 'true'
+				    },
+				    g_selected_node
+				);
+				
+				// g_bo_root.children.push({
+				// 	label: 'New File',
+				// 	type: 'bo', 
+				// });
+			}
+			
+			if (/^ui_root/.match(g_selected_node.type)  || g_selected_node.type == 'code'  ){
+				$('#tree').tree(
+				    'appendNode',
+				    {
+				        label: 'New UI File',
+				        type:'code',
+						isNew: 'true'
+				    },
+				    g_selected_node
+				);
+				
+				// g_bo_root.children.push({
+				// 	label: 'New File',
+				// 	type: 'bo', 
+				// });
+			}
+		
 		}
 	</script>
 	
@@ -1332,16 +1522,30 @@ end
 						// alert(inserted.length);
 						// inserted.attr("inserted", "1");
 						inserted = $(inserted[inserted.length-1]);
-						inserted.draggable();
+						inserted.draggable({containment: "parent" });
 						inserted.attr("id", _id);
 						inserted.css("left", x);
 						inserted.css("top", y);
 						// alert($(inserted[inserted.length-1]).attr("id"));
 						// alert(inserted.html());
 						inserted.click(function(event){
-							show_props(inserted);
+							show_boprops(inserted);
+							
 						})
-										
+						inserted.dblclick(function(event){
+							// inserted.balloon({ position: "bottom right" });
+							// $("#console").balloon({ position: "bottom right" });
+							// alert("dbc");
+							// $("#balloon").toggle(
+							// 							function(){
+							// 								$(this).animate({height: 'toggle', opacity: 'toggle'}, "slow");
+							// 							},
+							// 							function(){
+							// 								$(this).animate({height: 'toggle', opacity: 'toggle'}, "slow");
+							// 							});	
+							show_balloon(true, event);
+							
+						});			
 						// alert(inspect(inserted));
 					}
 				
@@ -1352,16 +1556,80 @@ end
 		}
 	});
 	
-	function show_props(t){
+	function show_boprops(t){
 		// alert(t.find("div.draggable_obj_name").html());
 		a =  t.find("div.draggable_obj_name").html();
 		// alert($("#props input#prop_name").html());
-		// alert(a);
-		$("#props input#prop_v_name").html(a);
+		// alert($("#props input#prop_v_name").length);
+		name = ""+$.trim(a);
+		// alert(name);
+		$("#props input#boprop_v_name").val(name);
+		$("#props input#boprop_v_type").val("BO");
 		$("#prop_pad").css("display", "block");
+		
+		ps = t.find(".draggable_obj_prop");
+		 // alert(ps.length);
+		i = 0;
+		for (;i<ps.length;i++){
+			// alert($(ps[i]).attr("n"));
+			item = $(ps[i]);
+			n = item.attr("n");
+			v = item.html();
+			v = $.trim(v);
+			// alert(v);
+			// alert("#props #boprop_v_"+n);
+			// alert($("#props #boprop_v_"+n).length);
+			$("#boprop_v_"+n).val(v);
+			
+		}
+		$("#field_prop_pad").css("display", "none");
 		// alert(0);
 	}
+	
+	
 	</script>
+
+	<script type="text/javascript" src="/javascripts/jquery.balloon.js"></script>
+<script>
+// jquery ballon
+
+// $("#pane1").balloon({});
+
+// $("#ballon").ballon({
+// contents: null,
+// url: null,
+// ajaxComplete: null,
+// classname: null,
+// position: "top",
+// offsetX: 0,
+// offsetY: 200,
+// tipSize: 12,
+// delay: 0,
+// minLifetime: 200,
+// showDuration: 100,
+// showAnimation: null,
+// hideDuration: 80
+// // hideAnimation: function (d) { this.fadeOut(d); }
+// 	});
+	// alert(111);
+	$("#balloon").draggable();
+	function show_balloon(t, e){
+		$("#balloon").animate({height: 'toggle', opacity: 'toggle'}, "slow");
+		if (e){
+			$("#balloon").css("left", e.clientX);
+			$("#balloon").css("top", e.clientY);
+		}
+	}
+	$(".field").click(function(event){
+		show_field_prop();
+	});
+	function show_field_prop(){
+		
+		$("#prop_pad").css("display", "none");
+		
+		$("#field_prop_pad").css("display", "block");
+	}
+</script>
 
   </body>
 </html>
