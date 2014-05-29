@@ -16,3 +16,4 @@ In your virtualhost configuration you must change the AllowOverride option to Al
                 Allow from all
     </Directory>
 </VirtualHost>
+
