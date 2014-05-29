@@ -1,5 +1,7 @@
 Install:
 1. Need ruby 1.8.7, rails 2.3.5, gem 1.3.5
+gem install -v=0.8.7 rake -V
+
 2.  Install gitlist
 
 In your virtualhost configuration you must change the AllowOverride option to All.
