@@ -31,7 +31,8 @@ class ApplicationController < ActionController::Base
   end
   
   def repo_url(repo)
-      "#{@user.name}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}"
+      # "#{@user.name}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}"
+      "#{$git_user}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}"
   end
   
   def workspace_path
