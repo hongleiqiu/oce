@@ -38,7 +38,8 @@ class RepoController < ApplicationController
         end
         
         r = system "cd #{g_SETTINGS[:repo_root]}\n
-               git init --bare #{repo}.git"
+               git init --bare #{repo}.git
+               chown -R git:git #{repo}.git"
         
         p "system call return #{r}"
         

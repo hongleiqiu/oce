@@ -38,3 +38,22 @@ AddType application/x-httpd-php .php
     order allow,deny
     deny from all
 </Files>
+
+#[SUSE] you need enable rewrite engine for apache2
+vi /etc/sysconfig/apache2
+add "rewrite" to variable APACHE_MODULES
+
+# you need to manually create the first repo, other index.php cannot work
+cd /var/mygithub
+sudo git init --bare test.git
+sudo chown -R git:git test.git
+
+3. create git user
+sudo useradd -d /home/git -m git
+
+groupadd git
+
+usermod -G git git
+su - git
+ssh-keygen 
+cp /home/git/.ssh/id_rsa.pub /home/git/.ssh/authorized_keys
