@@ -82,6 +82,7 @@ class AppController < ApplicationController
         new_file_path = "#{dir_path}/#{new_name}"
         # the path used by git commit
         git_relative_path = "app/#{fi[:relative_path]}"
+        git_newfile_rpath = "app/#{fi[:relative_dir]}/#{new_name}"
         
         begin
             if (!FileTest::exists?(file_path) )
@@ -90,7 +91,7 @@ class AppController < ApplicationController
             end
             File.rename(file_path, new_file_path)
             
-            Git2.commit(repo, @user.name, git_relative_path)
+            Git2.add_and_commit(appid, @user.name, git_newfile_rpath)
             
         rescue Expcetion=>e
            # logger.error e
@@ -161,6 +162,27 @@ class AppController < ApplicationController
           
           Git2.push(repo, @user.name)
           success()
+    end
+    
+    # deploy to dev environment
+    # appid 
+    def deploy
+        appid = params[:appid]
+        app_root_dir = repo_ws_path(appid)
+        ext_root_dir = "#{app_root_dir}/app/#{$FS_EXT_ROOT}"
+        
+        dest = "#{$FS_RT_EXT_ROOT}/#{appid}"
+        begin
+            FileUtils.mkdir_p(dest)
+            p "copy #{ext_root_dir} to #{dest}"
+            FileUtils.copy_entry(ext_root_dir, "#{dest}/")
+        rescue Exception => e
+            p e.inspect
+            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+            error("Deploy failed:<pre>"+ e.message+"</pre>")
+            return
+        end
+        success("Deploy successfully", {:url=>"http://"})
     end
     
     # open file

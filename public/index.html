@@ -228,11 +228,11 @@
 			</center>
 			<div id='main_tb_left' style="position:relatvie;float:left;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
 				<a href="javascript:alert('click this will publish this app to App Store');" style="display:block;float:left;margin-left:5px;"> <img src="/images/Lightning.png" title="App Store" class="toolbar_btn" style="width:35px;height:35px;"></a>
-				<a href="javascript:alert('click this to deploy app to sandbox environment');" style="display:block;float:left;margin-left:5px;"> <img src="/images/deploy.png" title="Deploy" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:deploy();" style="display:block;float:left;margin-left:5px;"> <img src="/images/deploy.png" title="Deploy" class="toolbar_btn" style="width:35px;height:35px;"></a>
 
 			</div>
 			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
-				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" title="Save" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" title="Save(Ctrl+Shift+S)" class="toolbar_btn" style="width:35px;height:35px;"></a>
 				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" title="Git" class="toolbar_btn" style="width:35px;height:35px;"></a>
 
 			</div>
@@ -422,7 +422,7 @@
 							<span>Delivery Note</span>
 						</div>
 						<div class="draggable_content draggable_source" t="code">
-class Com::Sap::Sbo::App::Jaw::Bo::Gen &lt; BOExtension
+class Com::Sap::Sbo::App::Jaw::Bo::Gen::DeliveryNote &lt; BOExtension
 
 end
 						</div>
@@ -641,27 +641,37 @@ end
 		return false;
 	}
 	// var ace = require("lib/ace");
-	var editor = ace.edit("editor");
+	var ace_editor = ace.edit("editor");
 	
 	// editor.setTheme("ace/theme/twilight");
 	
 	// editor.getSession().setMode("ace/mode/javascript");
-	editor.getSession().setMode("ace/mode/ruby");
+	ace_editor.getSession().setMode("ace/mode/ruby");
 	
-	editor.getSession().setTabSize(4);
+	ace_editor.getSession().setTabSize(4);
 	
 	document.getElementById('editor').style.fontSize='18px';
 	
-	editor.getSession().setUseWrapMode(false);
+	ace_editor.getSession().setUseWrapMode(false);
 	
-	editor.setHighlightActiveLine(false);
+	ace_editor.setHighlightActiveLine(false);
 	
-	editor.setReadOnly(false);
+	ace_editor.setReadOnly(false);
 	
-	editor.setValue("the new text here");// or session.setValue
+	ace_editor.setValue("");// or session.setValue
 	
-    // editor.getValue(); // or session.getValue
-	
+    // ace_editor.getValue(); // or session.getValue
+	ace_editor.commands.addCommand({
+    	name: 'save',
+    	bindKey: {win: 'Ctrl-Shift-S', mac: 'Command-Shift-S'},
+    	exec: function(ace_editor) {
+			// alert('save');
+			save();
+			return true;
+    	},
+    	readOnly: false // 如果不需要使用只读模式，这里设置false
+    });
+
 	function getNodePath(node){
 		fname = node.name;
 		parent = node.parent;
@@ -675,7 +685,7 @@ end
 	}
 	function save(){
 		// alert(getNodePath(g_selected_node));
-		content = editor.getValue(); 
+		content = ace_editor.getValue(); 
 		type = g_selected_node.type;
 		// fname = g_selected_node.name;
 		fname = getNodePath(g_selected_node);
@@ -709,6 +719,7 @@ end
 					g_selected_node.isNew = "false";
 					// $("#applist").html(data);
 					popup('Save successfully');
+					g_prevContent = ace_editor.getValue();
 					
 				}
 
@@ -726,7 +737,60 @@ end
 		showWaiting(true);
 	    
 	}
+	var g_prevContent = null;
+	function isEditorChanged(){
+		content = ace_editor.getValue(); 
+		
+		if (g_prevContent != null && content!=g_prevContent)
+			return true;
+		return false;
+	}
+	function deploy(){
+		
+		// alert(getNodePath(g_selected_node));
+		if (isEditorChanged()){
+			popup("Pleave save your file first");
+			return;
+		}
+		
+	
+			
+		$.ajax({
+			type: "post",
+			url: "/app/deploy?t="+ new Date().getTime(),
+			dataType: 'json',
 
+			data: {
+				appid:g_appid,
+		
+				// sid: '<%=@sid%>',
+				// authenticity_token:window._token
+			}, 
+			success: function(data, textStatus){
+				// alert( "Data Saved: " + data +","+ textStatus);
+
+				showWaiting(false);
+				if (data.error){
+					popup(data.error);
+				}else{
+					g_selected_node.isNew = "false";
+					// $("#applist").html(data);
+					popup('Deploy successfully.<br />Please click <a href="'+data.url+'" >here</a> to view.');
+				}
+
+			},
+			error: function(xhr, textStatus, errorThrow){
+				// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+				popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+				
+				showWaiting(false);
+
+			}
+		}); // $ajax
+		// alert(content);
+		showWaiting(true);
+	    
+	}
 	function gitlist(){
 		// window.location.href='http://mygithub/'+g_appid+".git";
 		window.open('http://mygithub/'+g_appid+".git");
@@ -1211,7 +1275,8 @@ end
 						popup(data.error);
 					}else{
 						// alert(data.data);
-						editor.setValue(data.data);
+						ace_editor.setValue(data.data);
+						g_prevContent = data.data;
 						
 						nav = "";
 						if (type == 'bo')
@@ -1263,8 +1328,17 @@ end
 		// var exc = [].concat(children);
 		
 		function get_new_name(exc, name, ext_count = 0){
+			// get filename and file ext
+			var prefix = name;
+			var file_ext = null;
+			i = name.lastIndexOf(".");
+			if (i>=0){
+				prefix = name.substr(0, i);
+				file_ext = name.substr(i, name.length);
+			}
+			
 			if (ext_count != 0)
-				_name = name+ext_count.toString();
+				_name = prefix+ext_count.toString()+file_ext;
 			else
 				_name = name;
 			// alert("test name "+_name);
@@ -1278,7 +1352,7 @@ end
 				if (_name == exc[i].name){
 					exc[i] = null;
 					ext_count += 1;
-					_name = name+ext_count.toString();
+					// _name = prefix+ext_count.toString()+file_ext;
 					get_new_name(exc, name, ext_count);
 				}
 			}
@@ -1286,8 +1360,20 @@ end
 		}
 		
 		function get_new_node_name(parent_node, name){
+			
+			// // get filename and file ext
+			// var prefix = name;
+			// var file_ext = null;
+			// i = name.lastIndexOf(".");
+			// if (i>=0){
+			// 	prefix = name.substr(0, i);
+			// 	file_ext = name.substr(i, name.length);
+			// }
+			
+			// alert(prefix+","+file_ext);
 			var exc = [].concat(parent_node.children);
-			return get_new_name(exc, name);
+			new_name =  get_new_name(exc, name);
+			return new_name;
 		}
 		
 		
@@ -1336,7 +1422,7 @@ end
 				if (g_selected_node.type == 'code'  ){
 					parent_node = g_selected_node.parent;
 					// alert(inspect(parent_node));
-					newname = get_new_node_name(parent_node, "New File");
+					newname = get_new_node_name(parent_node, "Untitled.rb");
 					
 					$('#tree').tree(
 					    'addNodeAfter',
@@ -1348,7 +1434,7 @@ end
 					    g_selected_node
 					);
 				}else /*	if (g_selected_node.type == 'extension' || g_selected_node.type == 'service_root' || /^ui_root/.match(g_selected_node.type)  )*/{
-					newname = get_new_node_name(g_selected_node, "New File");
+					newname = get_new_node_name(g_selected_node, "Untitled.rb");
 					
 					$('#tree').tree(
 					    'appendNode',
@@ -1614,7 +1700,7 @@ end
 					
 						source = content.html();
 						source = source.replace(/&lt;/g, "<");
-						editor.insert(source);
+						ace_editor.insert(source);
 					}
 				}
 				else if (id == "bo_designer"){
