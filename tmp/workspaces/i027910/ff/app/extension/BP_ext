@@ -1,0 +1,8 @@
+
+class Com::Sap::Sbo::App::Jaw::Bo::Gen::BusinessPartner < BOExtension
+
+def before_action_closed
+end
+							
+end
+						
