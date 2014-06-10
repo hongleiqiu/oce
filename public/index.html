@@ -394,7 +394,7 @@
 			<div class='pane2_toolbar' style="width:100%;height:35px;border:1px solod blue;background:#f5f5f5">
 				<center>
 				<div id='cp_tb_btns' style="padding:3px;">
-					<a href="javascript:show_list(1);" style="margin-right:3px;" title="Extension"> <img src="/images/dropbox-icon.png" class="toolbar_btn_m"></a>
+					<a href="javascript:show_list(1);" style="margin-right:3px;" title="Extendable"> <img src="/images/dropbox-icon.png" class="toolbar_btn_m"></a>
 					<a href="javascript:show_list(2);" title="Code"> <img src="/images/brackets-icon.png" class="toolbar_btn_m" style="margin-right:3px;"></a>
 					<a href="javascript:show_list(3);" title="Object"> <img src="/images/feedly-icon.png" class="toolbar_btn_m" style="margin-right:3px;"></a>
 					<a href="javascript:show_list(4);" title="OpenAPI"> <img src="/images/lastfm-icon.png" class="toolbar_btn_m" style="margin-right:3px;"></a>
@@ -409,7 +409,7 @@
 					</script>
 				</div>
 				</center>
-			</div>
+			</div><!-- pane2_toolbar -->
 			
 			<div id="pane2_content">
 				<div id="p2_content1" class='p2_c' style="display:none;">
@@ -418,8 +418,13 @@
 							<img src="/images/Plugins-48.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;">
-							<span style="font-size:13pt;font-weight:300;">Price Calculator</span><br>
-							<span>Help calculating price</span>
+							<span style="font-size:13pt;font-weight:300;">Delivery Note</span><br>
+							<span>Delivery Note</span>
+						</div>
+						<div class="draggable_content draggable_source" t="code">
+class Com::Sap::Sbo::App::Jaw::Bo::Gen &lt; BOExtension
+
+end
 						</div>
 					</div>
 					<!-- <div class="draggable_element revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
@@ -432,15 +437,41 @@
 							<img src="/images/Plugins-48.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;">
-							<span style="font-size:13pt;font-weight:300;">Foreign Exchange</span><br>
-							<span>Money exchange</span>
+							<span style="font-size:13pt;font-weight:300;">BusinessPartner</span><br>
+							<span>Business Partner</span>
+						</div>
+						<div class="draggable_content draggable_source" t="code">
+class Com::Sap::Sbo::App::Jaw::Bo::Gen::BusinessPartner &lt; BOExtension
+
+end
 						</div>
 					</div>
 					<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
 									</div> -->
 									<div class="line_splitter">
 									</div>
+			
+				<div class="draggable_element  component_line"  >	
+					<div style="float:left;height:100%;width:50px;border:0px solid red;">
+						<img src="/images/Plugins-48.png" style="height:100%;" />
+					</div>
+					<div style="float:left;margin-left:5px;">
+						<span style="font-size:13pt;font-weight:300;">Quotation</span><br>
+						<span>Quotation</span>
+					</div>
+					<div class="draggable_content draggable_source" t="code">
+class Com::Sap::Sbo::App::Jaw::Bo::Gen::Quotation &lt; BOExtension
+
+end
+					</div>
 				</div>
+				<!-- <div class="draggable revertable" style="height:60px;width:100%-6;z-index:100;margin-top:-60px;border:1px solid #cccccc;">
+								</div> -->
+								<div class="line_splitter">
+								</div>
+			
+			
+				</div> <!-- pane2_content1 -->
 				
 				<div id="p2_content2"  class='p2_c' style="display:none">
 					<div class="draggable_element component_line" style="">	
@@ -448,10 +479,10 @@
 							<img src="/images/bracket.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
-							<div style="font-size:13pt;font-weight:300;">Before Commit</div>
-							<div style="font-size:10pt;">Called after saving the business object</div>
+							<div style="font-size:13pt;font-weight:300;">Before Close</div>
+							<div style="font-size:10pt;">Called before The business object closed</div>
 							<div class="draggable_content draggable_source" t="code">
-def before_commit
+def before_action_closed
 end
 							</div>
 						</div>
@@ -466,10 +497,10 @@ end
 							<img src="/images/bracket.png" style="height:100%;" />
 						</div>
 						<div style="float:left;margin-left:5px;width:230px;">
-							<div style="font-size:13pt;font-weight:300;">After Commit</div>
-							<div style="font-size:10pt;">Called after saving the business object</div>
+							<div style="font-size:13pt;font-weight:300;">Before copyToDeliveryNote</div>
+							<div style="font-size:10pt;">Before copy to DeliveryNote</div>
 							<div class="draggable_content draggable_source" t="code">
-def after_commit
+def before_action_copyToDeliveryNote
 end
 							</div>
 						</div>
@@ -478,7 +509,8 @@ end
 										</div> -->	
 					<div class="line_splitter">
 					</div>				
-				</div>	
+				</div>	<!-- pane2_content1 -->
+				
 				<div id="p2_content3"  class='p2_c' style="display:none">
 					<div class="draggable_element  component_line" >	
 						<div style="float:left;height:100%;width:50px;border:0px solid red;">
@@ -531,7 +563,7 @@ end
 										</div> -->	
 										<div class="line_splitter">
 										</div>				
-				</div>
+				</div><!-- p2_content3 -->
 				
 				<div id="p2_content4"  class='p2_c' style="display:none">
 					<div class="draggable_element  component_line" >	
@@ -561,10 +593,10 @@ end
 										</div> -->	
 										<div class="line_splitter">
 										</div>				
-				</div>
+				</div><!-- p2_content4 -->
 									
-			</div>
-		</div>
+			</div><!-- p2_content -->
+		</div> <!-- pane2 -->
 	</div>
 	<!--script src="http://wh.joyqom.com/javascripts/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script-->
 	<!--script src="http://code.jquery.com/jquery-2.1.1.js"></script-->
@@ -1497,6 +1529,7 @@ end
 					}else{
 					
 						source = content.html();
+						source = source.replace(/&lt;/g, "<");
 						editor.insert(source);
 					}
 				}
