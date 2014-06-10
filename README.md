@@ -34,7 +34,7 @@ AddType application/x-httpd-php .php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^(.*)$ index.php/$1 [L,NC]
 </IfModule>
-<Files config.ini>
+<Files config.ini>	
     order allow,deny
     deny from all
 </Files>
@@ -44,9 +44,15 @@ vi /etc/sysconfig/apache2
 add "rewrite" to variable APACHE_MODULES
 
 # you need to manually create the first repo, other index.php cannot work
+mkdir /var/mygithub
+chmod 755 /var/mygithub
+# if you going run ruby server under root, you need to install all gem (like mysql gem) under root
+# suggest you use root install and run server
+# suggest you chmod 777 /var/mygithub if you dev it on mac with your own users
 cd /var/mygithub
 sudo git init --bare test.git
 sudo chown -R git:git test.git
+
 
 3. create git user
 sudo useradd -d /home/git -m git

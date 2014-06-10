@@ -648,7 +648,8 @@ end
 	// editor.getSession().setMode("ace/mode/javascript");
 	editor.getSession().setMode("ace/mode/ruby");
 	
-	 editor.getSession().setTabSize(4);
+	editor.getSession().setTabSize(4);
+	
 	document.getElementById('editor').style.fontSize='18px';
 	
 	editor.getSession().setUseWrapMode(false);
@@ -865,6 +866,7 @@ end
 				if (data_root.ext_list != null)
 				for (i = 0;i <  data_root.ext_list.length; i++){
 					item = data_root.ext_list[i];
+					
 					// alert("code:"+inspect(item));
 					item=item.substr(item.lastIndexOf('/')+1);
 					
@@ -947,12 +949,20 @@ end
 				    function(event) {
 
 				        // The clicked node is 'event.node'
-				        var node = event.node;
-						g_selected_node = node;
-						if (node.type == 'code')
-							open_file(node);
-						else if (node.type == 'bo')
-							open_bo(node);
+				       	var node = event.node;
+						if (g_selected_node && g_selected_node.isNew == 'true' ){
+							popup("You haven't save this file.");
+							return false;
+						}
+						else
+						{
+							
+							g_selected_node = node;
+							if (node.type == 'code')
+								open_file(node);
+							else if (node.type == 'bo')
+								open_bo(node);
+						}
 				    }
 				);
 				$tree.bind(
@@ -988,6 +998,57 @@ end
 						return true;
 				    }
 				);
+		}
+		
+		function rename_file(node, name){
+			fname = getNodePath(node);
+			
+				$.ajax({
+					type: "post",
+					url: "/app/ren?t="+ new Date().getTime(),
+					dataType: 'json',
+
+					data: {
+						appid:g_appid,
+						fname:fname,
+						name: name,
+						type:node.type
+						// sid: '<%=@sid%>',
+						// authenticity_token:window._token
+					}, 
+					success: function(data, textStatus){
+						// alert( "Data Saved: " + data +","+ textStatus);
+
+						showWaiting(false);
+						if (data.error){
+							popup(data.error);
+						}else{
+							va = {
+								type:g_editing_node.type,
+								isNew:g_editing_node.isNew,
+								label:name
+								};
+
+							$tree.tree('updateNode', g_editing_node, va);
+							$("#edit_box").css("display", "none");
+							$("#edit_value").val("");
+							g_editing_node = null;
+							popup('Rename successfully');
+
+						}
+
+					},
+					error: function(xhr, textStatus, errorThrow){
+						// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+						popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+						showWaiting(false);
+
+					}
+				}); // $ajax
+				// alert(content);
+
+				showWaiting(true);	
 		}
 		function pre_rename_node(event){
 			var node = event.node;
@@ -1033,17 +1094,23 @@ end
 				
 					// alert(g_selected_node.name);
 					// alert($tree[0]);
-					va = {
-						type:g_editing_node.type,
-						isNew:g_editing_node.isNew,
-						label:v
-						};
+					if (g_editing_node.isNew == 'true'){
+						va = {
+							type:g_editing_node.type,
+							isNew:g_editing_node.isNew,
+							label:v
+							};
 				
-					$tree.tree('updateNode', g_editing_node, va);
-					$("#edit_box").css("display", "none");
+						$tree.tree('updateNode', g_editing_node, va);
+						$("#edit_box").css("display", "none");
+					
 				
-					$("#edit_value").val("");
-					g_editing_node = null;
+						$("#edit_value").val("");
+						g_editing_node = null;
+					}else{
+						rename_file(g_editing_node, v);
+						
+					}
 					
 					// alert(v);
 				};
@@ -1192,23 +1259,58 @@ end
 			update_nav(fname, type);
 		
 		}
+		// you must clone your array before call this function
+		// var exc = [].concat(children);
+		
+		function get_new_name(exc, name, ext_count = 0){
+			if (ext_count != 0)
+				_name = name+ext_count.toString();
+			else
+				_name = name;
+			// alert("test name "+_name);
+			// alert("array:"+inspect(exc));
+			// alert(children.length);
+			for (i = 0; i< exc.length; i++){
+				// alert(i+":"+inspect(exc[i]));
+				if (exc[i] == null)
+					continue;
+				// alert(inspect(exc[i]));
+				if (_name == exc[i].name){
+					exc[i] = null;
+					ext_count += 1;
+					_name = name+ext_count.toString();
+					get_new_name(exc, name, ext_count);
+				}
+			}
+			return _name;
+		}
+		
+		function get_new_node_name(parent_node, name){
+			var exc = [].concat(parent_node.children);
+			return get_new_name(exc, name);
+		}
+		
+		
 		function add_node(){
-			
+			// alert(g_selected_node.type);
 			if (g_selected_node == null)
 				return;
-			if (g_selected_node.type == 'bo_root' || g_selected_node == 'bo'){
+			if (g_selected_node.type == 'bo_root' || g_selected_node.type == 'bo'){
 				
 				// g_bo_root.children.push({
 				// 			label: 'New File',
 				// 			type: 'bo', 
 				// 		})
-				// 
+				
+				
 				if (g_selected_node.type=='bo_root'){
-					
+					// json = $('#tree').tree('toJson');
+				//	alert(json);
+					newname = get_new_node_name(g_selected_node, "New BO");
 					$('#tree').tree(
 					    'appendNode',
 					    {
-					        label: 'New BO',
+					        label: newname,
 					        type: 'bo',
 							isNew: 'true'
 					    },
@@ -1217,11 +1319,11 @@ end
 					
 				}
 				else {
-					
+					newname = get_new_node_name(g_selected_node.parent, "New BO");
 					$('#tree').tree(
 					    'addNodeAfter',
 					    {
-					        label: 'New BO',
+					        label: newname,
 					        type:'bo',
 							isNew: 'true'
 					    },
@@ -1230,59 +1332,41 @@ end
 				}
 			}
 			// alert(g_selected_node.type);
+			else 	{ // if (g_selected_node.type == 'bo_root' || g_selected_node == 'bo')
+				if (g_selected_node.type == 'code'  ){
+					parent_node = g_selected_node.parent;
+					// alert(inspect(parent_node));
+					newname = get_new_node_name(parent_node, "New File");
+					
+					$('#tree').tree(
+					    'addNodeAfter',
+					    {
+					        label: newname,
+					        type:'code',
+							isNew: 'true'
+					    },
+					    g_selected_node
+					);
+				}else /*	if (g_selected_node.type == 'extension' || g_selected_node.type == 'service_root' || /^ui_root/.match(g_selected_node.type)  )*/{
+					newname = get_new_node_name(g_selected_node, "New File");
+					
+					$('#tree').tree(
+					    'appendNode',
+					    {
+					        label: newname,
+					        type:'code',
+							isNew: 'true'
+					    },
+					    g_selected_node
+					);
+					
+				}
 			
-			if (g_selected_node.type == 'extension' || g_selected_node.type == 'code'  ){
-				$('#tree').tree(
-				    'appendNode',
-				    {
-				        label: 'New File',
-				        type:'code',
-						isNew: 'true'
-				    },
-				    g_selected_node
-				);
-				
-				// g_bo_root.children.push({
-				// 	label: 'New File',
-				// 	type: 'bo', 
-				// });
-			}
+			} // if (g_selected_node.type == 'bo_root' || g_selected_node == 'bo') else
 			
-			if (g_selected_node.type == 'service_root' || g_selected_node.type == 'code'  ){
-				$('#tree').tree(
-				    'appendNode',
-				    {
-				        label: 'New Service',
-				        type:'code',
-						isNew: 'true'
-				    },
-				    g_selected_node
-				);
-				
-				// g_bo_root.children.push({
-				// 	label: 'New File',
-				// 	type: 'bo', 
-				// });
-			}
 			
-			if (/^ui_root/.match(g_selected_node.type)  || g_selected_node.type == 'code'  ){
-				$('#tree').tree(
-				    'appendNode',
-				    {
-				        label: 'New UI File',
-				        type:'code',
-						isNew: 'true'
-				    },
-				    g_selected_node
-				);
-				
-				// g_bo_root.children.push({
-				// 	label: 'New File',
-				// 	type: 'bo', 
-				// });
-			}
 		
-		}
+		} // function add_node(){
 	</script>
 	
 	<script>

@@ -63,6 +63,43 @@ class AppController < ApplicationController
             
         }
     end
+    
+    # rename file
+    # appid:
+    # fname: path,
+    # name: new name,
+    # type: node.type
+    def ren
+        appid = params[:appid]
+        path = params[:fname]
+        type = params[:type] 
+        fi= fileInfoFromPath(path)
+        new_name = params[:name]
+        
+        
+        dir_path = repo_ws_path(repo)+"/app/#{fi[:relative_dir]}"
+        file_path = "#{dir_path}/#{fname}"
+        new_file_path = "#{dir_path}/#{new_name}"
+        # the path used by git commit
+        git_relative_path = "app/#{fi[:relative_path]}"
+        
+        begin
+            if (!FileTest::exists?(file_path) )
+                error("File not exists")
+                return
+            end
+            File.rename(file_path, new_file_path)
+            
+            Git2.commit(repo, @user.name, git_relative_path)
+            
+        rescue Expcetion=>e
+           # logger.error e
+            p e.inspect
+            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+        end
+    
+    end
+    
     # save file
     def sf
         appid = params[:appid]
@@ -86,6 +123,12 @@ class AppController < ApplicationController
             FileUtils.makedirs(dir)
             # logger.info("===========>#{dir}/#{id}<====")
             p "===>save to file #{dir}/#{fname}"
+            
+            file_path = "#{dir}/#{fname}"
+            if isnew && FileTest::exists?(file_path) 
+                error("Cannot add file #{fname}, file already exists")
+                return 
+            end
             
             aFile = File.new("#{dir}/#{fname}","w")
             aFile.puts content
