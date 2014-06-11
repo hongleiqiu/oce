@@ -83,7 +83,7 @@
 	function del_app(appid){
 			$.ajax({
 				type: "post",
-				url: "/repo/delapp?t="+ new Date().getTime(),
+				url: "/app/delapp?t="+ new Date().getTime(),
 				dataType: 'json',
 				
 				data: {

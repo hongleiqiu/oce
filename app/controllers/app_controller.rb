@@ -6,7 +6,35 @@ class AppController < ApplicationController
     
     def app
     end
-    
+    def delapp
+        repo = appid = params[:appid]
+        
+        if !repo || repo == ""
+            error("invalid repository name")
+            return
+        end
+        
+        # r = system "cd #{g_SETTINGS[:repo_root]}\n
+        #        git init --bare #{repo}.git"
+        
+        # p "system call return #{r}"
+        # 
+        begin
+            p "appid=>#{appid}"
+            rs = ActiveRecord::Base.connection.execute("delete from apps where appid='#{appid}'")
+        rescue Exception=>e
+            error("delet app from db failed #{e.inspect}")
+            return
+        end
+        
+        begin
+            FileUtils.rm(repo_ws_path(appid))
+        rescue Exception=>e
+            error("delete app files failed #{e.inspect}")
+            return
+        end       
+        success()
+    end
     def ld
         p "===>d33e3"
         appid= params[:appid]
@@ -37,6 +65,16 @@ class AppController < ApplicationController
         
     end
     
+    # /project/extension/untitle1.rb => {
+    # :path=>"/project/extension/Untitled1.rb",
+    # :cat2=>"Untitled1.rb", 
+    # :project=>"project",
+    # :cat1=>"extension", 
+    # :relative_dir=>"extension", 
+    # :relative_path=>"extension/Untitled1.rb", 
+    # :fname=>"Untitled1.rb"
+    # }
+    # save file to ./tmp/workspaces/i027910/rrr/app/extension/Untitled1.rb
     def fileInfoFromPath(path)
         p "===>path #{path}"
         b = path.split('/')
@@ -51,7 +89,17 @@ class AppController < ApplicationController
          if (b.size > 2)
              cat2 = b[2]
          end
-        
+        r =  {
+             :path=>path,
+             :project=>prj,
+             :fname=>fname,
+             :cat1=>cat,
+             :cat2=>cat2,
+             :relative_path=>b[1..b.size-1].join("/"),
+             :relative_dir=>b[1..b.size-2].join("/")
+
+         }
+         p r
         return {
             :path=>path,
             :project=>prj,
@@ -126,7 +174,7 @@ class AppController < ApplicationController
             p "===>save to file #{dir}/#{fname}"
             
             file_path = "#{dir}/#{fname}"
-            if isnew && FileTest::exists?(file_path) 
+            if isnew == 'true' && FileTest::exists?(file_path) 
                 error("Cannot add file #{fname}, file already exists")
                 return 
             end
@@ -182,7 +230,8 @@ class AppController < ApplicationController
             error("Deploy failed:<pre>"+ e.message+"</pre>")
             return
         end
-        success("Deploy successfully", {:url=>"http://"})
+        dev_server = @user.dev_server
+        success("Deploy successfully", {:url=>"#{dev_server_b1_url}"})
     end
     
     # open file

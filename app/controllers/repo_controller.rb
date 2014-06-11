@@ -46,30 +46,7 @@ class RepoController < ApplicationController
         success('OK', {:ret=>r})
     end
     
-    def delapp
-        repo = appid = params[:appid]
-        
-        if !repo || repo == ""
-            error("invalid repository name")
-            return
-        end
-        
-        # r = system "cd #{g_SETTINGS[:repo_root]}\n
-        #        git init --bare #{repo}.git"
-        
-        # p "system call return #{r}"
-        # 
-        begin
-            p "appid=>#{appid}"
-            rs = ActiveRecord::Base.connection.execute("delete from apps where appid='#{appid}'")
-        rescue Exception=>e
-            error("create app failed #{e.inspect}")
-            return
-        end
-        
-        
-        success()
-    end
+
     
     # prepare work space for one for one user
     def prep_app()

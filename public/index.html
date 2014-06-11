@@ -689,8 +689,9 @@ end
 		type = g_selected_node.type;
 		// fname = g_selected_node.name;
 		fname = getNodePath(g_selected_node);
+		alert(fname);
 		isnew = g_selected_node.isNew;
-		// alert(isnew);
+		alert(isnew);
 		// alert(content);
 		if (type != 'bo' && type !='code')
 			return;
@@ -987,7 +988,7 @@ end
 							icon = "/images/Folder-128.png";
 						if (node.type == 'bo_root')
 							icon = "/images/Folder-128.png";
-						if (node.type == 'project')
+						if (node.type == 'app')
 							icon = "/images/apps-256.png";
 						if (node.type == "extension")
 							icon = "/images/Plugins-48.png";
@@ -1240,7 +1241,7 @@ end
 	var root = [
 		{
 			label: 'B1_project',
-			type: 'project',
+			type: 'app',
 			children:data
 		}
 	];	
