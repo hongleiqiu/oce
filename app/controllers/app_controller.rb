@@ -238,7 +238,7 @@ class AppController < ApplicationController
             error("Deploy failed:<pre>"+ e.message+"</pre>")
             return
         end
-        dev_server = @user.dev_server
+        dev_server_b1_url = @user.dev_server_b1_url
         success("Deploy successfully", {:url=>"#{dev_server_b1_url}"})
     end
     
