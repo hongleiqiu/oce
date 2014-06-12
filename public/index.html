@@ -266,13 +266,15 @@
 					
 				</div>
 				<div id='cp_tb_btns' style="float:right;">
-					<button class='btn1' onclick="openvi();">Log</button>
+					<button class='btn1' onclick="openlog();">Log</button>
 					
 					<button class='btn1' onclick="openvi();">vim</button>
 					<button class='btn1'>textmate</button>
 				</div>
 			</div>
 			<div id="editor" name="body" class="droppable" style="display:none;width:99%;height:580px;">
+			</div>
+			<div id="log" name="body" class="droppable" style="display:none;width:99%;height:580px;">
 			</div>
 			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:#fefefe;">
 				<div id="bod_tb" style="float:left;width:50px;height:100%;border-right:1px solid grey;margin-right:5px;">
@@ -1246,6 +1248,15 @@ end
 		}
 	];	
 
+	function openlog(){
+		$("#editor").css("display", "none");	
+		$("#bo_designer").css("display", "none");
+		$("#log").css("display", "block");	
+		retrieve_log();
+	}
+	function retrieve_log(){
+		
+	}
 
 		function open_file(node){
 			$("#editor").css("display", "block");	

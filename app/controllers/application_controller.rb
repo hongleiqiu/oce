@@ -3,6 +3,8 @@
 require 'settings.rb'
 require 'git.rb'
 require 'json'
+require 'ruby_utility.rb'
+
 class ApplicationController < ActionController::Base
   helper :all # include all helpers, all the time
   protect_from_forgery # See ActionController::RequestForgeryProtection for details

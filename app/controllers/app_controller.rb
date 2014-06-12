@@ -38,13 +38,21 @@ class AppController < ApplicationController
     def ld
         p "===>d33e3"
         appid= params[:appid]
+=begin        
         rs = App.find_by_sql("select * from apps where appid='#{appid}'")
         if rs == nil || rs.size == 0
             error("No such App")
             return
         end
         app = rs[0]
-        
+=end        
+        data = http_post(g_SETTINGS[:appstore_query_app_url], {:appid=>appid})
+        p "--->#{data}"
+        ret = JSON.parse(data)
+        if ret['error']
+            error(ret['error'])
+            return
+        end
         repo = appid
         repo_url = repo_url(appid)
         # clone if not yet
@@ -372,5 +380,35 @@ class AppController < ApplicationController
                 # logger.error e
                 p e.inspect
               end
+    end
+    
+    # retrieve log
+    def rlog
+        # logfile = params[:logfile]
+        startline = params[:startline]
+        startline = 0 if startline == nil
+        line_num = 100
+        max_line = 500
+        t = Time.now
+        p g_SETTINGS[:conlose_log]
+        logfile = sprintf(g_SETTINGS[:conlose_log], t.year, t.month, t.day )
+        p "==>logfile:#{logfile}"
+        ar = []
+         begin
+                if FileTest::exists?(logfile)
+                     f=File.open(logfile,"r")  
+                        t = nil      
+                        
+
+                    f.readlines[startline..startline+line_num].each do |line| 
+                        ar.push(line)
+                    end
+                end
+        rescue Exception=>e
+            p e.inspect
+            return
+        end
+        render :text=>ar.join("<br/>")
+        return
     end
 end
