@@ -1,3 +1,5 @@
+# require 'base64'
+require 'cgi'
 class AppController < ApplicationController
     
     def list
@@ -238,6 +240,7 @@ class AppController < ApplicationController
             error("Deploy failed:<pre>"+ e.message+"</pre>")
             return
         end
+        p "deploy ok"
         dev_server_b1_url = @user.dev_server_b1_url
         success("Deploy successfully", {:url=>"#{dev_server_b1_url}"})
     end
@@ -381,34 +384,87 @@ class AppController < ApplicationController
                 p e.inspect
               end
     end
-    
+    # tail log
+    def tlog
+        ln = params[:ln].to_i
+        t = Time.now
+        logfile = sprintf(g_SETTINGS[:console_log], t.year, t.month, t.day )
+        p "==>logfile:#{logfile}"
+        ar = []
+         begin
+                if FileTest::exists?(logfile)
+                    line_number = `grep -Fc "" #{logfile}`.to_i
+                     f=File.open(logfile,"r")  
+                        t = nil      
+                        
+                    f.readlines[line_number-ln..line_number].each do |line| 
+                        ar.push("#{line}<br/>")
+                    end
+                end
+        rescue Exception=>e
+            p "===>aaa"+e.inspect
+            error(e.inspect)
+            return
+        end
+        p "===>ar:#{ar.join('')}"
+        # c = Base64.encode64(ar.join("\n"))
+        c = CGI.escape(ar.join("\n"))
+        success("OK",{
+            :start_line =>line_number-ln-1,
+            :c=>c
+            
+        })
+        return
+    end
     # retrieve log
     def rlog
         # logfile = params[:logfile]
-        startline = params[:startline]
+        startline = params[:sl]
         startline = 0 if startline == nil
-        line_num = 100
+        startline = startline.to_i
+        startline += 1
+        line_num = params[:ln]
+        if line_num == nil
+            line_num = 100 
+        else
+            line_num = line_num.to_i
+        end
         max_line = 500
         t = Time.now
-        p g_SETTINGS[:conlose_log]
-        logfile = sprintf(g_SETTINGS[:conlose_log], t.year, t.month, t.day )
+        p g_SETTINGS[:console_log]
+        logfile = sprintf(g_SETTINGS[:console_log], t.year, t.month, t.day )
         p "==>logfile:#{logfile}"
         ar = []
          begin
                 if FileTest::exists?(logfile)
                      f=File.open(logfile,"r")  
                         t = nil      
-                        
-
-                    f.readlines[startline..startline+line_num].each do |line| 
-                        ar.push(line)
+                    p "start line #{startline}, line_num  #{line_num}"
+                    if line_num < 0
+                        f.readlines[startline+line_num..startline].each do |line| 
+                            ar.push("#{line}<br/>")
+                        end
+                    else
+                        f.readlines[startline..startline+line_num].each do |line| 
+                            ar.push("#{line}<br/>")
+                        end
                     end
                 end
         rescue Exception=>e
             p e.inspect
+            render :text=>""
             return
         end
-        render :text=>ar.join("<br/>")
+        
+        # if line_num < 0
+            # ar.reverse!
+        # end
+        p "log:#{ar.join("<br/>")}"
+        render :text=>ar.join("\n")
         return
+    end
+
+    def submit
+        redirect_to "#{g_SETTINGS[:submit_url]}?appid=#{params[:appid]}"
     end
 end
