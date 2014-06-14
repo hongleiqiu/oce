@@ -393,11 +393,17 @@ class AppController < ApplicationController
         ar = []
          begin
                 if FileTest::exists?(logfile)
+                    p "grep -Fc \"\" #{logfile}"
                     line_number = `grep -Fc "" #{logfile}`.to_i
-                     f=File.open(logfile,"r")  
-                        t = nil      
+                    f=File.open(logfile,"r")  
+                    t = nil      
+                    
+                    line_number = 0 if !line_number
+                    
+                    start_line = line_number-ln
+                    start_line = 0 if start_line < 0
                         
-                    f.readlines[line_number-ln..line_number].each do |line| 
+                    f.readlines[start_line..line_number].each do |line| 
                         ar.push("#{line}<br/>")
                     end
                 end
@@ -410,7 +416,7 @@ class AppController < ApplicationController
         # c = Base64.encode64(ar.join("\n"))
         c = CGI.escape(ar.join("\n"))
         success("OK",{
-            :start_line =>line_number-ln-1,
+            :start_line =>start_line,
             :c=>c
             
         })
