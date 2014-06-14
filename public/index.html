@@ -785,7 +785,8 @@ end
 				if (data.error){
 					popup(data.error);
 				}else{
-					g_selected_node.isNew = "false";
+					if (g_selected_node != null)
+						g_selected_node.isNew = "false";
 					// $("#applist").html(data);
 					popup('Deploy successfully.<br />Please click <a target="_blank" href="'+data.url+'" >here</a> to view.');
 				}
