@@ -447,7 +447,8 @@ class AppController < ApplicationController
          begin
                 if FileTest::exists?(logfile)
                     line_number = `grep -Fc "" #{logfile}`.to_i
-                    if line_number <= startline
+                    p "log line number #{line_number}"
+                    if line_number > startline
                         
                         f=File.open(logfile,"r")  
                         t = nil      
