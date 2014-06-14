@@ -14,6 +14,8 @@ class ApplicationController < ActionController::Base
   before_filter :before_action
   
   def before_action
+      @SETTINGS = $SETTINGS
+      
       @user = User.new
   end
   def error(msg, data=nil)
