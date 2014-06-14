@@ -1,9 +1,0 @@
-
-class Com::Sap::Sbo::App::Jaw::Bo::Gen < BOExtension
-
-def before_action_closed
-    p "===>hello hahahahah"
-end
-							
-end
-						
