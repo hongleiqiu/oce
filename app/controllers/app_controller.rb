@@ -446,21 +446,26 @@ class AppController < ApplicationController
         ar = []
          begin
                 if FileTest::exists?(logfile)
-                     f=File.open(logfile,"r")  
+                    line_number = `grep -Fc "" #{logfile}`.to_i
+                    if line_number <= startline
+                        
+                        f=File.open(logfile,"r")  
                         t = nil      
-                    p "start line #{startline}, line_num  #{line_num}"
-                    if line_num < 0
-                        f.readlines[startline+line_num..startline].each do |line| 
-                              next if line == nil
-                                l  = line.gsub("<", "&lt;").gsub(">", "&gt;") 
-                                ar.push("#{l}<br/>")
+                        p "start line #{startline}, line_num  #{line_num}"
+                        if line_num < 0
+                            f.readlines[startline+line_num..startline].each do |line| 
+                                  next if line == nil
+                                    l  = line.gsub("<", "&lt;").gsub(">", "&gt;") 
+                                    ar.push("#{l}<br/>")
+                            end
+                        else
+                            f.readlines[startline..startline+line_num].each do |line| 
+                                  next if line == nil
+                                    l  = line.gsub("<", "&lt;").gsub(">", "&gt;") 
+                                    ar.push("#{l}<br/>")
+                            end
                         end
-                    else
-                        f.readlines[startline..startline+line_num].each do |line| 
-                              next if line == nil
-                                l  = line.gsub("<", "&lt;").gsub(">", "&gt;") 
-                                ar.push("#{l}<br/>")
-                        end
+                    
                     end
                 end
         rescue Exception=>e
