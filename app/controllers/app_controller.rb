@@ -415,7 +415,7 @@ class AppController < ApplicationController
             error(e.message)
             return
         end
-        p "===>ar:#{ar.join('')}"
+        p "===>ar:#{ar.join('\n')}"
         # c = Base64.encode64(ar.join("\n"))
         c = CGI.escape(ar.join("\n"))
         success("OK",{
@@ -451,16 +451,21 @@ class AppController < ApplicationController
                     p "start line #{startline}, line_num  #{line_num}"
                     if line_num < 0
                         f.readlines[startline+line_num..startline].each do |line| 
-                            ar.push("#{line}<br/>")
+                              next if line == nil
+                                l  = line.gsub("<", "&lt;").gsub(">", "&gt;") 
+                                ar.push("#{l}<br/>")
                         end
                     else
                         f.readlines[startline..startline+line_num].each do |line| 
-                            ar.push("#{line}<br/>")
+                              next if line == nil
+                                l  = line.gsub("<", "&lt;").gsub(">", "&gt;") 
+                                ar.push("#{l}<br/>")
                         end
                     end
                 end
         rescue Exception=>e
-            p e.inspect
+            err(e)
+            
             render :text=>""
             return
         end
@@ -468,7 +473,7 @@ class AppController < ApplicationController
         # if line_num < 0
             # ar.reverse!
         # end
-        p "log:#{ar.join("<br/>")}"
+        p "log:#{ar.join("\n")}"
         render :text=>ar.join("\n")
         return
     end
