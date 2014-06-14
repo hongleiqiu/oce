@@ -405,7 +405,7 @@ class AppController < ApplicationController
                         
                     p "start_line=#{start_line}, line_number=#{line_number}"
                     f.readlines[start_line..line_number].each do |line|
-                        l  = l.gsub("<", "&lt;").gsub(">", "&gt;") 
+                        l  = line.gsub("<", "&lt;").gsub(">", "&gt;") 
                         ar.push("#{l}<br/>")
                     end
                 end
