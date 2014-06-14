@@ -36,7 +36,10 @@ class RepoController < ApplicationController
             error("invalid repository name")
             return
         end
-        
+        p "cd #{$SETTINGS[:repo_root]}\n
+               git init --bare #{repo}.git
+               chown -R git:git #{repo}.git"
+               
         r = system "cd #{$SETTINGS[:repo_root]}\n
                git init --bare #{repo}.git
                chown -R git:git #{repo}.git"
@@ -68,6 +71,9 @@ class RepoController < ApplicationController
     end
     
     def _create_repo(repo)
+        p "cd #{$SETTINGS[:repo_root]}\n
+                git init --bare #{repo}.git"
+                
         r = system "cd #{$SETTINGS[:repo_root]}\n
                 git init --bare #{repo}.git"
 
