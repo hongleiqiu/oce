@@ -405,13 +405,14 @@ class AppController < ApplicationController
                         
                     p "start_line=#{start_line}, line_number=#{line_number}"
                     f.readlines[start_line..line_number].each do |line|
+                        next if line == nil
                         l  = line.gsub("<", "&lt;").gsub(">", "&gt;") 
                         ar.push("#{l}<br/>")
                     end
                 end
         rescue Exception=>e
             p "===>aaa"+e.inspect
-            error(e.inspect)
+            error(e.message)
             return
         end
         p "===>ar:#{ar.join('')}"
