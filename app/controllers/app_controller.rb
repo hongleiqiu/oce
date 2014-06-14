@@ -411,7 +411,7 @@ class AppController < ApplicationController
                     end
                 end
         rescue Exception=>e
-            p "===>aaa"+e.inspect
+            err(e)
             error(e.message)
             return
         end
