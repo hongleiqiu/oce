@@ -403,6 +403,7 @@ class AppController < ApplicationController
                     start_line = line_number-ln
                     start_line = 0 if start_line < 0
                         
+                    p "start_line=#{start_line}, line_number=#{line_number}"
                     f.readlines[start_line..line_number].each do |line| 
                         ar.push("#{line}<br/>")
                     end
