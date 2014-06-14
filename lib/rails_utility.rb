@@ -13,6 +13,7 @@ def p(m, stack=0)
     end
     
     Rails.logger.debug(m)
+    p m
 end
 def warn(m)
     # Rails.logger.warn(m)
@@ -21,5 +22,6 @@ def err(m)
     if m.is_a?(Exception)
         m = "!!!Exception:#{m.inspect}:\n#{m.backtrace[0..9].join("\n")}"
     end
+    p m
     Rails.logger.error(m)
 end
