@@ -13,7 +13,7 @@ def p(m, stack=0)
     end
     
     Rails.logger.debug(m)
-    p m
+    puts m
 end
 def warn(m)
     # Rails.logger.warn(m)
