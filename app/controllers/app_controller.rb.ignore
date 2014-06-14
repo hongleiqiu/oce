@@ -16,7 +16,7 @@ class AppController < ApplicationController
             return
         end
         
-        # r = system "cd #{$SETTINGS[:repo_root]}\n
+        # r = system "cd #{g_SETTINGS[:repo_root]}\n
         #        git init --bare #{repo}.git"
         
         # p "system call return #{r}"
@@ -48,7 +48,7 @@ class AppController < ApplicationController
         end
         app = rs[0]
 =end        
-        data = http_post($SETTINGS[:appstore_query_app_url], {:appid=>appid})
+        data = http_post(g_SETTINGS[:appstore_query_app_url], {:appid=>appid})
         p "--->#{data}"
         ret = JSON.parse(data)
         if ret['error']
@@ -388,7 +388,7 @@ class AppController < ApplicationController
     def tlog
         ln = params[:ln].to_i
         t = Time.now
-        logfile = sprintf($SETTINGS[:console_log], t.year, t.month, t.day )
+        logfile = sprintf(g_SETTINGS[:console_log], t.year, t.month, t.day )
         p "==>logfile:#{logfile}"
         ar = []
          begin
@@ -431,8 +431,8 @@ class AppController < ApplicationController
         end
         max_line = 500
         t = Time.now
-        p $SETTINGS[:console_log]
-        logfile = sprintf($SETTINGS[:console_log], t.year, t.month, t.day )
+        p g_SETTINGS[:console_log]
+        logfile = sprintf(g_SETTINGS[:console_log], t.year, t.month, t.day )
         p "==>logfile:#{logfile}"
         ar = []
          begin
@@ -465,6 +465,6 @@ class AppController < ApplicationController
     end
 
     def submit
-        redirect_to "#{$SETTINGS[:submit_url]}?appid=#{params[:appid]}"
+        redirect_to "#{g_SETTINGS[:submit_url]}?appid=#{params[:appid]}"
     end
 end

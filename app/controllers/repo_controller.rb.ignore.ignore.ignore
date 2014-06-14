@@ -37,7 +37,7 @@ class RepoController < ApplicationController
             return
         end
         
-        r = system "cd #{$SETTINGS[:repo_root]}\n
+        r = system "cd #{g_SETTINGS[:repo_root]}\n
                git init --bare #{repo}.git
                chown -R git:git #{repo}.git"
         
@@ -57,9 +57,9 @@ class RepoController < ApplicationController
     
     # clone repo for user
     def init(repo)       
-        # = Git.clone("#{@user.name}@#{$SETTINGS[:git_server]}:#{$SETTINGS[:repo_root]}/#{repo}",
+        # = Git.clone("#{@user.name}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}",
         # repo, :path => './tmp/checkout')
-         # g = Git.clone("#{@user.name}@#{$SETTINGS[:git_server]}:#{$SETTINGS[:repo_root]}/#{repo}", repo)
+         # g = Git.clone("#{@user.name}@#{g_SETTINGS[:git_server]}:#{g_SETTINGS[:repo_root]}/#{repo}", repo)
         # g.config('user.name', @user.name)
         # g.config('user.email', @user.email)
         
@@ -68,7 +68,7 @@ class RepoController < ApplicationController
     end
     
     def _create_repo(repo)
-        r = system "cd #{$SETTINGS[:repo_root]}\n
+        r = system "cd #{g_SETTINGS[:repo_root]}\n
                 git init --bare #{repo}.git"
 
         p "system call return #{r}"
