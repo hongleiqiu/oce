@@ -104,3 +104,12 @@ div.line_splitter{
 .bo_field_prop_list{
 	display:none;
 }
+div.btn_add_bf{
+	border-bottom:1px solid grey;margin-top:5px;
+}
+div.field{
+	border-bottom:1px solid grey;margin-top:5px;
+}
+div.field_list{
+	display:none;margin-top:10px;scroll:auto;
+}

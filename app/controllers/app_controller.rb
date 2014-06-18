@@ -167,6 +167,7 @@ class AppController < ApplicationController
         content = params[:content]
         isnew = params[:isnew]
         
+        p "content:#{content}"
         fi= fileInfoFromPath(path)
         fname = fi[:fname]
         
@@ -276,7 +277,10 @@ class AppController < ApplicationController
              
         end
         
-   
+        if params[:r] == 'json'
+            p "data:#{data}"
+            data = JSON.parse(data)
+        end
         success("ok", {:data=>data})
         return 
         

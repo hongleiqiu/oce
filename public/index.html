@@ -180,8 +180,7 @@
     </style>
 	<link rel="stylesheet" href="/stylesheets/index.css" type="text/css" />
 
-    <script type="text/javascript" src="javascripts/prototype.js"></script>
-    <script type="text/javascript" src="javascripts/effects.js"></script>
+    <script type="text/javascript" src="javascripts/utils.js"></script>
     <script type="text/javascript">
       function about() {
         if (Element.empty('about-content')) {
@@ -364,7 +363,10 @@
 						<div class="prop_name">Type</div><div class="prop_v"><input id="boprop_v_type" onchange="on_boprop_change(event);"></input></div>
 					</div>
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly" onchange="on_boprop_change(event);"></input></div>
+						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="boprop_v_readonly" onchange="on_boprop_change(event);"></input></div>
+					</div>
+					<div class="prop_line" style="height:30px;">
+						<div class="prop_name">Description</div><div class="prop_v"><textarea  id="boprop_v_desc" onchange="on_boprop_change(event);"></textarea></div>
 					</div>
 				</div>
 			</div>
@@ -707,7 +709,7 @@ end
 		return fname;
 	}
 	function export_bo(){
-		ret = [];
+	/*	ret = [];
 		bo_list = $("div.bo");
 		bo_list.forEach(function(bo){
 			
@@ -734,15 +736,33 @@ end
 			ret.push(p);
 		});
 		alert(inspect(ret));
+		*/
+		alert(inspect(g_bos));
+		
+		for (i=0; i<g_bos.data.length; i++){
+			b = g_bos.data[i];
+			if (b){
+				alert(inspect(b));
+				alert("#"+b.ui);
+				pos = $("#"+b.ui).offset();
+				alert(pos);
+				b.x = pos.left;
+				b.y = pos.top;
+			}
+		}
+		return JSON.stringify(g_bos);
+		// return toJSON(g_bos);
+		
 	}
 	function save(){
 		if (g_currentView == "bo_designer"){
+			
 			content = export_bo();
 			
 		}else
-		// alert(getNodePath(g_selected_node));
-		content = ace_editor.getValue(); 
-		
+			// alert(getNodePath(g_selected_node));
+			content = ace_editor.getValue(); 
+		alert(content);
 		type = g_selected_node.type;
 		// fname = g_selected_node.name;
 		fname = getNodePath(g_selected_node);
@@ -1074,10 +1094,11 @@ end
 				$tree.bind(
 				    'tree.click',
 				    function(event) {
-
+						
+						// alert(inspect(event));
 				        // The clicked node is 'event.node'
 				       	var node = event.node;
-						if (g_selected_node && g_selected_node.isNew == 'true' ){
+						if (g_selected_node && g_selected_node.isNew == 'true' && node !=g_selected_node ){
 							popup("You haven't save this file.");
 							return false;
 						}
@@ -1558,20 +1579,103 @@ end
 		}
 		g_currentView = null;
 		function open_bo(node){
-			
+			// fname = g_selected_node.name;
 			type = g_selected_node.type;
-			fname = g_selected_node.name;
-			$("#editor").css("display", "none");	
-			$("#bo_designer").css("display", "block");		
-			$("#prop_pad").css("display", "none");
-			$("#canvas").empty();
 			
-			g_currentView = "bo_designer";
+				// fname = g_selected_node.name;
+			fname = getNodePath(g_selected_node);
+			if (g_selected_node.isNew){
+				
+				
+				nav = "";
+				if (type == 'bo')
+					nav = "Business Objects > ";
+				else if	(type == "code")
+					nav = "Extensions > ";
+				$("#filenav").html(nav+g_selected_node.name);
+				
+
+				$("#editor").css("display", "none");	
+				$("#bo_designer").css("display", "block");
+				g_currentView = "bo_designer";
+												
+				$("#prop_pad").css("display", "none");
+				$("#canvas").empty();
+
+				// $("#applist").html(data);
+				appendToConsole('Load successfully');
+				return;
+			}
 			
+			
+
+			
+			$.ajax({
+				type: "post",
+				url: "/app/of?r=json&t="+ new Date().getTime(),
+				dataType: 'json',
+
+				data: {
+					appid:g_appid,
+					fname:fname,
+					type:type,
+
+					// sid: '<%=@sid%>',
+					// authenticity_token:window._token
+				}, 
+				success: function(data, textStatus){
+					// alert( "Data Saved: " + data +","+ textStatus);
+
+					showWaiting(false);
+					if (data.error){
+						popup(data.error);
+					}else{
+						// alert(data.data);
+						alert(inspect(data.data.data));
+
+						nav = "";
+						if (type == 'bo')
+							nav = "Business Objects > ";
+						else if	(type == "code")
+							nav = "Extensions > ";
+						$("#filenav").html(nav+g_selected_node.name);
+
+						$("#editor").css("display", "none");	
+						$("#bo_designer").css("display", "block");
+						g_currentView = "bo_designer";
+								
+						$("#prop_pad").css("display", "none");
+						$("#canvas").empty();
+						
+						g_bos = data.data;
+						_html = "";
+						for (i =0; i< data.data.data.length; i++){
+							// alert(inspect(data.data.data[i]));
+							// _html += render_bo(data.data.data[i]);
+							inserted = $("#canvas").append(render_bo(data.data.data[i]));
+							prepare_bo(inserted, data.data.data[i]);
+						}
+						// $("#canvas").html(_html);
+						
+						// $("#applist").html(data);
+						appendToConsole('Load successfully');
+
+					}
+
+				},
+				error: function(xhr, textStatus, errorThrow){
+					// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+					popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+					showWaiting(false);
+
+				}
+			}); // $ajax
+		
 			// $("#props").empty();
 			appendToConsole("Load BO Successfully");
 			update_nav(fname, type);
-		
+	
 		}
 		// you must clone your array before call this function
 		// var exc = [].concat(children);
@@ -1931,7 +2035,7 @@ end
 	$(".draggable_element" ).draggable({
 		opacity: 0.7, helper: "clone" 
 	});
-	var g_bos = [];
+	var g_bos = {data:[]};
 	
 	 $( ".droppable" ).droppable({
 		drop: function( event, ui ) {
@@ -1962,7 +2066,8 @@ end
 						// alert(inspect(event));
 						x = event.clientX-$("#bo_designer").offset().left;
 						y = event.clientY-$("#bo_designer").offset().top;
-						_id = Math.random();
+						// _id = Math.random();
+						_id = rand(10000000);
 						// alert(_id);
 						cloned.attr("id", _id+"");
 						// alert(x+","+y);
@@ -1983,20 +2088,25 @@ end
 					
 						
 						_bo = {
+							x:x,
+							y:y,
 							name:"",
 							type:"",
+							desc:"",
+							ui:_id,
 							fields:[{
 								name:"id",
 								type:"integer",
 								unique:true
 							}]
 						};
+						alert(inspect(_bo));
 						// alert(inspect(g_bos));
-						g_bos.push(_bo);
+						g_bos.data.push(_bo);
 						
 						inserted.prop("ref", _bo);
 						// alert(inspect(inserted.prop("ref")));
-						// alert(inserted[0].outerHTML);
+						alert(inserted[0].outerHTML);
 						// alert($(inserted[inserted.length-1]).attr("id"));
 						// alert(inserted.html());
 						inserted.click(function(event){
@@ -2031,7 +2141,7 @@ end
 		}
 	});
 	
-	function show_boprops(t){
+/*	function show_boprops(t){
 		// alert(t.find("div.draggable_obj_name").html());
 		a =  t.find("div.draggable_obj_name").html();
 		// alert($("#props input#prop_name").html());
@@ -2060,8 +2170,18 @@ end
 		$("#field_prop_pad").css("display", "none");
 		// alert(0);
 	}
-	
-	
+*/	
+	function show_boprops(t){
+		
+			$("#props input#boprop_v_name").val(g_bo.name);
+			$("#props input#boprop_v_type").val("BO");
+			$("#prop_pad").css("display", "block");
+			$("#boprop_v_name").html(g_bo.name);
+			$("#boprop_v_type").html(g_bo.type);
+			
+			$("#field_prop_pad").css("display", "none");
+			// alert(0);
+		}
 	</script>
 
 	<script type="text/javascript" src="/javascripts/jquery.balloon.js"></script>
@@ -2145,6 +2265,62 @@ end
 	}
 	
 	g_selected_bo_field = null;
+	function render_bo(bo){
+		alert(inspect(bo));
+		str = "<div style='left:"+bo.x+"; top: "+bo.y+";' id='"+bo.ui+"' class='draggable_obj ui-draggable bo'>\
+			<img src='/images/block2.png' style='height:50px;'>\
+			<div class='draggable_obj_name'>"
+			+bo.name+
+			"</div> \
+			<div class='draggable_obj_prop' n='type'>"
+			+bo.type+
+			"</div>\
+			<div class='draggable_obj_prop' n='desc'>"
+				+bo.desc+
+			"</div>\
+		</div>";
+		// alert(str);
+		return str;
+	}
+	function prepare_bo(inserted, bo){
+		// alert(inspect(inserted));
+		// alert(inserted.outerHTML);
+		inserted = inserted.find("div#"+bo.ui);
+		// alert(inserted.length);
+		// inserted.attr("inserted", "1");
+		// inserted = $(inserted[inserted.length-1]);
+		// alert(inserted[0].outerHTML);
+		inserted.draggable({containment: "parent" });	
+
+		inserted.prop("ref", bo);
+		// alert(inspect(inserted.prop("ref")));
+		// alert($(inserted[inserted.length-1]).attr("id"));
+		// alert(inserted.html());
+		inserted.click(function(event){
+			g_bo = inserted;
+			show_boprops(inserted);
+			
+		});
+		
+		inserted.dblclick(function(event){
+			// inserted.balloon({ position: "bottom right" });
+			// $("#console").balloon({ position: "bottom right" });
+			// alert("dbc");
+			// $("#balloon").toggle(
+			// 							function(){
+			// 								$(this).animate({height: 'toggle', opacity: 'toggle'}, "slow");
+			// 							},
+			// 							function(){
+			// 								$(this).animate({height: 'toggle', opacity: 'toggle'}, "slow");
+			// 							});	
+			show_balloon(true, event);
+			g_bo = inserted;
+			
+		});		
+		g_bo = inserted;
+			
+		
+	}
 	function render_bo_fields(bo){
 		ret = "";
 		// alert(inspect(bo.fields.length));
@@ -2303,7 +2479,7 @@ end
 	}
 	
 	function on_boprop_change(event){
-		bo_name = g_bo.find(".draggable_obj_name");
+	/*	bo_name = g_bo.find(".draggable_obj_name");
 		bo_name.html($(event.currentTarget).val());
 		
 		if ($(event.currentTarget).prop("id") == "fprop_v_name"){			
@@ -2311,7 +2487,13 @@ end
 		}else if ($(event.currentTarget).prop("id") == "fprop_v_type"){
 			g_selected_bo_field.find("span.field_type").html($(event.currentTarget).val());
 			
-		}		
+		}*/
+		bo = g_bo.prop('ref');
+		bo.name = $("#boprop_v_name").val();
+		bo.type = $("#boprop_v_type").val();
+		bo.desc = $("#boprop_v_desc").html();
+	
+		g_bo.find(".draggable_obj_name").html(bo.name);
 	}
 </script>
 

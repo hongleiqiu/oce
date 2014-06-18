@@ -279,6 +279,10 @@ function rand(r){
 	return Math.floor(Math.random()*(r+1));
 }
 
+function rand2(min, max){
+	return Math.floor( Math.random()*(max-min+1)+min ); 
+}
+
 
 
 
