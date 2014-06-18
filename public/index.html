@@ -314,8 +314,9 @@
 	</div>
 	<div id="balloon" style="display:none;left:200px;top:200px;width:300px;height:300px;position:absolute;z-index:200;">
 		<img style="float:right;width:20px;" src="/images/close.png" onclick="show_balloon(false);" />
-		<div id="field_list" style="margin-top:10px;scroll:auto;">
-			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
+		<!-- <div id="ballon_c"> -->
+		<div id="balloon_field_list" style="margin-top:10px;scroll:auto;">
+			<!--div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
 				Id <span style="color:grey">(Integer)</span>
 			</div>
 			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
@@ -324,12 +325,15 @@
 			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
 				company <span style="color:grey">(String)</span>
 			</div>
-			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
+			<div class="field" style="border-bottom:1px solid grey;margin-top:5px;" onclick="add_bo_field();">
 				<img src="/images/button-add.png" class="toolbar_btn">
-			</div>
+			</div-->
 		</div><!-- field_list -->
+		<!-- </div--><!-- ballon_c -->
 	</div>
+<script>
 
+</script>
 	<div id="edit_box"  style="display:none;background-color:white;color:black;text-align:left;position:absolute;z-index:800;font-size:18pt;overflow:auto;word-wrap: break-word;word-break: normal;border:0px red solid;">
 		<input id="edit_value" style="font-size:18pt;min-width:300px;"></input>
 	</div>
@@ -354,13 +358,13 @@
 				</div>
 				<div id="props" style="float:right;">
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">Name</div><div class="prop_v"><input id="boprop_v_name"></input></div>
+						<div class="prop_name">Name</div><div class="prop_v"><input id="boprop_v_name" onchange="on_boprop_change(event);"></input></div>
 					</div>
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">Type</div><div class="prop_v"><input id="boprop_v_type"></input></div>
+						<div class="prop_name">Type</div><div class="prop_v"><input id="boprop_v_type" onchange="on_boprop_change(event);"></input></div>
 					</div>
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly"></input></div>
+						<div class="prop_name">ReadOnly</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly" onchange="on_boprop_change(event);"></input></div>
 					</div>
 				</div>
 			</div>
@@ -542,6 +546,14 @@ end
 									<div class="draggable_obj_prop" n="xx">
 										yy
 									</div>
+									<div class="field_list" style="display:none;margin-top:10px;scroll:auto;">
+										<div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
+											Id <span style="color:grey">(Integer)</span>
+										</div>
+										<div class="btn_add_bf" style="border-bottom:1px solid grey;margin-top:5px;" onclick="add_bo_field();">
+											<img src="/images/button-add.png" class="toolbar_btn">
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -694,15 +706,49 @@ end
 		fname = "/"+fname;
 		return fname;
 	}
+	function export_bo(){
+		ret = [];
+		bo_list = $("div.bo");
+		bo_list.forEach(function(bo){
+			
+			name = bo.find(".draggable_obj_name").html();
+			var p = {
+				name:name,
+				fields:[]
+			};
+			field_list = bo.find("div.field_list");
+			var f = {};
+			for(field in field_list){
+				field_name = field.find("span.field_name").html(); 
+				field_type = field.find("span.field_type").html();
+				f.name = field_name;
+				f.type = field_type;
+				props = field.find(".bo_field_prop_list");
+				for (prop in props){
+					n = prop.find(".prop_name");
+					v = prop.find(".prop_v");
+					f[n] = v.prop("v");
+				}
+			}
+			p.fields.push(f);
+			ret.push(p);
+		});
+		alert(inspect(ret));
+	}
 	function save(){
+		if (g_currentView == "bo_designer"){
+			content = export_bo();
+			
+		}else
 		// alert(getNodePath(g_selected_node));
 		content = ace_editor.getValue(); 
+		
 		type = g_selected_node.type;
 		// fname = g_selected_node.name;
 		fname = getNodePath(g_selected_node);
-		alert(fname);
+		// alert(fname);
 		isnew = g_selected_node.isNew;
-		alert(isnew);
+		// alert(isnew);
 		// alert(content);
 		if (type != 'bo' && type !='code')
 			return;
@@ -1275,6 +1321,7 @@ end
 			g_rlog_timer = setInterval("retrieve_log();", 1000);
 		}else
 			retrieve_log();
+		g_currentView = "log";
 	}
 	// function decode_base64(s) {
 	//     var e={},i,k,v=[],r='',w=String.fromCharCode;
@@ -1446,6 +1493,7 @@ end
 		function open_file(node){
 			$("#editor").css("display", "block");	
 			$("#bo_designer").css("display", "none");
+			g_currentView = "editor";
 			
 			type = g_selected_node.type;
 			// fname = g_selected_node.name;
@@ -1508,6 +1556,7 @@ end
 					nav = "Extensions > ";
 			$("#filenav").html(nav+fname);
 		}
+		g_currentView = null;
 		function open_bo(node){
 			
 			type = g_selected_node.type;
@@ -1516,6 +1565,9 @@ end
 			$("#bo_designer").css("display", "block");		
 			$("#prop_pad").css("display", "none");
 			$("#canvas").empty();
+			
+			g_currentView = "bo_designer";
+			
 			// $("#props").empty();
 			appendToConsole("Load BO Successfully");
 			update_nav(fname, type);
@@ -1879,6 +1931,7 @@ end
 	$(".draggable_element" ).draggable({
 		opacity: 0.7, helper: "clone" 
 	});
+	var g_bos = [];
 	
 	 $( ".droppable" ).droppable({
 		drop: function( event, ui ) {
@@ -1915,7 +1968,7 @@ end
 						// alert(x+","+y);
 						// alert(cloned.html());
 						cloned.attr("id", _id+"");
-				
+						
 						inserted = $("#canvas").append(cloned.html());
 						// alert(inserted.html());
 						inserted = inserted.find("div.draggable_obj");
@@ -1926,9 +1979,28 @@ end
 						inserted.attr("id", _id);
 						inserted.css("left", x);
 						inserted.css("top", y);
+						inserted.addClass("bo");
+					
+						
+						_bo = {
+							name:"",
+							type:"",
+							fields:[{
+								name:"id",
+								type:"integer",
+								unique:true
+							}]
+						};
+						// alert(inspect(g_bos));
+						g_bos.push(_bo);
+						
+						inserted.prop("ref", _bo);
+						// alert(inspect(inserted.prop("ref")));
+						// alert(inserted[0].outerHTML);
 						// alert($(inserted[inserted.length-1]).attr("id"));
 						// alert(inserted.html());
 						inserted.click(function(event){
+							g_bo = inserted;
 							show_boprops(inserted);
 							
 						})
@@ -1944,8 +2016,11 @@ end
 							// 								$(this).animate({height: 'toggle', opacity: 'toggle'}, "slow");
 							// 							});	
 							show_balloon(true, event);
+							g_bo = inserted;
 							
-						});			
+						});		
+						g_bo = inserted;
+							
 						// alert(inspect(inserted));
 					}
 				
@@ -2012,22 +2087,231 @@ end
 // // hideAnimation: function (d) { this.fadeOut(d); }
 // 	});
 	// alert(111);
-	$("#balloon").draggable();
+	
 	function show_balloon(t, e){
+	/*	fl = g_bo.find("div.field_list");
+		bal = $("#balloon_field_list");
+		bal.html(fl.html());
+		
+		inputs = fl.find("input");
+		forEach(i in inputs){
+			bal.find(i.prop('id')).val(i.val());
+		}*/
+		
+		html = render_bo_fields(g_bo.prop('ref'));
+		html += "					<div class=\"btn_add_bf\" style=\"border-bottom:1px solid grey;margin-top:5px;\" onclick=\"add_bo_field();\">\
+								<img src=\"/images/button-add.png\" class=\"toolbar_btn\">\
+							</div>";
+		$("#balloon_field_list").html(html);
+		alert(html);
 		$("#balloon").animate({height: 'toggle', opacity: 'toggle'}, "slow");
 		if (e){
 			$("#balloon").css("left", e.clientX);
 			$("#balloon").css("top", e.clientY);
 		}
+		// alert(g_bo.html());
+		// alert(inspect(g_bo));
 	}
-	$(".field").click(function(event){
-		show_field_prop();
-	});
-	function show_field_prop(){
+	$("#balloon").draggable();
+	
+	
+	// $(".field").click(function(event){
+	// 	show_field_prop();
+	// });
+	
+	function add_bo_field(){
+		newf = "<div class=\"field\" style=\"border-bottom:1px solid grey;margin-top:5px;\" i='"+g_bo.prop("ref").fields.length+"' onclick=\"show_field_prop(event);\";>\
+			<span class='field_name' >unnamed</span> <span class='field_type' style=\"color:grey\">(String)</span>\
+		<div class=bo_field_prop_list ></div>\
+		</div>";
+
+		btn = g_bo.find(".btn_add_bf");
+		$(newf).insertBefore(btn);
+
+		b = $("#balloon");
+		btn = b.find(".btn_add_bf");
+		newn = $(newf).insertBefore(btn);
 		
+		data = {
+			name:"untitled",
+			type:"string",
+			length:1,
+			default_value:"null"
+		};
+		g_bo.prop("ref").fields.push(data);
+		newn.prop("ref", data);
+		
+		// alert(1);
+	}
+	
+	g_selected_bo_field = null;
+	function render_bo_fields(bo){
+		ret = "";
+		// alert(inspect(bo.fields.length));
+		for (i =0; i< bo.fields.length;i++){
+			f = bo.fields[i];
+			ret += "<div class=\"field\" style=\"border-bottom:1px solid grey;margin-top:5px;\" i='"+i+"'onclick=\"show_field_prop(event);\";>\
+				<span class='field_name' >"+f.name+"</span> <span class='field_type' style=\"color:grey\">("+f.type+")</span></div>";
+		}
+		return ret;
+	}
+	g_type_options = ["string", "integer", "timestamp"];
+	function render_bo_field_props(f){
+	
+		ret =  "<div class='prop_line' style='height:30px;' >                                                                        \
+			<div class='prop_name'>Name</div><div class='prop_v'  n='name'><input id='fprop_v_name' value='"+ f.name +"' onchange='on_bfprop_change(event);'></input></div>                             \
+		</div>";
+		
+		opt = "";
+		
+		
+		for (i=0;i<g_type_options.length;i++){
+			op = g_type_options[i];
+			if (op.toLowerCase() == f.type.toLowerCase())
+				opt += "<option selected>"+op+"</option>";
+			else
+				opt += "<option >"+op+"</option>";
+
+		}
+		ret += "<div class='prop_line' style='height:30px;'>                                                                                 \
+			<div class='prop_name' >Type</div><div class='prop_v' n='type'><select id='fprop_v_type' value='"+ f.type +"' onchange='on_bfprop_change(event);'>"
+			+opt +"</select></div></div>";
+		
+		
+		 if (f.readonly )
+			ret += "<div class='prop_line' style='height:30px;'>                                                                                 \
+			<div class='prop_name'>ReadOnly</div><div class='prop_v' n='readonly'><input type='checkbox' id='prop_v_readonly' checked='checked' onchange='on_bfprop_change(event);'></input></div>      \
+		</div>   ";
+		else
+			ret += "<div class='prop_line' style='height:30px;'>                                                                                 \
+			<div class='prop_name'>ReadOnly</div><div class='prop_v' n='readonly'><input type='checkbox' id='prop_v_readonly' onchange='on_bfprop_change(event);'></input></div>      \
+		</div>   ";	
+		
+		ret += "  <div class='prop_line' style='height:30px;'>                                                                                 \
+			<div class='prop_name'>Default value</div><div class='prop_v' n='default_value'><input id='fprop_v_default_value' onchange='on_bfprop_change(event);' value='"+f.default_value+"'></input></div>                    \
+		</div>                                                                                                                       \
+		<div class='prop_line' style='height:30px;'>                                                                                 \
+			<div class='prop_name'>Length</div><div class='prop_v' n='length'><input id='bfprop_v_length' onchange='on_bfprop_change(event);' value='"+f.length+"' ></input></div>                          \
+		</div>                                                                                                                       \
+		<div class='prop_line' style='height:30px;'>                                                                                 \
+			<div class='prop_name'>Enabled</div><div class='prop_v' n='enabled'><input type='checkbox' id='bfprop_v_enabled' onchange='on_bfprop_change(event);'></input></div>     \
+		</div>                                                                                                                       \
+		<div class='prop_line' style='height:30px;'>                                                                                 \
+			<div class='prop_name'>Encoding</div><div class='prop_v' n='encoding'><input id='bfprop_v_encoding' onchange='on_bfprop_change(event); value='"+f.default_value+"'></input></div>                        \
+		</div>                                                                                                                       \                                                                                                    \
+		<div class='prop_line' style='height:30px;'>                                                                                 \
+			<div class='prop_name'>unique</div><div class='prop_v' n='unique'><input type='checkbox' id='bfprop_v_unique' onchange='on_bfprop_change(event);'></input></div>      \
+		</div>";
+		
+		return ret;
+	}
+	function show_field_prop(event){
+		if (g_selected_bo_field != null)
+			g_selected_bo_field.css("color", "#000000");
+		
+		g_selected_bo_field = $(event.currentTarget);
+		// alert(g_selected_bo_field.html());
+		g_selected_bo_field.css("color", "#9999ff");
+/*		prop_list = g_selected_bo_field.find(".bo_field_prop_list");
+
+		
+		_html = prop_list.html();
+		
+		if (_html == ""){                    
+			name = g_selected_bo_field.find("span.field_name").html(); 
+			type = g_selected_bo_field.find("span.field_type").html();                                                                                 
+			                                                                                
+			_html = "<div class='prop_line' style='height:30px;'>                                                                        \
+				<div class='prop_name'>Name</div><div class='prop_v'><input id='fprop_v_name' value='"+ name +"' onchange='on_bfprop_change(event);'></input></div>                             \
+			</div>                                                                                                                       \
+			<div class='prop_line' style='height:30px;'>                                                                                 \
+				<div class='prop_name'>Type</div><div class='prop_v'><select id='fprop_v_type' value='"+ type +"' onchange='on_bfprop_change(event);'>\
+				<option>String</option>\
+				<option>Integer</option>\
+				</input></div>                             \
+			</div>                                                                                                                       \
+			<div class='prop_line' style='height:30px;'>                                                                                 \
+				<div class='prop_name'>ReadOnly</div><div class='prop_v'><input type='checkbox' id='prop_v_readonly' onchange='on_bfprop_change(event);'></input></div>      \
+			</div>                                                                                                                       \
+			<div class='prop_line' style='height:30px;'>                                                                                 \
+				<div class='prop_name'>Default value</div><div class='prop_v'><input id='fprop_v_default_value' onchange='on_bfprop_change(event);'></input></div>                    \
+			</div>                                                                                                                       \
+			<div class='prop_line' style='height:30px;'>                                                                                 \
+				<div class='prop_name'>Length</div><div class='prop_v'><input id='bfprop_v_length' onchange='on_bfprop_change(event);'></input></div>                          \
+			</div>                                                                                                                       \
+			<div class='prop_line' style='height:30px;'>                                                                                 \
+				<div class='prop_name'>Enabled</div><div class='prop_v'><input type='checkbox' id='bfprop_v_enabled' onchange='on_bfprop_change(event);'></input></div>     \
+			</div>                                                                                                                       \
+			<div class='prop_line' style='height:30px;'>                                                                                 \
+				<div class='prop_name'>Encoding</div><div class='prop_v'><input id='bfprop_v_encoding' onchange='on_bfprop_change(event);'></input></div>                        \
+			</div>                                                                                                                       \                                                                                                    \
+			<div class='prop_line' style='height:30px;'>                                                                                 \
+				<div class='prop_name'>unique</div><div class='prop_v'><input type='checkbox' id='bfprop_v_unique' onchange='on_bfprop_change(event);'></input></div>      \
+			</div>";                                                                                                                     
+			prop_list.html(_html);                                                                                                       
+		}                                                                                                                    
+		$("#fprops").html(_html);
+		*/
+		i = g_selected_bo_field.attr("i");
+		alert(i);
+		f  = g_bo.prop("ref").fields[i];
+		alert(inspect(f));
+		_html = render_bo_field_props(f);
+		alert(_html);
+		$("#fprops").html(_html);
 		$("#prop_pad").css("display", "none");
-		
 		$("#field_prop_pad").css("display", "block");
+	}
+	function on_bfprop_change(event){
+	/*	prop_list = g_selected_bo_field.find(".bo_field_prop_list");
+		prop_list.html($("#fprops").html());
+		currentTarget = $(event.currentTarget);
+		currentTarget.parent().prop("v", currentTarget.val());
+		
+		if ($(event.currentTarget).prop("id") == "fprop_v_name"){			
+			g_selected_bo_field.find("span.field_name").html(currentTarget.val());
+		}else if ($(event.currentTarget).prop("id") == "fprop_v_type"){
+			g_selected_bo_field.find("span.field_type").html(currentTarget.val());			
+		}		
+		
+		alert(prop_list.html());
+		f = prop_list.find("#"+currentTarget.prop("id"));
+		if (f.size() > 0 ){
+			f.val(currentTarget.val());
+		}
+			*/
+		// alert($("#balloon_field_list").html());
+		currentTarget = $(event.currentTarget);
+		i = g_selected_bo_field.attr("i");
+		f  = g_bo.prop("ref").fields[i];
+		alert(currentTarget);
+		if (currentTarget.is(':radio,:checkbox'))
+			v = currentTarget.prop('checked');
+		else
+			v = currentTarget.val();
+			alert(v);
+		prop_name = currentTarget.parent().attr("n");
+		if (prop_name == "name")
+			g_selected_bo_field.find(".field_name").html(v);
+		else if (prop_name == "type")
+			g_selected_bo_field.find(".field_type").html(v);
+		
+		
+		
+		f[prop_name] = v;
+		// alert(inspect(f));
+	}
+	
+	function on_boprop_change(event){
+		bo_name = g_bo.find(".draggable_obj_name");
+		bo_name.html($(event.currentTarget).val());
+		
+		if ($(event.currentTarget).prop("id") == "fprop_v_name"){			
+			g_selected_bo_field.find("span.field_name").html($(event.currentTarget).val());
+		}else if ($(event.currentTarget).prop("id") == "fprop_v_type"){
+			g_selected_bo_field.find("span.field_type").html($(event.currentTarget).val());
+			
+		}		
 	}
 </script>
 

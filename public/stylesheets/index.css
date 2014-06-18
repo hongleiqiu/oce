@@ -100,3 +100,7 @@ div.line_splitter{
 	position: relative;
 	width: 200px;
 }
+
+.bo_field_prop_list{
+	display:none;
+}
