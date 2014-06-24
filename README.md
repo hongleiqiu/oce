@@ -63,3 +63,4 @@ usermod -G git git
 su - git
 ssh-keygen 
 cp /home/git/.ssh/id_rsa.pub /home/git/.ssh/authorized_keys
+-
