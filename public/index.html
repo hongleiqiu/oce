@@ -179,6 +179,7 @@
       
     </style>
 	<link rel="stylesheet" href="/stylesheets/index.css" type="text/css" />
+	<link rel="stylesheet" href="/stylesheets/github.css" type="text/css" />
 
     <script type="text/javascript" src="javascripts/utils.js"></script>
     <script type="text/javascript">
@@ -207,7 +208,7 @@
   <body>
 	<style>
 	.btn1{
-		border:1px solid #d8d8d8;
+		border:1px solid #d8d8d8;/*font-size:11px;*/
 	}
 
 
@@ -233,6 +234,7 @@
 			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
 				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" title="Save(Ctrl+Shift+S)" class="toolbar_btn" style="width:35px;height:35px;"></a>
 				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" title="Git" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:git_push();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" title="Git" class="toolbar_btn" style="width:35px;height:35px;"></a>
 
 			</div>
 		</div>
@@ -265,10 +267,11 @@
 					
 				</div>
 				<div id='cp_tb_btns' style="float:right;">
+					<button class='btn1' onclick="show_git();">Git</button>
 					<button class='btn1' onclick="openlog();">Log</button>
 					
 					<button class='btn1' onclick="openvi();">vim</button>
-					<button class='btn1'>textmate</button>
+					<button id = "btn_open_editor"  class='btn1' onclick="show_editor()" >Editor</button>
 				</div>
 			</div>
 			<div id="editor" name="body" class="droppable" style="display:none;width:99%;height:580px;">
@@ -284,6 +287,297 @@
 				<div style="clear:both">
 				</div>
 			</div>
+			<div id="git" name="body" class="" style="display:none;width:99%;height:580px;overflow:auto;">
+				<div id="git_tab">
+					<button id="btn_tab_commit" class="minibutton selected" onclick="select_commit();" style="margin:0px;width:65px;height:23px;font-size:10pt;padding:2px;line-height:12px;font-weight:normal;border-radius: 0px 0px 0px 0px;" >Commit</button>
+					<button id="btn_tab_diff" class="minibutton " onclick="select_diff();" style="margin:0px;width:60px;height:23px;font-size:10pt;padding:2px;line-height:12px;font-weight:normal;border-radius: 0px 0px 0px 0px;">Diff</button>
+					<button id="btn_tab_pull" class="minibutton " onclick="select_pull();" style="margin:0px;width:60px;height:23px;font-size:10pt;padding:2px;line-height:12px;font-weight:normal;border-radius: 0px 0px 0px 0px;">Pull</button>
+					<button id="btn_tab_push" class="minibutton " onclick="select_push();" style="margin:0px;width:60px;height:23px;font-size:10pt;padding:2px;line-height:12px;font-weight:normal;border-radius: 0px 0px 0px 0px;">Push</button>
+					<button id="btn_tab_hisotry" class="minibutton " onclick="select_hisotry();" style="margin:0px;width:60px;height:23px;font-size:10pt;padding:2px;line-height:12px;font-weight:normal;border-radius: 0px 0px 0px 0px;">History</button>
+					
+				
+				</div>
+				<div id="diff" name="body" class="droppable" style="display:none;width:99%;min-height:500px;border:1px solid #999999">
+					
+				</div>
+				<div id="push" name="body" class="droppable" style="display:none;width:99%;min-height:500px;border:1px solid #999999">
+					
+				</div>
+				<div id="pull" name="body" class="droppable" style="display:none;width:99%;min-height:500px;border:1px solid #999999">
+					
+				</div>
+				<div id="git_history" name="body" class="droppable" style="display:none;width:99%;min-height:500px;border:1px solid #999999">
+					
+				</div>
+				<div id="git_commit" class="file-commit-form js-file-commit-form" style="margin:2px;">
+				  <img alt="Jackie Ju" class="commit-form-avatar js-avatar" data-user="53884" height="48" src="https://avatars2.githubusercontent.com/u/53884?s=140" width="48" />
+
+				  <div class="commit-form" style="height:320px;">
+				    <h3 class="file-commit-form-heading">Commit changes</h3>
+
+				    <div class="too-long-message">
+				      <span class="octicon octicon-megaphone"></span>
+				      ProTip: Great commit summaries are 50 characters or less. Place extra information in the extended description.
+				    </div>
+
+				    <label for="commit-summary-input" class="hidden">
+				      Commit summary
+				    </label>
+				    <input id="commit-summary-input" type="text" class="input-block input-contrast commit-message-summary js-new-blob-commit-summary"
+				      placeholder="Update README.md"
+				      name="message" value="">
+				    <input type="hidden" class="js-commit-message-fallback" name="placeholder_message"
+				      value="Update README.md" />
+
+				    <label for="commit-description-textarea" class="hidden">
+				      Optional extended description
+				    </label>
+				    <textarea id="commit-description-textarea" name="description"
+				      class="input-block input-contrast commit-message js-new-blob-commit-description" placeholder="Add an optional extended description..."></textarea>
+
+
+				    <div class="commit-form-actions">
+				      <button type="submit" class="button primary js-blob-submit"
+				        id="submit-file"
+				        data-test-id="blob-submit-file"
+				        data-edit-text="Commit changes"
+				        data-pull-text="Propose file change"
+				        onclick="commit_file();">
+				      <!--button type="submit" class="button primary js-blob-submit"
+				        id="submit-file"
+				        data-test-id="blob-submit-file"
+				        data-edit-text="Commit changes"
+				        data-pull-text="Propose file change"
+				         disabled -->
+				        Commit changes
+				      </button>
+				      <!-- <a href="/jackieju/appstore/blob/master/README.md" class="button danger cancel">Cancel</a> -->
+				    </div>
+				  </div>
+				</div>
+			<script>
+				function commit_file(){
+					type = g_selected_node.type;
+					// fname = g_selected_node.name;
+					fname = getNodePath(g_selected_node);
+					// alert(fname);
+					// alert(isnew);
+					if (type != 'bo' && type !='code')
+						return;
+					$.ajax({
+						type: "post",
+						url: "/app/commit?t="+ new Date().getTime(),
+						dataType: 'json',
+
+						data: {
+							appid:g_appid,
+							fname:fname,
+							type:type,
+							
+							// sid: '<%=@sid%>',
+							// authenticity_token:window._token
+						}, 
+						success: function(data, textStatus){
+							// alert( "Data Saved: " + data +","+ textStatus);
+
+							showWaiting(false);
+							if (data.error){
+								popup(data.error);
+							}else{
+								// $("#applist").html(data);
+								popup('Commit successfully');
+								show_editor();
+							}
+
+						},
+						error: function(xhr, textStatus, errorThrow){
+							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+							showWaiting(false);
+
+						}
+					}); // $ajax
+				}
+				function select_commit(){
+					$("#git_commit").css("display", "block");
+					$("#diff").css("display", "none");
+					$("#push").css("display", "none");
+					$("#pull").css("display", "none");
+					$("#history").css("display", "none");
+										
+					$("#btn_tab_commit").addClass("selected");
+					$("#btn_tab_diff").removeClass("selected");
+					$("#btn_tab_push").removeClass("selected");
+					$("#btn_tab_pull").removeClass("selected");
+				}
+				function select_diff(){
+					$("#diff").css("display", "block");
+					$("#git_commit").css("display", "none");
+					$("#push").css("display", "none");
+					$("#pull").css("display", "none");
+					$("#history").css("display", "none");
+										
+					$("#btn_tab_diff").addClass("selected");
+					$("#btn_tab_commit").removeClass("selected");
+					$("#btn_tab_push").removeClass("selected");
+					$("#btn_tab_pull").removeClass("selected");
+					
+					show_diff();
+				}
+				function select_hisotry(){
+					$("#diff").css("display", "block");
+					$("#git_commit").css("display", "none");
+					$("#push").css("display", "none");
+					$("#pull").css("display", "none");
+					$("#history").css("display", "none");
+										
+					$("#btn_tab_diff").addClass("selected");
+					$("#btn_tab_commit").removeClass("selected");
+					$("#btn_tab_push").removeClass("selected");
+					$("#btn_tab_pull").removeClass("selected");
+					
+					$.ajax({
+						type: "post",
+						url: "/app/history?f="+fname+"&t="+ new Date().getTime(),
+						// dataType: 'json',
+
+						data: {
+							appid:g_appid,
+
+
+							// sid: '<%=@sid%>',
+							// authenticity_token:window._token
+						}, 
+						success: function(data, textStatus){
+							// alert( "Data Saved: " + data +","+ textStatus);
+
+							showWaiting(false);
+							// if (data.error){
+							// 					popup(data.error);
+							// 					diff_editor.setValue(data.data);
+							// 
+							// 				}else{
+							// 					// alert(data.data);
+							// 					// $("#diff").text(data);
+							// 					popup(data.OK);
+
+								diff_editor.setValue(data);
+							// }
+
+						},
+						error: function(xhr, textStatus, errorThrow){
+							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+							showWaiting(false);
+
+						}
+					}); // $ajax
+				}
+				function select_pull(){
+					$("#diff").css("display", "block");
+					$("#push").css("display", "none");
+					// $("#pull").css("display", "block");
+					$("#git_commit").css("display", "none");
+					$("#history").css("display", "none");
+					
+					$("#btn_tab_pull").addClass("selected");
+					$("#btn_tab_commit").removeClass("selected");
+					$("#btn_tab_push").removeClass("selected");
+					$("#btn_tab_diff").removeClass("selected");
+					$.ajax({
+						type: "post",
+						url: "/app/pull?f="+fname+"&t="+ new Date().getTime(),
+						dataType: 'json',
+
+						data: {
+							appid:g_appid,
+
+
+							// sid: '<%=@sid%>',
+							// authenticity_token:window._token
+						}, 
+						success: function(data, textStatus){
+							// alert( "Data Saved: " + data +","+ textStatus);
+
+							showWaiting(false);
+							if (data.error){
+								popup(data.error);
+								diff_editor.setValue(data.data);
+							
+							}else{
+								// alert(data.data);
+								// $("#diff").text(data);
+								popup(data.OK);
+								
+								diff_editor.setValue(data.data);
+							}
+
+						},
+						error: function(xhr, textStatus, errorThrow){
+							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+							showWaiting(false);
+
+						}
+					}); // $ajax
+			
+				}
+				
+				function select_push(){
+					$("#diff").css("display", "block");
+					$("#push").css("display", "none");
+					$("#pull").css("display", "none");
+					$("#git_commit").css("display", "none");
+					$("#history").css("display", "none");
+					
+					$("#btn_tab_push").addClass("selected");
+					$("#btn_tab_commit").removeClass("selected");
+					$("#btn_tab_pull").removeClass("selected");
+					$("#btn_tab_diff").removeClass("selected");
+					$.ajax({
+						type: "post",
+						url: "/app/push?f="+fname+"&t="+ new Date().getTime(),
+						dataType: 'json',
+
+						data: {
+							appid:g_appid,
+
+
+							// sid: '<%=@sid%>',
+							// authenticity_token:window._token
+						}, 
+						success: function(data, textStatus){
+							// alert( "Data Saved: " + data +","+ textStatus);
+
+							showWaiting(false);
+							if (data.error){
+								popup(data.error);
+								diff_editor.setValue(data.data);
+
+							}else{
+								// alert(data.data);
+								// $("#diff").text(data);
+								popup(data.OK);
+
+								diff_editor.setValue(data.data);
+							}
+
+						},
+						error: function(xhr, textStatus, errorThrow){
+							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+							showWaiting(false);
+
+						}
+					}); // $ajax
+				}
+			</script>
+			</div>
+			
 			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:#fefefe;">
 				<div id="bod_tb" style="float:left;width:50px;height:100%;border-right:1px solid grey;margin-right:5px;">
 					<div class="bod_tb_btn" style="margin-top:50px;">
@@ -309,7 +603,7 @@
 			<img src="/images/wait3.gif" style="width:50px;margin-top:230px;"/>
 		</center>
 	</div>
-	<div id="popup" class="round_border_m" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:500px;top:180px;z-index:800;width:200px;height:128px;font-size:13pt;min-height:37px;max-height:200px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
+	<div id="popup" class="round_border_m" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:500px;top:180px;z-index:800;width:200px;height:128px;font-size:13pt;min-height:57px;max-height:300px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
 	</div>
 	<div id="balloon" style="display:none;left:200px;top:200px;width:300px;height:300px;position:absolute;z-index:200;">
 		<img style="float:right;width:20px;" src="/images/close.png" onclick="show_balloon(false);" />
@@ -697,6 +991,20 @@ end
     	readOnly: false // 如果不需要使用只读模式，这里设置false
     });
 
+
+
+	var diff_editor = ace.edit("diff");
+	diff_editor.getSession().setMode("ace/mode/ruby");
+	diff_editor.getSession().setTabSize(4);	
+	document.getElementById('editor').style.fontSize='18px';
+	diff_editor.getSession().setUseWrapMode(false);
+	diff_editor.setHighlightActiveLine(false);
+	diff_editor.setReadOnly(false);
+	diff_editor.setReadOnly(false);
+	diff_editor.setShowPrintMargin(false);
+	diff_editor.renderer.setShowGutter(false); 
+	diff_editor.setValue("");// or session.setValue	
+	
 	function getNodePath(node){
 		fname = node.name;
 		parent = node.parent;
@@ -762,7 +1070,7 @@ end
 		}else
 			// alert(getNodePath(g_selected_node));
 			content = ace_editor.getValue(); 
-		alert(content);
+		// alert(content);
 		type = g_selected_node.type;
 		// fname = g_selected_node.name;
 		fname = getNodePath(g_selected_node);
@@ -1328,6 +1636,16 @@ end
 			children:data
 		}
 	];	
+	
+	function open_git(){
+		
+		$("#editor").css("display", "block");	
+		$("#bo_designer").css("display", "none");
+		$("#log").css("display", "none");	
+		
+		g_currentView = "git";
+		
+	}
 
 	var g_startLogline = 0;
 	var g_lastLogLine = 0;
@@ -1494,7 +1812,7 @@ end
 									_num = g_lastLogLine+1;
 									$("#log_ln").append(_num+"<br/>");
 						}
-						appendToConsole("last log line "+g_lastLogLine);
+						// appendToConsole("last log line "+g_lastLogLine);
 						$("#log").attr("scrollTop",$("#log").attr('scrollHeight'));
 					}
 					// alert(g_lastLogLine);
@@ -1578,6 +1896,66 @@ end
 			$("#filenav").html(nav+fname);
 		}
 		g_currentView = null;
+		function show_editor(){
+			$("#editor").css("display", "block");	
+			$("#bo_designer").css("display", "none");
+			$("#log").css("display", "none");
+			$("#git").css("display", "none");
+		}
+		
+		function show_diff(){
+			if (g_selected_node.type == "bo" || g_selected_node.type == "file" ||  g_selected_node.type == "code"){
+				if (g_selected_node)
+					fname = getNodePath(g_selected_node);
+				$.ajax({
+					type: "post",
+					url: "/app/diff?f="+fname+"&t="+ new Date().getTime(),
+					// dataType: 'json',
+
+					data: {
+						appid:g_appid,
+					
+
+						// sid: '<%=@sid%>',
+						// authenticity_token:window._token
+					}, 
+					success: function(data, textStatus){
+						// alert( "Data Saved: " + data +","+ textStatus);
+
+						showWaiting(false);
+						// if (data.error){
+						// 						popup(data.error);
+						// 					}else{
+							// alert(data.data);
+							// $("#diff").text(data);
+							diff_editor.setValue(data);
+						// }
+
+					},
+					error: function(xhr, textStatus, errorThrow){
+						// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+						popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+						showWaiting(false);
+
+					}
+				}); // $ajax
+			}
+		}
+		function show_git(){
+			$("#editor").css("display", "none");	
+			$("#bo_designer").css("display", "none");
+			$("#log").css("display", "none");
+			
+			$("#git").css("display", "block");
+			select_commit();
+			
+			g_currentView = "git";
+			fname = "";
+			diff_editor.setValue("");
+			
+
+		}
 		function open_bo(node){
 			// fname = g_selected_node.name;
 			type = g_selected_node.type;
@@ -1631,7 +2009,7 @@ end
 						popup(data.error);
 					}else{
 						// alert(data.data);
-						alert(inspect(data.data.data));
+						// alert(inspect(data.data.data));
 
 						nav = "";
 						if (type == 'bo')
@@ -1642,6 +2020,8 @@ end
 
 						$("#editor").css("display", "none");	
 						$("#bo_designer").css("display", "block");
+						$("#git").css("display", "none");	
+						alert($("#git").length);
 						g_currentView = "bo_designer";
 								
 						$("#prop_pad").css("display", "none");
@@ -1658,7 +2038,7 @@ end
 						// $("#canvas").html(_html);
 						
 						// $("#applist").html(data);
-						appendToConsole('Load successfully');
+						appendToConsole('Load BO successfully');
 
 					}
 
@@ -2267,7 +2647,7 @@ end
 	g_selected_bo_field = null;
 	function render_bo(bo){
 		alert(inspect(bo));
-		str = "<div style='left:"+bo.x+"; top: "+bo.y+";' id='"+bo.ui+"' class='draggable_obj ui-draggable bo'>\
+		str = "<div style='position:absolute;left:"+bo.x+"px; top: "+bo.y+"px;' id='"+bo.ui+"' class='draggable_obj ui-draggable bo'>\
 			<img src='/images/block2.png' style='height:50px;'>\
 			<div class='draggable_obj_name'>"
 			+bo.name+
@@ -2291,7 +2671,9 @@ end
 		// inserted = $(inserted[inserted.length-1]);
 		// alert(inserted[0].outerHTML);
 		inserted.draggable({containment: "parent" });	
-
+		// inserted.css('left', bo.x);
+		// 	inserted.css('top', bo.x);
+		
 		inserted.prop("ref", bo);
 		// alert(inspect(inserted.prop("ref")));
 		// alert($(inserted[inserted.length-1]).attr("id"));

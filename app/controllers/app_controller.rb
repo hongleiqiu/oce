@@ -198,7 +198,7 @@ class AppController < ApplicationController
             if isnew == 'true'
                 Git2.add_and_commit(repo, @user.name, relative_path)
             else
-                Git2.commit(repo, @user.name, relative_path)
+                # Git2.commit(repo, @user.name, relative_path)
             end
           rescue Exception=>e
             # logger.error e
@@ -219,7 +219,7 @@ class AppController < ApplicationController
           
           # save_appinfo(appid)
           
-          Git2.push(repo, @user.name)
+          # Git2.push(repo, @user.name)
           success()
     end
     
@@ -490,5 +490,143 @@ class AppController < ApplicationController
 
     def submit
         redirect_to "#{$SETTINGS[:submit_url]}?appid=#{params[:appid]}"
+    end
+    
+    def commit
+        appid = params[:appid]
+        path = params[:fname]
+        type = params[:type]
+        
+        fi= fileInfoFromPath(path)
+        fname = fi[:fname]
+        
+        if type == 'code'
+            
+        elsif type == 'bo'
+            
+        end
+        repo = appid
+        begin
+            
+            dir = repo_ws_path(repo)+"/app/#{fi[:relative_dir]}"
+            FileUtils.makedirs(dir)
+            
+            file_path = "#{dir}/#{fname}"
+
+            
+          
+            relative_path = "app/#{fi[:relative_path]}"
+
+             Git2.commit(repo, @user.name, relative_path)
+          rescue Exception=>e
+            # logger.error e
+            p "exception:"+e.inspect
+            p "call stack:"+e.backtrace[1..e.backtrace.size-1].join("\n\r")
+            
+            if /no changes/=~e.message      
+                error("No Changes need to commit")
+            else
+                error(e.inspect+e.backtrace[1..e.backtrace.size-1].join("\n\r"))
+            end
+            return
+          end
+
+
+          success()
+    end
+    
+    def diff
+        appid = params[:appid]
+        path = params[:f]
+        
+        if path && path != ""
+            fi= fileInfoFromPath(path)
+            relative_path = "app/#{fi[:relative_path]}"
+        else
+            relative_path = ""
+        end
+        o = Git2.diff(appid, @user.name, relative_path)
+        p "diff result:"+o
+        if (o.lines.count>=5)
+        lines_Removed = 5
+            # o = o.gsub(Regexp.new("([^\n]*\n){%s}" % lines_Removed), '') 
+            # o = o.gsub(/^(?:[^\n]*\n){3}/, "")
+            o = o.to_a[4..-1].join
+        end
+        render :text=>o
+        
+    end
+    
+    def pull
+        appid = params[:appid]
+        
+        begin
+            o = Git2.pull(appid, @user.name)
+            p "pull result:"+o
+        rescue Exception=>e
+            # e.git_msg.scan(/CONFLICT (content): Merge conflict in ([^\n]*)\n/){|m|
+            #     p m.inspect
+            # 
+            # }
+            p "git_msg =#{e.git_msg}"
+            o = e.git_msg + "\n"+Git2.status(appid, @user.name)
+            
+            error("Cannot pull", {:data=>o})
+            
+            return
+        end
+        
+        success("Pull successfully", {:data=>o})
+        
+        # render :text=>o
+        
+    end
+    def push
+        appid = params[:appid]
+
+        begin
+            o = Git2.push(appid, @user.name)
+            p "push result:"+o
+        rescue Exception=>e
+            # e.git_msg.scan(/CONFLICT (content): Merge conflict in ([^\n]*)\n/){|m|
+            #     p m.inspect
+            # 
+            # }
+            p "git_msg =#{e.git_msg}"
+            o = e.git_msg + "\n"+Git2.status(appid, @user.name)
+            
+            error("Cannot push", {:data=>o})
+            
+            return
+        end
+  
+        
+        success("Push successfully", {:data=>o})
+        
+        # render :text=>o        
+    end
+    def history
+        appid = params[:appid]
+
+        begin
+            o = Git2.log(appid, @user.name, nil, "--all")
+            p "git-log result:"+o
+        rescue Exception=>e
+            # e.git_msg.scan(/CONFLICT (content): Merge conflict in ([^\n]*)\n/){|m|
+            #     p m.inspect
+            # 
+            # }
+            p "git_msg =#{e.git_msg}"
+            o = e.git_msg + "\n"+Git2.status(appid, @user.name)
+            
+            # error("Cannot push", {:data=>o})
+            
+            # return
+        end
+  
+        
+        # success("Push successfully", {:data=>o})
+        
+        render :text=>o        
     end
 end
