@@ -496,6 +496,8 @@ class AppController < ApplicationController
         appid = params[:appid]
         path = params[:fname]
         type = params[:type]
+        msg = params[:m]
+        msg = "user change" if msg == nil || msg == ""
         
         fi= fileInfoFromPath(path)
         fname = fi[:fname]
@@ -517,7 +519,7 @@ class AppController < ApplicationController
           
             relative_path = "app/#{fi[:relative_path]}"
 
-             Git2.commit(repo, @user.name, relative_path)
+             Git2.add_and_commit(repo, @user.name, relative_path, msg)
           rescue Exception=>e
             # logger.error e
             p "exception:"+e.inspect
@@ -525,6 +527,8 @@ class AppController < ApplicationController
             
             if /no changes/=~e.message      
                 error("No Changes need to commit")
+            elsif /fatal: cannot do a partial commit during a merge/ =~ e.git_msg
+                error("You have files during a merge, pleas commit them firstly")
             else
                 error(e.inspect+e.backtrace[1..e.backtrace.size-1].join("\n\r"))
             end

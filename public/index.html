@@ -362,6 +362,7 @@
 					fname = getNodePath(g_selected_node);
 					// alert(fname);
 					// alert(isnew);
+					msg = $("#commit-description-textarea").val();
 					if (type != 'bo' && type !='code')
 						return;
 					$.ajax({
@@ -373,6 +374,7 @@
 							appid:g_appid,
 							fname:fname,
 							type:type,
+							m:msg
 							
 							// sid: '<%=@sid%>',
 							// authenticity_token:window._token

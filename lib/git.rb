@@ -64,15 +64,19 @@ class Git2
          p "===>#{$git_user}@#{$SETTINGS[:git_server]}:#{$SETTINGS[:repo_root]}/#{repo}"  
 
          command = "cd #{$SETTINGS[:workspace_root]}/#{username}/#{repo}\n 
-                git add \"#{filepath}\" "
+                git add \"#{filepath}\" 
+                git commit \"#{filepath}\" -m \"#{msg}\""
+                
         p "command=>#{command}"
-        r = `#{command}`
-        # success('OK', {:ret=>r})
-        p "==>r=#{r}"
-        if $?.exitstatus != 0
-            raise Exception.new("git command=>#{command}\n return:\n#{r}")
-        end
-        self.commit(repo, username, filepath, msg)
+        # r = `#{command}`
+        # # success('OK', {:ret=>r})
+        # p "==>r=#{r}"
+        # if $?.exitstatus != 0
+        #     raise Exception.new("git command=>#{command}\n return:\n#{r}")
+        # end
+        # self.commit(repo, username, filepath, msg)
+        
+        return do_cmd(command)
     end
     def self.commit(repo, username, filepath, msg="c")
         p "===>#{$git_user}@#{$SETTINGS[:git_server]}:#{$SETTINGS[:repo_root]}/#{repo}"  
