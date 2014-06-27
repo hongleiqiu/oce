@@ -63,5 +63,39 @@ usermod -G git git
 su - git
 ssh-keygen 
 cp /home/git/.ssh/id_rsa.pub /home/git/.ssh/authorized_keys
--dd
-sss
+
+4. hana for ruby
+[on mac]
+#install unixodbc
+brew install unixodbc
+# if it make link failed and prompt you link it
+brew link unixodbc
+
+
+[linux SUSE]
+install unixOdbc
+sudo zypper install unixODBC-devel unixODBC
+
+ln -sf /home/jackie/sap/hdbclient/libodbcHDB.so /usr/lib/libodbcHDB.so
+# must edit /etc/odbc.ini not /etc/unixODBC/odbc.ini, it's a bug of unixODBC
+# sudo vi /etc/unixODBC/odbc.ini 
+sudo vi /etc/odbc.ini
+[DSN1]
+driver=/usr/lib/libodbcHDB.so
+servernode=10.58.114.228:30115
+
+
+install ruby odbc(http://www.ch-werner.de/rubyodbc/)
+download http://www.ch-werner.de/rubyodbc/ruby-odbc-0.99995.gem 
+gem install --local  ruby-odbc-0.99995.gem 
+
+rails setup https://wiki.wdf.sap.corp/wiki/display/ic/Documentation#Documentation-RailsSetup
+gem 'ruby-odbc'
+gem 'activerecord-odbc-adapter'
+
+gem install activerecord-hana-adapter (https://github.com/SAP/activerecord-hana-adapter)
+(install from git source
+git clone https://github.com/SAP/activerecord-hana-adapter.git
+cd activerecord-hana-adapter/
+gem build activerecord-hana-adapter.gemspec 
+gem install --local activerecord-hana-adapter-0.1.2.gem)
