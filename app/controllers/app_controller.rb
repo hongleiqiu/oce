@@ -8,6 +8,7 @@ class AppController < ApplicationController
     
     def app
     end
+    
     def delapp
         repo = appid = params[:appid]
         
@@ -48,6 +49,7 @@ class AppController < ApplicationController
         end
         app = rs[0]
 =end        
+        ActiveRecord::Base.connection.execute("select * from I027910_master.HLD1")
         data = http_post($SETTINGS[:appstore_query_app_url], {:appid=>appid})
         p "--->#{data}"
         ret = JSON.parse(data)

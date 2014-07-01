@@ -108,7 +108,8 @@ ruby script/server -p 3000 -e production
 review
 ruby script/server -p 3002
 
-
+# hana command line tool
+/home/jackie/sap/hdbclient/hdbsql -n 10.58.114.210:30015 -u system -p manager
 
 # create hana odbc adapter
 /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/
