@@ -99,3 +99,16 @@ git clone https://github.com/SAP/activerecord-hana-adapter.git
 cd activerecord-hana-adapter/
 gem build activerecord-hana-adapter.gemspec 
 gem install --local activerecord-hana-adapter-0.1.2.gem)
+
+
+app store
+ruby script/server -p 3001 -e production
+oce
+ruby script/server -p 3000 -e production
+review
+ruby script/server -p 3002
+
+
+
+# create hana odbc adapter
+/usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/
