@@ -11,12 +11,12 @@
 #     socket: /var/lib/mysql/mysql.sock
     
 development:
-  adapter: odbc
+  adapter: odbc1
   dsn: DSN1
   username: system
   password: manager
   column_store: true
-  schema: I027910_MASTER
+  schema: I027910_MASTER2
     
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -28,6 +28,14 @@ test:
   timeout: 5000
 
 production:
+  adapter: odbc
+  dsn: DSN1
+  username: system
+  password: manager
+  column_store: true
+  schema: I027910_MASTER
+
+production1:
     adapter:  mysql
     database: appstore
     host: localhost
