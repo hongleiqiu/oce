@@ -48,6 +48,37 @@ class AppController < ApplicationController
         end
         app = rs[0]
 =end        
+ActiveRecord::Schema.define(:version => 20140514091125) do
+
+  create_table "apps", :force => true do |t|
+    t.string   "appid"
+    t.string   "name"
+    t.string   "desc"
+    t.integer  "uid"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "apps", ["appid"], :name => "index_apps_on_appid", :unique => true
+  add_index "apps", ["name"], :name => "index_apps_on_name", :unique => true
+
+end
+        
+        App.new({
+         :appid=>rand(1000),
+         :name=>"fdadf#{rand(1000)}"
+        }).save!
+        rs = App.find_by_sql("select * from apps")
+        p "====>#{rs.inspect}"
+
+        rs = ActiveRecord::Base.connection.execute("select 'hldcode', 'strdate' from I027910_master.HLD1")
+        p "===> #{rs.inspect}"
+        p "===> #{rs[0].class}"
+
+        #App.find(0)
+
+        rs = ActiveRecord::Base.connection.execute("insert into I027910_MASTER.HLD1 VALUES( '2012','2010-10-01 00:00:00.000000000','2010-10-03 00:00:00.000000000','LL')")
+
         data = http_post($SETTINGS[:appstore_query_app_url], {:appid=>appid})
         p "--->#{data}"
         ret = JSON.parse(data)
