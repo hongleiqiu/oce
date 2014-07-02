@@ -762,41 +762,41 @@ end
     def generate_migration(udo)
         sf = ""
         udo["fields"].each{|f|
-            sf << "t.#{f["type"]} :#{f["name"]} \n"
+            sf << "\t\tt.#{f["type"]} :#{f["name"]} \n"
         }
         class_name = udo["name"]
         template = <<TEMPLATE_END
-        class #{class_name} < ActiveRecord::Migration
-          def self.up
-            create_table :#{udo["name"]} do |t|
-              # t.string :appid
-              #          t.string :name
-              #          t.string :desc
-              #          t.integer :uid
-              #{sf}
-              t.timestamps
-            end
-            #add_index(:apps, ["appid"], {:unique=>true})
-            #add_index(:apps, ["name"], {:unique=>true})
-            create_udo_def({
-                :name=>#{udo["name"]},
-                :desc=>#{udo["desc"]},
-                :files=>[
-                    {
-                        :name=>"",
-                        :type=>""
-                    }
-                    ]
-            }){|u|
-                u.add_field(f['name'], f['type'])
+class #{class_name} < ActiveRecord::Migration
+  def self.up
+    # create_table :#{udo["name"]} do |t|
+    #    # t.string :appid
+    #    #          t.string :name
+    #    #          t.string :desc
+    #    #          t.integer :uid
+    #    #{sf}
+    #    t.timestamps
+    #  end
+    #add_index(:apps, ["appid"], {:unique=>true})
+    #add_index(:apps, ["name"], {:unique=>true})
+    create_udo_def({
+        :name=>#{udo["name"]},
+        :desc=>#{udo["desc"]},
+        :files=>[
+            {
+                :name=>"",
+                :type=>""
             }
-          end
+            ]
+    }){|u|
+        u.add_field(f['name'], f['type'])
+    }
+  end
 
-          def self.down
-            drop_table :#{udo["name"]}
-          end
-        end
-    end
+  def self.down
+    drop_table :#{udo["name"]}
+  end
+end
+
 TEMPLATE_END
         return template
       
