@@ -112,3 +112,20 @@ ActiveRecord::AnwSchema.define(:version => 20140514091120) do
   add_index "apps3", ["name"], :name => "index_apps3_on_name", :unique => true
 
 end
+
+def deploy_udo_to_tenant(tentant, base_dir)
+    # initialize connection to hana
+    config={
+        :adapter=> "odbc",
+        :dsn=> "DSN1",
+        :username=> "system",
+        :password=> "manager",
+        :column_store=> "true",
+        :schema=>tenant
+    }
+    
+    ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
+    
+    # migrate to this version
+    
+end

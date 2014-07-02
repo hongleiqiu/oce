@@ -283,7 +283,11 @@ function rand2(min, max){
 	return Math.floor( Math.random()*(max-min+1)+min ); 
 }
 
-
+function get_file_ext(fname){
+	ar =  fname.split(".");
+	return ar[ar.length-1];
+	
+}
 
 
 

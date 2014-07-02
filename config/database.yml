@@ -1,16 +1,16 @@
 # SQLite version 3.x
 #   gem install sqlite3-ruby (not necessary on OS X Leopard)
-# development:
-#     adapter:  mysql
-#     database: appstore
-#     host: localhost
-#     username: root
-#     password: 
-#     pool: 15
-#     timeout: 5000
-#     socket: /var/lib/mysql/mysql.sock
-    
 development:
+    adapter:  mysql
+    database: appstore
+    host: localhost
+    username: root
+    password: 
+    pool: 15
+    timeout: 5000
+    socket: /var/lib/mysql/mysql.sock
+    
+development1:
   adapter: odbc
   dsn: DSN1
   username: system

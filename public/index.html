@@ -577,6 +577,59 @@
 						}
 					}); // $ajax
 				}
+				
+				
+				function gen_bo_mig(){
+						// type = g_selected_node.type;
+					// fname = g_selected_node.name;
+					fname = getNodePath(g_selected_node);
+
+					$.ajax({
+						type: "post",
+						url: "/app/gbm?t="+ new Date().getTime(),
+						dataType: 'json',
+
+						data: {
+							appid:g_appid,
+							fname:fname,
+							// type:type,
+
+							// sid: '<%=@sid%>',
+							// authenticity_token:window._token
+						}, 
+						success: function(data, textStatus){
+							// alert( "Data Saved: " + data +","+ textStatus);
+
+							showWaiting(false);
+							if (data.error){
+								popup(data.error);
+							}else{
+								 alert(data.data);
+								var parent_node = $tree.tree('getNodeById', 111);
+								
+								$('#tree').tree(
+								    'appendNode',
+								    {
+								        label: data.migrate,
+								        type:'code',
+								    },
+								    parent_node
+								);
+								// $("#applist").html(data);
+								appendToConsole('Generate migration script successfully');
+
+							}
+
+						},
+						error: function(xhr, textStatus, errorThrow){
+							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+							showWaiting(false);
+
+						}
+					}); // $ajax
+				}
 			</script>
 			</div>
 			
@@ -590,6 +643,9 @@
 					</div>
 					<div class="bod_tb_btn" >
 						<a href=""> <img src="/images/edit.png" class="toolbar_btn_m"></a>
+					</div>
+					<div class="bod_tb_btn" >
+						<a href="javascript:gen_bo_mig();"> <img src="/images/edit.png" class="toolbar_btn_m"></a>
 					</div>
 				</div>
 				<div id="canvas" class="grid_background" style="float:left;border:0px solid red;height:100%;width:90%;">
@@ -1281,7 +1337,7 @@ end
 						popup(data.error);
 					}else{
 						// popup(data.data_root);
-						init_tree(data.data_root);
+						init_tree2(data.data_root);
 						appendToConsole("Project Ready");
 					}
 
@@ -1458,6 +1514,168 @@ end
 				);
 		}
 		
+		function add_file_to_tree(node, parent, tree_node){
+			// alert(typeof(node));
+			// if (typeof(node) != 'string'){
+			if (typeof(node) == 'object'){
+				// type = "folder";
+				// if (node.name == 'bo_root'){
+				// 			type = 'bo_root';
+				// 		}
+				label = node.name;
+				// alert(node.name);
+				if (label == 'bo_root'){
+					label = "Business Objects";
+					// alert(inspect(root[0].children[0]));
+					tnode = root[0].children[0];
+				}else if (label == 'extension'){
+					type = "extension";
+					tnode = root[0].children[1];
+				}else if (label == 'service_root'){
+					type = "code";
+					tnode = root[0].children[2];
+				}else if (label == 'ui_root'){
+					type = "code";
+					tnode = root[0].children[3];
+				}
+				else if (label == 'ui_root_u'){
+					type = "code";
+					tnode = root[0].children[3].children[0];
+				}else if (label == 'ui_root_m'){
+					type = "code";
+					tnode = root[0].children[3].children[1];
+				}
+				else{
+					tnode = {
+						label:label,
+						type:node.name,
+						children:[]
+					};
+					tree_node.children.push(tnode);
+				}
+			
+				list = node.v;
+				for (var i =0; i< list.length; i++){
+					add_file_to_tree(list[i], node, tnode);
+				}
+			}else{
+				type = "code";
+				// alert(get_file_ext(node).toLowerCase());
+				if (get_file_ext(node).toLowerCase() == 'bo')
+					type = "bo";
+					// alert(type);
+				tree_node.children.push({
+					label:node,
+					type:type,
+				});
+			}
+		}
+		// init tree from fs structure
+		function init_tree2(data_root){
+			// alert(inspect(data_root.bo_list));
+		
+			// alert(inspect(data_root));
+			if (data_root != null){
+				// data_root,root[0].children= [];
+				for (var i = 0;i <  data_root.length; i++){
+					item = data_root[i];
+					add_file_to_tree(item, data_root,root[0]);
+					// alert(i);
+					
+				}
+			
+			}
+			// alert();
+			
+			
+			 $tree = $('#tree').tree({
+			    data: root,
+			 	dragAndDrop: true,
+				  onCreateLi: function(node, $li) {
+				        // Add 'icon' span before title
+						icon = "/images/File-32.png";
+						style= "vertical-align:bottom;height:25px;border:0px solid red;";
+						if (node.type == 'folder')
+							icon = "/images/Folder-128.png";
+						if (node.type == 'bo_root')
+							icon = "/images/Folder-128.png";
+						if (node.type == 'app')
+							icon = "/images/apps-256.png";
+						if (node.type == "extension")
+							icon = "/images/Plugins-48.png";
+						if (node.type == "ui_root_u" )
+							icon = "/images/Apps-48.png";
+						if (node.type == "ui_root" )
+							icon = "/images/Apps-48.png";	
+						if (node.type == "ui_root_m" )
+							icon = "/images/mobile.png";
+						if (node.type == "service_root")
+							icon = "/images/service.png";
+						if (node.children == null  || node.children.length == 0)
+							style= "vertical-align:bottom;height:25px;border:0px solid red;margin-left:20px;";
+
+				        $li.find('.jqtree-title').before('<img style="'+style+'" src="'+icon+'" />');
+				    }
+			    });
+			 g_root_node = $tree.tree("getTree").children[0];
+			// alert(g_root_node.children[0]);
+				// bind 'tree.click' event
+				$tree.bind(
+				    'tree.click',
+				    function(event) {
+						
+						// alert(inspect(event));
+				        // The clicked node is 'event.node'
+				       	var node = event.node;
+						if (g_selected_node && g_selected_node.isNew == 'true' && node !=g_selected_node ){
+							popup("You haven't save this file.");
+							return false;
+						}
+						else
+						{
+							
+							g_selected_node = node;
+							if (node.type == 'code')
+								open_file(node);
+							else if (node.type == 'bo')
+								open_bo(node);
+						}
+				    }
+				);
+				$tree.bind(
+				    'tree.dblclick',
+				    function(event) {
+				        // event.node is the clicked node
+				        // console.log(event.node);
+				        var node = event.node;
+						g_editing_node = node;
+				        if (node.type == 'code')
+							pre_rename_node(event)
+						else if (node.type == 'bo')
+							pre_rename_node(event)
+						else 
+						$tree.tree(
+							'openNode',
+							event.node,
+							true);
+				    }
+				);
+				$tree.bind(
+				    'tree.move',
+				    function(event) {
+				        // console.log('moved_node', event.move_info.moved_node);
+				        // 		        console.log('target_node', event.move_info.target_node);
+				        // 		        console.log('position', event.move_info.position);
+				        // 		        console.log('previous_parent', event.move_info.previous_parent);
+						if (event.move_info.target_node == g_root_node)
+							return false;
+						if ( (event.move_info.moved_node.type == 'code' && event.move_info.target_node.type=='bo_root') 
+						||  (event.move_info.moved_node.type == 'bo' && event.move_info.target_node.type=='extension'))
+							return false;
+						return true;
+				    }
+				);
+		}		
 		function rename_file(node, name){
 			fname = getNodePath(node);
 			
@@ -1626,7 +1844,21 @@ end
 						
 							
 		        ]
-		    }
+		    },
+			{
+		        label: 'Migration',
+				type: 'migrate',
+				id: 111,
+		        children: [
+		      					//       { 
+		      					// label: 'TestBO1',
+		      					// type: 'bo',
+		      					// 	 			},
+		      					// 	            {
+		      					// 		 			label: 'TestBO2',
+		      					// type: 'bo', }
+		        ]
+		    },
 	];
 	// var g_bo_root = data[0];
 	// var g_extion_root = data[1];
@@ -2062,33 +2294,33 @@ end
 		// you must clone your array before call this function
 		// var exc = [].concat(children);
 		
-		function get_new_name(exc, name, ext_count = 0){
+		function get_new_name(excl, name, ext_count = 0){
 			// get filename and file ext
 			var prefix = name;
-			var file_ext = null;
+			var file_ext = "";
 			i = name.lastIndexOf(".");
 			if (i>=0){
 				prefix = name.substr(0, i);
 				file_ext = name.substr(i, name.length);
 			}
-			
+			// alert("ext_count="+ext_count+", prefix="+prefix+", ext="+file_ext);
 			if (ext_count != 0)
 				_name = prefix+ext_count.toString()+file_ext;
 			else
 				_name = name;
 			// alert("test name "+_name);
-			// alert("array:"+inspect(exc));
+			// alert("array:"+inspect(excl));
 			// alert(children.length);
-			for (i = 0; i< exc.length; i++){
+			for (i = 0; i< excl.length; i++){
 				// alert(i+":"+inspect(exc[i]));
-				if (exc[i] == null)
+				if (excl[i] == null)
 					continue;
 				// alert(inspect(exc[i]));
-				if (_name == exc[i].name){
-					exc[i] = null;
+				if (_name == excl[i].name){
+					// excl[i] = null;
 					ext_count += 1;
 					// _name = prefix+ext_count.toString()+file_ext;
-					get_new_name(exc, name, ext_count);
+					get_new_name(excl, name, ext_count);
 				}
 			}
 			return _name;
@@ -2106,8 +2338,8 @@ end
 			// }
 			
 			// alert(prefix+","+file_ext);
-			var exc = [].concat(parent_node.children);
-			new_name =  get_new_name(exc, name);
+			var excl = [].concat(parent_node.children);
+			new_name =  get_new_name(excl, name);
 			return new_name;
 		}
 		
@@ -2116,7 +2348,7 @@ end
 			// alert(g_selected_node.type);
 			if (g_selected_node == null)
 				return;
-			if (g_selected_node.type == 'bo_root' || g_selected_node.type == 'bo'){
+			if (g_selected_node.type == 'bo_root' || g_selected_node.parent.type == 'bo_root'){
 				
 				// g_bo_root.children.push({
 				// 			label: 'New File',
@@ -2127,7 +2359,7 @@ end
 				if (g_selected_node.type=='bo_root'){
 					// json = $('#tree').tree('toJson');
 				//	alert(json);
-					newname = get_new_node_name(g_selected_node, "New BO");
+					newname = get_new_node_name(g_selected_node, "NewBO.bo");
 					$('#tree').tree(
 					    'appendNode',
 					    {
@@ -2140,7 +2372,7 @@ end
 					
 				}
 				else {
-					newname = get_new_node_name(g_selected_node.parent, "New BO");
+					newname = get_new_node_name(g_selected_node.parent, "NewBO.bo");
 					$('#tree').tree(
 					    'addNodeAfter',
 					    {

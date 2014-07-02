@@ -102,8 +102,12 @@ end
         
         json = load_appinfo(repo)
         
+        json = load_appinfo2(repo)
+        p "dfff"
+        p json.inspect
+        p "===>"+json["name"]
         ret = {
-            :data_root=>json
+            :data_root=>json["v"]
         }
         p ret.to_json
         render :text=>ret.to_json
@@ -405,6 +409,39 @@ end
         
     end
     
+    def load_app_struct(dir)
+        base = File.basename(dir)
+         json = {
+             'name'=>base, 
+             'v' =>[]
+         }
+         node = json['v']
+         begin
+             if FileTest::exists?(dir) 
+                     Dir.foreach("#{dir}") do |item|
+
+                       next if item.start_with?(".")
+                       fname = "#{dir}/#{item}"
+                       if File.file?(fname)
+                          p "file  #{fname}"
+                          node.push(item)
+                       elsif File.directory?(fname)
+                           node.push(load_app_struct(fname))
+                       end
+                     end
+             end
+         rescue Exception=>e
+              p e.inspect
+              p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+              
+         end
+         return json
+    end
+    def load_appinfo2(appid)
+        dir = repo_ws_path(appid)+"/app"
+        node = load_app_struct(dir)
+        return node
+    end    
     def save_appinfo(appid, content)
          begin
                 dir = repo_ws_path(appid)
@@ -560,7 +597,7 @@ end
             p "exception:"+e.inspect
             p "call stack:"+e.backtrace[1..e.backtrace.size-1].join("\n\r")
             
-            if /no changes/=~e.message      
+            if /no changes/=~e.message  ||  /nothing to commit/=~e.message
                 error("No Changes need to commit")
             elsif /fatal: cannot do a partial commit during a merge/ =~ e.git_msg
                 error("You have files during a merge, pleas commit them firstly")
@@ -667,5 +704,101 @@ end
         # success("Push successfully", {:data=>o})
         
         render :text=>o        
+    end
+    # genereate bo migration script
+    def gbm
+        appid = params[:appid]
+        path = params[:fname]
+    
+        repo = appid
+        fi= fileInfoFromPath(path)
+        fname = fi[:fname]
+        
+        # dir = repo_ws_path(repo)+"/app/#{fi[:relative_dir]}"
+        
+        fpath = "#{repo_ws_path(repo)}/app/#{fi[:relative_path]}"
+        data = ""
+        begin
+            if FileTest::exists?(fpath) 
+                    open(fpath, "r+") {|f|
+                           data = f.read
+                           
+                       p "===>data(#{fpath}):#{data}"
+                            data = "" if data == nil
+                                
+                       }
+                  
+                   
+            end
+        rescue Exception=>e
+             p e.inspect
+             p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+             
+        end
+        
+        js = JSON.parse(data)
+        p js.inspect
+        script = ""
+        js["data"].each{|o|
+            script << generate_migration(o)
+        }
+        p "fname=#{fname}"
+        ar  = fname.split(".")
+        mi_name = ar[0..ar.size-2].join(".")
+        m_fname = "#{repo_ws_path(repo)}/app/migrate/#{mi_name}.rb"
+          p "output to #{m_fname}"
+         begin
+              FileUtils.mkdir_p("#{repo_ws_path(repo)}/app/migrate")
+              aFile = File.new(m_fname, "w+")
+              aFile.puts script
+              aFile.close
+          rescue Exception=>e
+              p e
+          end
+        success("ok", {:data=>script, :migrate=>mi_name+".rb"})
+        return
+    end
+    
+    def generate_migration(udo)
+        sf = ""
+        udo["fields"].each{|f|
+            sf << "t.#{f["type"]} :#{f["name"]} \n"
+        }
+        class_name = udo["name"]
+        template = <<TEMPLATE_END
+        class #{class_name} < ActiveRecord::Migration
+          def self.up
+            create_table :#{udo["name"]} do |t|
+              # t.string :appid
+              #          t.string :name
+              #          t.string :desc
+              #          t.integer :uid
+              #{sf}
+              t.timestamps
+            end
+            #add_index(:apps, ["appid"], {:unique=>true})
+            #add_index(:apps, ["name"], {:unique=>true})
+            create_udo_def({
+                :name=>#{udo["name"]},
+                :desc=>#{udo["desc"]},
+                :files=>[
+                    {
+                        :name=>"",
+                        :type=>""
+                    }
+                    ]
+            }){|u|
+                u.add_field(f['name'], f['type'])
+            }
+          end
+
+          def self.down
+            drop_table :#{udo["name"]}
+          end
+        end
+    end
+TEMPLATE_END
+        return template
+      
     end
 end
