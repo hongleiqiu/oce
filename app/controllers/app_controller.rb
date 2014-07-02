@@ -39,7 +39,7 @@ class AppController < ApplicationController
         success()
     end
     def ld
-        p "===>d33e3"
+        p "===>ld"
         appid= params[:appid]
 =begin    
     # test odbc adapter

@@ -11,7 +11,7 @@
 #     socket: /var/lib/mysql/mysql.sock
     
 development:
-  adapter: odbc1
+  adapter: odbc
   dsn: DSN1
   username: system
   password: manager
