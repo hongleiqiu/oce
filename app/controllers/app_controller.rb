@@ -288,38 +288,19 @@ end
         
         p "deploy udo"
         begin
-            dir = "#{repo_ws_path(appid)}/app/migrate"
-            if FileTest::exists?(dir) 
-                files = Dir["#{dir}/*.rb"] 
-                migrations = files.inject([]) do |klasses, file|
-                    version, name = file.scan(/([0-9]+)_([_a-z0-9]*).rb/).first
-                    raise IllegalMigrationNameError.new(file) unless version
-                    version = version.to_i
-
-                    if klasses.detect { |m| m.version == version }
-                        raise Exception.new("DuplicateMigrationVersionError #{version}")
-                    end
-
-                    if klasses.detect { |m| m.name == name.camelize }
-                        raise Exception.new("DuplicateMigrationNameError #{name.camelize}")
-                    end
-
-                    klasses.push({
-                        :name=>name.camelize,
-                        :cls =>name,
-                        :version=>version,
-                        :filename=>file
-                    })
-                 
-                end
-                migrations = migrations.sort_by{|h| h[:version]}
-                
-                migrations.each{|m|
+            migrations = all_migrations(appid)
+        
+            migrations.each{|m|
+                begin
                     eval "load '#{m[:filename]}'"
                     eval "#{m[:cls]}.new().up"
-                }
+                rescue
+                    p e.inspect
+                    p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+                end
+            }
                   
-            end # if FileTest::exists?(dir) 
+            
             p "deploy udo success"
             
         rescue Exception => e
@@ -804,8 +785,8 @@ end
                return
            end
            
-            script = generate_migration(o)
-            
+            script = generate_migration(appid, o)
+            o["version"] += 1
             t = Time.now
             time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
             m_fname = "#{repo_ws_path(repo)}/app/migrate/#{time}_#{o['name']}.rb"
@@ -820,6 +801,12 @@ end
                   p e
               end
         }
+        
+        # save to file because version changed
+        aFile = File.new(fpath,"w")
+         aFile.puts js.to_json
+         aFile.close
+
         # p "fname=#{fname}"
         # ar  = fname.split(".")
         # mi_name = ar[0..ar.size-2].join(".")
@@ -838,8 +825,111 @@ end
         success("ok", {:data=>script, :migrate=>m_fnames})
         return
     end
-    
-    def generate_migration(udo)
+    def all_migrations(appid, udo_name = "")
+           if !udo_name || udo_name==""
+             exp_pattern = "[_a-z0-9]" 
+             file_pattern = ""
+            else
+                exp_pattern = udo_name
+
+             file_pattern = udo_name
+           end
+           begin
+               dir = "#{repo_ws_path(appid)}/app/migrate"
+               if FileTest::exists?(dir) 
+                   
+                   files = Dir["#{dir}/*#{file_pattern}.rb"] 
+                   migrations = files.inject([]) do |klasses, file|
+                       reg = Regexp.new("([0-9]+)_(#{exp_pattern}).rb")
+                       p "([0-9]+)_(#{exp_pattern}).rb" 
+                       version, name = file.scan(reg).first
+                       p "#{name} #{version}"
+                       raise Exception.new("IllegalMigrationNameError #{file}") unless version
+                       version = version.to_i
+
+                       # if klasses.detect { |m| m[:version] == version }
+                       #     raise Exception.new("DuplicateMigrationVersionError #{version}")
+                       # end
+
+                       # if klasses.detect { |m| m[:name] == name.camelize }
+                       #     raise Exception.new("DuplicateMigrationNameError #{name.camelize}")
+                       # end
+                       if klasses.detect { |m| m[:version] == version &&  m[:name] == name.camelize}
+                           raise Exception.new("DuplicateMigrationVersionError #{version}")
+                       end
+                       klasses.push({
+                           :name=>name.camelize,
+                           :cls =>name,
+                           :version=>version,
+                           :filename=>file
+                       })
+
+                   end
+                   migrations = migrations.sort_by{|h| h[:version]}
+
+               
+               end # if FileTest::exists?(dir) 
+               p "deploy udo success"
+
+           rescue Exception => e
+               p e.inspect
+               p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+               # error("Deploy failed:<pre>"+ e.message+"</pre>")
+               return
+           end
+           return migrations
+    end
+    def find_previous_migrate(appid, udo)
+        begin
+           migrations = all_migrations(appid, udo['name'])
+            p "migrations size #{migrations.size}"
+            migrations.each{|m|
+                eval "load '#{m[:filename]}'"
+                obj = eval "#{m[:cls]}.new()"
+                p "udo mig version:"+obj.version
+            }
+              
+            
+        rescue Exception => e
+            p e.inspect
+            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+            # error("Deploy failed:<pre>"+ e.message+"</pre>")
+            return
+        end
+        return
+    end
+    def generate_migration(appid, udo)
+        # find previous version of udo
+        old_udo = find_previous_migrate(appid, udo)
+        script = ""
+        if old_udo  # if found
+            # find difference
+            diffs = []
+            compared = []
+            udo["fields"].each{|f|
+                name = f["name"]
+                compared.push(name)
+                if old_udo.fields.detect{|f| f['name'] == name }
+                    
+                else
+                    diffs.push({
+                        :type=>"add",
+                        :name=>name
+                    })
+                end
+            }
+            
+            diffs.each{|d|
+                field = udo["fields"].detect{|f|f['name'] == d[:name]}
+                script << "add_column \"#{udo['name']}\", \"#{d[:name]}\", :#{field}"
+            }
+        else
+        # if not found, generate from nothing
+            script += generate_migration_source(udo)
+        end
+        return script
+    end
+    def generate_migration_source(udo)
         sf = ""
         _sf = ""
         udo["fields"].each{|f|
@@ -867,15 +957,16 @@ ENDD
         class_name = udo["name"]
         version = udo["version"]
         template = <<TEMPLATE_END
+require 'Bomigration.rb"
 class #{class_name} < Bomigration
-    @version=#{version}
+  @version=#{version}
   def self.up
     create_udo_def({
         :name=>#{udo["name"]},
         :desc=>#{udo["desc"]},
         :fields=>#{sf},
     }){|u| # you can also define columns by this way
-#{sf2}}
+#{sf2}\t}
     #add_index(:#{udo["name"]}, ["appid"], {:unique=>true})
     #add_index(:#{udo["name"]}, ["name"], {:unique=>true})
   end
