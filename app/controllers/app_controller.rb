@@ -172,8 +172,9 @@ end
         type = params[:type] 
         fi= fileInfoFromPath(path)
         new_name = params[:name]
-        
-        
+        fi= fileInfoFromPath(path)
+        fname = fi[:fname]        
+        repo = appid
         dir_path = repo_ws_path(repo)+"/app/#{fi[:relative_dir]}"
         file_path = "#{dir_path}/#{fname}"
         new_file_path = "#{dir_path}/#{new_name}"
@@ -195,6 +196,8 @@ end
             p e.inspect
             p e.backtrace[1..e.backtrace.size-1].join("\n\r")
         end
+        
+        success()
     
     end
     
@@ -269,11 +272,56 @@ end
         app_root_dir = repo_ws_path(appid)
         ext_root_dir = "#{app_root_dir}/app/#{$FS_EXT_ROOT}"
         
+        # deploy script
         dest = "#{$FS_RT_EXT_ROOT}/#{appid}"
         begin
             FileUtils.mkdir_p(dest)
             p "copy #{ext_root_dir} to #{dest}"
             FileUtils.copy_entry(ext_root_dir, "#{dest}/")
+        rescue Exception => e
+            p e.inspect
+            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+            error("Deploy failed:<pre>"+ e.message+"</pre>")
+            return
+        end
+        p "deploy script ok"
+        
+        p "deploy udo"
+        begin
+            dir = "#{repo_ws_path(appid)}/app/migrate"
+            if FileTest::exists?(dir) 
+                files = Dir["#{dir}/*.rb"] 
+                migrations = files.inject([]) do |klasses, file|
+                    version, name = file.scan(/([0-9]+)_([_a-z0-9]*).rb/).first
+                    raise IllegalMigrationNameError.new(file) unless version
+                    version = version.to_i
+
+                    if klasses.detect { |m| m.version == version }
+                        raise Exception.new("DuplicateMigrationVersionError #{version}")
+                    end
+
+                    if klasses.detect { |m| m.name == name.camelize }
+                        raise Exception.new("DuplicateMigrationNameError #{name.camelize}")
+                    end
+
+                    klasses.push({
+                        :name=>name.camelize,
+                        :cls =>name,
+                        :version=>version,
+                        :filename=>file
+                    })
+                 
+                end
+                migrations = migrations.sort_by{|h| h[:version]}
+                
+                migrations.each{|m|
+                    eval "load '#{m[:filename]}'"
+                    eval "#{m[:cls]}.new().up"
+                }
+                  
+            end # if FileTest::exists?(dir) 
+            p "deploy udo success"
+            
         rescue Exception => e
             p e.inspect
             p e.backtrace[1..e.backtrace.size-1].join("\n\r")
@@ -733,72 +781,157 @@ end
         rescue Exception=>e
              p e.inspect
              p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+             error("Cannot read BO")
+             return
              
         end
-        
+        begin
+            FileUtils.mkdir_p("#{repo_ws_path(repo)}/app/migrate")
+        rescue Exception=>e
+             p e.inspect
+             p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+             error("Cannot create path for migrate")
+             return
+        end
         js = JSON.parse(data)
         p js.inspect
         script = ""
+        m_fnames = []
         js["data"].each{|o|
-            script << generate_migration(o)
+            o["version"] = 0 if !o["version"]
+           if o["name"] == nil || o["name"].strip == ""
+               error("BO must have a name")
+               return
+           end
+           
+            script = generate_migration(o)
+            
+            t = Time.now
+            time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
+            m_fname = "#{repo_ws_path(repo)}/app/migrate/#{time}_#{o['name']}.rb"
+              p "output to #{m_fname}"
+             begin
+                  
+                  aFile = File.new(m_fname, "w+")
+                  aFile.puts script
+                  aFile.close
+                  m_fnames << File.basename(m_fname)
+              rescue Exception=>e
+                  p e
+              end
         }
-        p "fname=#{fname}"
-        ar  = fname.split(".")
-        mi_name = ar[0..ar.size-2].join(".")
-        m_fname = "#{repo_ws_path(repo)}/app/migrate/#{mi_name}.rb"
-          p "output to #{m_fname}"
-         begin
-              FileUtils.mkdir_p("#{repo_ws_path(repo)}/app/migrate")
-              aFile = File.new(m_fname, "w+")
-              aFile.puts script
-              aFile.close
-          rescue Exception=>e
-              p e
-          end
-        success("ok", {:data=>script, :migrate=>mi_name+".rb"})
+        # p "fname=#{fname}"
+        # ar  = fname.split(".")
+        # mi_name = ar[0..ar.size-2].join(".")
+        # t = Time.now
+        # time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
+        # m_fname = "#{repo_ws_path(repo)}/app/migrate/#{time}_#{mi_name}.rb"
+        #   p "output to #{m_fname}"
+        #  begin
+        #       FileUtils.mkdir_p("#{repo_ws_path(repo)}/app/migrate")
+        #       aFile = File.new(m_fname, "w+")
+        #       aFile.puts script
+        #       aFile.close
+        #   rescue Exception=>e
+        #       p e
+        #   end
+        success("ok", {:data=>script, :migrate=>m_fnames})
         return
     end
     
     def generate_migration(udo)
         sf = ""
+        _sf = ""
         udo["fields"].each{|f|
-            sf << "\t\tt.#{f["type"]} :#{f["name"]} \n"
+            # sf << "\t\tt.#{f["type"]} :#{f["name"]} \n"
+            s = <<ENDD
+            {
+                :name=>"#{f['name']}",
+                :type=>"#{f['type']}"
+            },
+ENDD
+        _sf += s
+          
         }
+        sf = "[
+#{_sf}
+        ]"
+        
+        sf2 = ""
+        udo["fields"].each{|f|
+            sf2 += "\t\t# u.add_field :name=>#{f['name']} :type #{f['type']}\n" 
+        }
+        
+        t = Time.now
+        time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
         class_name = udo["name"]
+        version = udo["version"]
         template = <<TEMPLATE_END
-class #{class_name} < ActiveRecord::Migration
+class #{class_name} < Bomigration
+    @version=#{version}
   def self.up
-    # create_table :#{udo["name"]} do |t|
-    #    # t.string :appid
-    #    #          t.string :name
-    #    #          t.string :desc
-    #    #          t.integer :uid
-    #    #{sf}
-    #    t.timestamps
-    #  end
-    #add_index(:apps, ["appid"], {:unique=>true})
-    #add_index(:apps, ["name"], {:unique=>true})
     create_udo_def({
         :name=>#{udo["name"]},
         :desc=>#{udo["desc"]},
-        :files=>[
-            {
-                :name=>"",
-                :type=>""
-            }
-            ]
-    }){|u|
-        u.add_field(f['name'], f['type'])
-    }
+        :fields=>#{sf},
+    }){|u| # you can also define columns by this way
+#{sf2}}
+    #add_index(:#{udo["name"]}, ["appid"], {:unique=>true})
+    #add_index(:#{udo["name"]}, ["name"], {:unique=>true})
   end
 
   def self.down
-    drop_table :#{udo["name"]}
+    drop_udo :#{udo["name"]}
   end
 end
 
 TEMPLATE_END
         return template
       
+    end
+    
+    def rm
+        appid = params[:appid]
+        path = params[:fname]
+        type = params[:type]
+        content = params[:content]
+        isnew = params[:isnew]
+        
+        p "content:#{content}"
+        fi= fileInfoFromPath(path)
+        fname = fi[:fname]
+        
+        if type == 'code'
+            
+        elsif type == 'bo'
+            
+        end
+        repo = appid
+        begin
+            
+            dir = repo_ws_path(repo)+"/app/#{fi[:relative_dir]}"
+       
+            p "===>remove file #{dir}/#{fname}"
+            
+            file_path = "#{dir}/#{fname}"
+            FileUtils.rm(file_path)
+            
+            relative_path = "app/#{fi[:relative_path]}"
+            begin
+                Git2.commit(repo, @user.name, relative_path)
+            rescue Exception=>e
+                # logger.error e
+                p e.inspect
+                p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+            end
+          rescue Exception=>e
+            # logger.error e
+            p e.inspect
+            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+            error("Fail to remove file "+e.inspect)
+            return
+          end
+     
+          success()       
     end
 end
