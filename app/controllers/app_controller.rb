@@ -957,7 +957,7 @@ ENDD
         
         sf3 = ""
         udo["fields"].each{|f|
-            sf3 += "\t\t u.#{f['type']} :#{f['name']} \n" 
+            sf3 += "\t\t t.#{f['type']} :#{f['name']} \n" 
         }    
         # t = Time.now
         #    time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
