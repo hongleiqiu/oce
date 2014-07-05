@@ -5,3 +5,18 @@ require 'anwschema.rb'
 require 'bomigration.rb'
 
 
+# initialize connection to hana
+config={
+    :adapter=> "odbc",
+    :dsn=> "DSN1",
+    :username=> "system",
+    :password=> "manager",
+    :column_store=> "true",
+    :schema=>tenant
+}
+
+ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
+
+# migrate to this version
+load "20140705163029503873_ffe.rb"
+Ffe.new.up
