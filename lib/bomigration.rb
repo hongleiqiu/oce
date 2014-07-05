@@ -19,11 +19,11 @@ class Bomigration < ActiveRecord::Migration
     # end
     
     
-    def create_udo_def(hash&, block)
+    def create_udo(name, hash={}, &block)
         ActiveRecord::AnwSchema.define(:version => self.version) do
 
-          create_table hash[:name], :force => false do |t|
-              yield
+          create_table name, :force => false do |t|
+              yield(t)
               # hash[:fields].each{|f|
               #                   switch 
               #               }

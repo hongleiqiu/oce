@@ -113,3 +113,9 @@ ruby script/server -p 3002
 
 # create hana odbc adapter
 /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/
+
+
+tips:
+find /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0 -name "*.rb" |xargs grep "drop_table"
+find ~/.gem/ruby/ -name "*.rb" |xargs grep "drop_table"
+sudo vi /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/lib/active_record/vendor/odbcext_hdb.rb

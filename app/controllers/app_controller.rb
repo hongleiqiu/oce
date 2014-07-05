@@ -954,12 +954,17 @@ ENDD
             sf2 += "\t\t# u.add_field :name=>#{f['name']} :type #{f['type']}\n" 
         }
         
+        
+        sf3 = ""
+        udo["fields"].each{|f|
+            sf3 += "\t\t# u.#{f['type']} :#{f['name']} \n" 
+        }    
         # t = Time.now
         #    time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
         class_name = udo["name"].camelize
         version = udo["version"]
         template = <<TEMPLATE_END
-require 'Bomigration.rb'
+require 'bomigration.rb'
 class #{class_name} < Bomigration
   @@version=#{version}
   @@udo_json=<<JSONEND
@@ -968,14 +973,12 @@ JSONEND
   cattr_accessor :udo_json
   
   def self.up
-    create_udo_def({
-        :name=>\"#{udo["name"]}\",
+    create_udo :#{udo["name"]} ({
         :desc=>\"#{udo["desc"]}\",
-        :fields=>#{sf},
-    }){|u| # you can also define columns by this way
-#{sf2}\t}
-    #add_index(:#{udo["name"]}, ["appid"], {:unique=>true})
-    #add_index(:#{udo["name"]}, ["name"], {:unique=>true})
+        :other=>\"xxx\",
+    }){|t| 
+#{sf3}\t}
+    
   end
 
   def self.down
