@@ -1528,13 +1528,15 @@ end
 		function add_file_to_tree(node, parent, tree_node){
 			// alert(typeof(node));
 			// if (typeof(node) != 'string'){
-			if (typeof(node) == 'object'){
+			if (typeof(node) == 'object'){ // node is a folder
 				// type = "folder";
 				// if (node.name == 'bo_root'){
 				// 			type = 'bo_root';
 				// 		}
 				label = node.name;
 				// alert(node.name);
+				
+				// determin target node where to add this node
 				if (label == 'bo_root'){
 					label = "Business Objects";
 					// alert(inspect(root[0].children[0]));
@@ -1558,7 +1560,13 @@ end
 				}else if (label == 'migrate'){
 					type = "code";
 					tnode = root[0].children[4];
-				}
+				}else if (label == 'lib'){
+					type = "code";
+					tnode = root[0].children[5];
+				}else if (label == 'bosource'){
+					type = "code";
+					tnode = root[0].children[5].children[0];
+				}				
 				else{
 					tnode = {
 						label:label,
@@ -1873,6 +1881,22 @@ end
 		      					// 	            {
 		      					// 		 			label: 'TestBO2',
 		      					// type: 'bo', }
+		        ]
+		    },
+			{
+		        label: 'Lib',
+				type: 'lib', // actually the folder nam inf FS
+				id: 112,
+		        children: [
+		      			{ 
+		      				label: 'bosource',
+		      				type: 'bosource',
+							children:[],
+		      			},
+		      			// {
+		      			//       				label: 'source',
+		      			//       				type: 'bosource', 
+		      			// 				}
 		        ]
 		    },
 	];
