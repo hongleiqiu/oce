@@ -1,94 +1,87 @@
-diff --git a/public/index.html b/public/index.html
-index eb0622f..882592c 100644
---- a/public/index.html
-+++ b/public/index.html
-@@ -226,13 +226,13 @@
- 		
- 		<div id="main_toolbar" class="gradient" style="width:100%;height:50px;border:1px solid #d8d8d8;border-bottom:0px;">
- 			<center>
--			<div id="console" class="round_border shadowed-border" style="position:relative;top:20px;height:20px;width:300px;border:0px solid red;background:#f0f0f0;overflow:hidden;">
--				dd
-+			<div id="console" class="round_border shadowed-border" style="overflow:scroll;position:relative;top:20px;height:20px;width:300px;border:1px solid red;background:#f0f0f0;">
-+				<div>Ready</div>
- 			</div>
- 			</center>
- 			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-10px;border:0px solid red;">
- 				<a href="javascript:save();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
--				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/save.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
-+				<a href="javascript:gitlist();" style="display:block;float:right;margin-right:5px;"> <img src="/images/git.png" class="toolbar_btn" style="width:35px;height:35px;"></a>
- 
- 			</div>
- 		</div>
-@@ -493,7 +493,7 @@
- 					}else{
- 						// popup(data.data_root);
- 						init_tree(data.data_root);
--						
-+						appendToConsole("project ready");
- 					}
- 
- 				},
-@@ -714,10 +714,48 @@
- 
- 
- 		function open_file(node){
--			// TODO 
-+			type = g_selected_node.type;
-+			fname = g_selected_node.name;
-+			$.ajax({
-+				type: "post",
-+				url: "/app/of?t="+ new Date().getTime(),
-+				dataType: 'json',
-+
-+				data: {
-+					appid:g_appid,
-+					fname:fname,
-+					type:type,
-+			
-+					// sid: '<%=@sid%>',
-+					// authenticity_token:window._token
-+				}, 
-+				success: function(data, textStatus){
-+					// alert( "Data Saved: " + data +","+ textStatus);
-+
-+					showWaiting(false);
-+					if (data.error){
-+						popup(data.error);
-+					}else{
-+						// alert(data.data);
-+						editor.setValue(data.data);
-+						// $("#applist").html(data);
-+						appendToConsole('load successfully');
-+
-+					}
-+
-+				},
-+				error: function(xhr, textStatus, errorThrow){
-+					// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
-+					popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
-+
-+					showWaiting(false);
-+
-+				}
-+			}); // $ajax 
- 		}
- 		function open_bo(node){
- 			// TODO
-+			open_file(node);
- 		}
- 		function add_node(){
- 			
-@@ -861,6 +899,13 @@
- 		return false;
- 
- 	});
-+	
-+	function appendToConsole(msg){
-+		return;
-+		h = $("#console").html();
-+		$("#console").html(h+"<div>"+msg+"</div><br/>");
-+		$("#console").attr("scrollTop", $("#console").attr('scrollHeight'));
-+	}
- 
- 	</script>
- 
+total 672
+drwxr-xr-x  86 i027910  GLOBAL\Domain Users  2924 Jul  4 15:40 .
+drwxr-xr-x   7 i027910  GLOBAL\Domain Users   238 Jul  3 01:01 ..
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   477 Jul  3 21:02 20140703210248469604_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   617 Jul  3 21:32 20140703213205406859_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   477 Jul  3 21:32 20140703213205412388_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   478 Jul  3 21:33 2014070321331814674_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   618 Jul  3 21:33 201407032133188723_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:30 20140703223055741959_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:30 20140703223055749025_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:31 20140703223152564541_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:31 20140703223152574232_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:38 20140703223843377984_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:38 20140703223843384308_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:38 20140703223855133723_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:38 20140703223855140658_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:39 20140703223920581878_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:39 20140703223920586580_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:39 20140703223929125822_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:39 20140703223929133126_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:41 20140703224136185343_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:41 20140703224136192771_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:42 20140703224250187709_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:42 20140703224250192923_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:44 20140703224444789280_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:44 20140703224444796539_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:45 20140703224549431805_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:45 20140703224549436026_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:47 20140703224755828457_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:47 20140703224755832670_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   616 Jul  3 22:51 20140703225151332674_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   476 Jul  3 22:51 20140703225151338532_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   617 Jul  3 22:52 20140703225258333496_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   477 Jul  3 22:52 20140703225258342807_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   617 Jul  3 22:53 20140703225358366072_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   477 Jul  3 22:53 20140703225358373293_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   617 Jul  3 22:55 2014070322550549075_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   477 Jul  3 22:55 2014070322550558349_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   617 Jul  3 22:56 20140703225630498485_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   477 Jul  3 22:56 20140703225630505562_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   617 Jul  3 22:56 20140703225659857221_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   477 Jul  3 22:56 20140703225659887349_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  3 22:58 20140703225850263501_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  3 22:58 20140703225850269319_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:08 2014070415081678165_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:08 2014070415081685411_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:08 20140704150854544774_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:08 20140704150854550664_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:20 20140704152009281517_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:20 20140704152009288198_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:21 20140704152127694752_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:21 20140704152127703951_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:21 20140704152137482054_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:21 20140704152137489707_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   643 Jul  4 15:22 20140704152235682423_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   503 Jul  4 15:22 20140704152235689202_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:24 20140704152453516051_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:24 20140704152453585711_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:25 20140704152518523676_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:25 20140704152518560613_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:26 20140704152633783811_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:26 20140704152633822359_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   642 Jul  4 15:27 20140704152705970625_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   502 Jul  4 15:27 2014070415270610838_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:28 20140704152829423989_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:28 20140704152829488254_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:28 20140704152857720896_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:28 20140704152857783024_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:32 20140704153218920807_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:32 20140704153218992087_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:33 20140704153302217769_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:33 20140704153302250134_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:33 20140704153342323676_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:33 20140704153342332384_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:34 20140704153456566333_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:34 20140704153456597600_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:35 20140704153542469604_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:35 20140704153542478594_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:37 20140704153700769291_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:37 20140704153700780169_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:37 20140704153758618318_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:37 20140704153758627181_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:39 2014070415391542425_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:39 201407041539159984_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   646 Jul  4 15:40 20140704154050134725_ff.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   506 Jul  4 15:40 20140704154050149916_ffe.rb
+-rw-r--r--   1 i027910  GLOBAL\Domain Users   477 Jul  3 21:01 69_ffe3.rb

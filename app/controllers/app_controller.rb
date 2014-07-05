@@ -294,7 +294,7 @@ end
                 begin
                     eval "load '#{m[:filename]}'"
                     eval "#{m[:cls]}.new().up"
-                rescue
+                rescue Exception=>e
                     p e.inspect
                     p e.backtrace[1..e.backtrace.size-1].join("\n\r")
                 end
@@ -883,10 +883,27 @@ end
         begin
            migrations = all_migrations(appid, udo['name'])
             p "migrations size #{migrations.size}"
+        migrations.reverse!
             migrations.each{|m|
+                p "migrate '#{m[:filename]}'"
+            }
+            migrations.each{|m|
+            begin
+                p "load '#{m[:filename]}'"
+                
                 eval "load '#{m[:filename]}'"
-                obj = eval "#{m[:cls]}.new()"
-                p "udo mig version:"+obj.version
+                p "#{m[:name]}.new()"
+                obj = eval "#{m[:name]}.new()"
+                
+            rescue Exception=>e
+                p e.inspect
+                p e.backtrace[1..e.backtrace.size-1].join("\n\r")                    
+            end
+            p "udo mig version:#{obj.version}" if obj
+            p "udo version #{udo['version'].to_i}"
+            if obj && obj.version < udo['version'].to_i
+                return obj
+            end
             }
               
             
@@ -894,9 +911,9 @@ end
             p e.inspect
             p e.backtrace[1..e.backtrace.size-1].join("\n\r")
             # error("Deploy failed:<pre>"+ e.message+"</pre>")
-            return
+            return nil
         end
-        return
+        return nil
     end
     def generate_migration(appid, udo)
         # find previous version of udo
@@ -904,25 +921,10 @@ end
         script = ""
         if old_udo  # if found
             # find difference
-            diffs = []
-            compared = []
-            udo["fields"].each{|f|
-                name = f["name"]
-                compared.push(name)
-                if old_udo.fields.detect{|f| f['name'] == name }
-                    
-                else
-                    diffs.push({
-                        :type=>"add",
-                        :name=>name
-                    })
-                end
-            }
-            
-            diffs.each{|d|
-                field = udo["fields"].detect{|f|f['name'] == d[:name]}
-                script << "add_column \"#{udo['name']}\", \"#{d[:name]}\", :#{field}"
-            }
+            p "find old udo version #{old_udo.version}"
+            old_udo_json = JSON.parse(old_udo.udo_json)
+            # p old_udo_json.inspect
+            script += generate_migration_diff(udo, old_udo_json)
         else
         # if not found, generate from nothing
             script += generate_migration_source(udo)
@@ -952,18 +954,23 @@ ENDD
             sf2 += "\t\t# u.add_field :name=>#{f['name']} :type #{f['type']}\n" 
         }
         
-        t = Time.now
-        time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
-        class_name = udo["name"]
+        # t = Time.now
+        #    time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
+        class_name = udo["name"].camelize
         version = udo["version"]
         template = <<TEMPLATE_END
-require 'Bomigration.rb"
+require 'Bomigration.rb'
 class #{class_name} < Bomigration
-  @version=#{version}
+  @@version=#{version}
+  @@udo_json=<<JSONEND
+  #{udo.to_json}
+JSONEND
+  cattr_accessor :udo_json
+  
   def self.up
     create_udo_def({
-        :name=>#{udo["name"]},
-        :desc=>#{udo["desc"]},
+        :name=>\"#{udo["name"]}\",
+        :desc=>\"#{udo["desc"]}\",
         :fields=>#{sf},
     }){|u| # you can also define columns by this way
 #{sf2}\t}
@@ -1024,5 +1031,58 @@ TEMPLATE_END
           end
      
           success()       
+    end
+    
+    def generate_migration_diff(udo, old_udo)
+        diffs = []
+        compared = []
+       
+        udo["fields"].each{|f|
+            name = f["name"]
+            p name
+            compared.push(name)
+            p old_udo["fields"].inspect
+            if old_udo['fields'].detect{|ff| 
+                p "ff=#{ff.inspect}"
+                ff['name'] == name }
+                
+            else
+                diffs.push({
+                    :type=>"add",
+                    :name=>name
+                })
+            end
+        }
+        script = ""
+        script_down = ""
+        
+        diffs.each{|d|
+            field = udo["fields"].detect{|f|f['name'] == d[:name]}
+            script << "add_column \"#{udo['name']}\", \"#{d[:name]}\", :#{field['type']}"
+            script_down << "delete_column \"#{udo['name']}\", \"#{d[:name]}\""
+        }
+        class_name = udo['name'].camelize
+         version = udo["version"]
+        template = <<TEMPLATE_END
+require 'Bomigration.rb'
+class #{class_name} < Bomigration
+  @@version=#{version}
+  @@udo_json=<<JSONEND
+  #{udo.to_json}
+JSONEND
+  cattr_accessor :udo_json
+
+  def self.up
+    #{script}
+  end
+
+  def self.down
+    #{script_down}
+  end
+end
+
+TEMPLATE_END
+        return template
+
     end
 end
