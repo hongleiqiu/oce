@@ -12,11 +12,14 @@ config={
     :username=> "system",
     :password=> "manager",
     :column_store=> "true",
-    :schema=>tenant
+    :schema=>"abcddd"
 }
 
 ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
 
+#ActiveRecord::Base.connection.execute("create schema #{config[:schema]}") 
+
 # migrate to this version
 load "20140705163029503873_ffe.rb"
+#Ffe.new.down
 Ffe.new.up
