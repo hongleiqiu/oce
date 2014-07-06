@@ -273,16 +273,18 @@ end
         ext_root_dir = "#{app_root_dir}/app/#{$FS_EXT_ROOT}"
         
         # deploy script
-        dest = "#{$FS_RT_EXT_ROOT}/#{appid}"
-        begin
-            FileUtils.mkdir_p(dest)
-            p "copy #{ext_root_dir} to #{dest}"
-            FileUtils.copy_entry(ext_root_dir, "#{dest}/")
-        rescue Exception => e
-            p e.inspect
-            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
-            error("Deploy failed:<pre>"+ e.message+"</pre>")
-            return
+        if FileTest::exists?(ext_root_dir) 
+            dest = "#{$FS_RT_EXT_ROOT}/#{appid}"
+            begin
+                FileUtils.mkdir_p(dest)
+                p "copy #{ext_root_dir} to #{dest}"
+                FileUtils.copy_entry(ext_root_dir, "#{dest}/")
+            rescue Exception => e
+                p e.inspect
+                p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+                error("Deploy failed:<pre>"+ e.message+"</pre>")
+                return
+            end
         end
         p "deploy script ok"
         
@@ -300,8 +302,24 @@ end
             #     end
             # }
         
+load "migration.rb"
+load "schema_statements.rb"
+load "anwschema.rb"
+load "bomigration.rb"
+
+            config={
+                :adapter=> "odbc",
+                :dsn=> "DSN1",
+                :username=> "system",
+                :password=> "manager",
+                :column_store=> "true",
+                :schema=>"abcddde"
+            }
+
+            ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
+       
             # ActiveRecord::Migrator.run(:down, "db/migrate/", version)   
-            ActiveRecord::Migrator.migrate("db/migrate/", nil)
+            ActiveRecord::Migrator.migrate(appid, "#{repo_ws_path(appid)}/app/migrate", nil)
             
             p "deploy udo success"
             
