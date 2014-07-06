@@ -119,3 +119,4 @@ tips:
 find /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0 -name "*.rb" |xargs grep "drop_table"
 find ~/.gem/ruby/ -name "*.rb" |xargs grep "drop_table"
 sudo vi /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/lib/active_record/vendor/odbcext_hdb.rb
+vi /home/jackie/.gem/ruby/1.8/gems/activerecord-2.3.5/lib/active_record/schema.rb

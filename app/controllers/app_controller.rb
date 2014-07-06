@@ -288,18 +288,20 @@ end
         
         p "deploy udo"
         begin
-            migrations = all_migrations(appid)
+            # migrations = all_migrations(appid)
+            #         
+            # migrations.each{|m|
+            #     begin
+            #         eval "load '#{m[:filename]}'"
+            #         eval "#{m[:cls]}.new().up"
+            #     rescue Exception=>e
+            #         p e.inspect
+            #         p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+            #     end
+            # }
         
-            migrations.each{|m|
-                begin
-                    eval "load '#{m[:filename]}'"
-                    eval "#{m[:cls]}.new().up"
-                rescue Exception=>e
-                    p e.inspect
-                    p e.backtrace[1..e.backtrace.size-1].join("\n\r")
-                end
-            }
-                  
+            # ActiveRecord::Migrator.run(:down, "db/migrate/", version)   
+            ActiveRecord::Migrator.migrate("db/migrate/", nil)
             
             p "deploy udo success"
             

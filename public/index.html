@@ -1121,8 +1121,8 @@ end
 				alert("#"+b.ui);
 				pos = $("#"+b.ui).offset();
 				alert(pos);
-				b.x = pos.left;
-				b.y = pos.top;
+				b.x = pos.left-$("#main").offset().left;
+				b.y = pos.top-$("#main").offset().top;
 			}
 		}
 		return JSON.stringify(g_bos);
@@ -2919,12 +2919,18 @@ end
 	}
 */	
 	function show_boprops(t){
-		
-			$("#props input#boprop_v_name").val(g_bo.name);
+			// alert(g_bo);
+			bo = g_bo.prop('ref');
+			$("#props input#boprop_v_name").val(bo.name);
 			$("#props input#boprop_v_type").val("BO");
+			$("#boprop_v_desc").val(bo.desc);
+			// $("#props input#boprop_v_desc").val(bo.desc);
+			// alert(bo.desc);
+			
+			
 			$("#prop_pad").css("display", "block");
-			$("#boprop_v_name").html(g_bo.name);
-			$("#boprop_v_type").html(g_bo.type);
+			// $("#boprop_v_name").html(bo.name);
+			// $("#boprop_v_type").html(bo.type);
 			
 			$("#field_prop_pad").css("display", "none");
 			// alert(0);
@@ -3003,7 +3009,8 @@ end
 			name:"unamed",
 			type:"string",
 			length:1,
-			default_value:"null"
+			default_value:"null",
+			desc:""
 		};
 		g_bo.prop("ref").fields.push(data);
 		newn.prop("ref", data);
@@ -3240,7 +3247,8 @@ end
 		bo = g_bo.prop('ref');
 		bo.name = $("#boprop_v_name").val();
 		bo.type = $("#boprop_v_type").val();
-		bo.desc = $("#boprop_v_desc").html();
+		bo.desc = $("#boprop_v_desc").val();
+		// alert(bo.desc);
 	
 		g_bo.find(".draggable_obj_name").html(bo.name);
 	}
