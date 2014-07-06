@@ -989,7 +989,16 @@ ENDD
         
         sf3 = ""
         udo["fields"].each{|f|
-            sf3 += "\t\t t.#{f['type']} :#{f['name']} :default=>#{f['default_value']}\n" 
+            sf3 += "\t\t t.#{f['type']} :#{f['name']}" 
+            if f['default_value']
+             if ["string"].include?(f['type'].downcase)
+                    dfv = "\"#{f['default_value']}\""
+             else
+                    dfv = "#{f['default_value']}"
+             end
+                sf3 += " :default=>#{dfv}"
+            end
+            sfe +="\n"
         }    
         # t = Time.now
         #    time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
@@ -1005,11 +1014,8 @@ JSONEND
   cattr_accessor :udo_json
   
   def self.up
-    create_udo :#{udo["name"]} ({
-        :desc=>\"#{udo["desc"]}\",
-        :other=>\"xxx\",
-    }){|t| 
-#{sf3}\t}
+    create_udo :#{udo["name"]}, :desc=>\"#{udo["desc"]}\",:other=>\"xxx\" do |t| 
+#{sf3}\tend
     
   end
 

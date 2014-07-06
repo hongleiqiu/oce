@@ -43,7 +43,7 @@ class Bomigration < ActiveRecord::Migration
         um = UdoMeta.new({
             :id=>id,
             :name=>name,
-            :namespace=>#{Migrator.appid},
+            :namespace=>Migrator.appid,
             :label=>name, # TODO
             :impltable=>impltable
         })
@@ -70,7 +70,7 @@ class Bomigration < ActiveRecord::Migration
             hash = args[1]
             up = UserProperty.new({
                 :id=>null,
-                :namespace=>#{Migrator.appid}
+                :namespace=>Migrator.appid,
                 :name=>fname,
                 :type=>name
             }).save
