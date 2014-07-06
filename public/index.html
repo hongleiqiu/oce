@@ -670,7 +670,7 @@
 			<img src="/images/wait3.gif" style="width:50px;margin-top:230px;"/>
 		</center>
 	</div>
-	<div id="popup" class="round_border_m" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:500px;top:180px;z-index:800;width:200px;height:128px;font-size:13pt;min-height:57px;max-height:300px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
+	<div id="popup" class="round_border_b" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:500px;top:180px;z-index:800;width:300px;height:168px;font-size:13pt;min-height:57px;max-height:300px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
 	</div>
 	<div id="balloon" style="display:none;left:200px;top:200px;width:300px;height:300px;position:absolute;z-index:200;">
 		<img style="float:right;width:20px;" src="/images/close.png" onclick="show_balloon(false);" />
@@ -3087,7 +3087,7 @@ end
 		}
 		return ret;
 	}
-	g_type_options = ["string", "integer", "timestamp"];
+	g_type_options = ["String", "Integer", "Date", "Boolean", "Time", "Long", "Double", "Decimal"];
 	function render_bo_field_props(f){
 	
 		ret =  "<div class='prop_line' style='height:30px;' >                                                                        \
@@ -3216,12 +3216,12 @@ end
 		currentTarget = $(event.currentTarget);
 		i = g_selected_bo_field.attr("i");
 		f  = g_bo.prop("ref").fields[i];
-		alert(currentTarget);
+		// alert(currentTarget);
 		if (currentTarget.is(':radio,:checkbox'))
 			v = currentTarget.prop('checked');
 		else
 			v = currentTarget.val();
-			alert(v);
+			// alert(v);
 		prop_name = currentTarget.parent().attr("n");
 		if (prop_name == "name")
 			g_selected_bo_field.find(".field_name").html(v);

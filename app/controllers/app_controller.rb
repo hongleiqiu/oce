@@ -273,16 +273,18 @@ end
         ext_root_dir = "#{app_root_dir}/app/#{$FS_EXT_ROOT}"
         
         # deploy script
-        dest = "#{$FS_RT_EXT_ROOT}/#{appid}"
-        begin
-            FileUtils.mkdir_p(dest)
-            p "copy #{ext_root_dir} to #{dest}"
-            FileUtils.copy_entry(ext_root_dir, "#{dest}/")
-        rescue Exception => e
-            p e.inspect
-            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
-            error("Deploy failed:<pre>"+ e.message+"</pre>")
-            return
+        if FileTest::exists?(ext_root_dir) 
+            dest = "#{$FS_RT_EXT_ROOT}/#{appid}"
+            begin
+                FileUtils.mkdir_p(dest)
+                p "copy #{ext_root_dir} to #{dest}"
+                FileUtils.copy_entry(ext_root_dir, "#{dest}/")
+            rescue Exception => e
+                p e.inspect
+                p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+                error("Deploy failed:<pre>"+ e.message+"</pre>")
+                return
+            end
         end
         p "deploy script ok"
         
@@ -299,8 +301,20 @@ end
             #         p e.backtrace[1..e.backtrace.size-1].join("\n\r")
             #     end
             # }
+            
+            config={
+                :adapter=> "odbc",
+                :dsn=> "DSN1",
+                :username=> "system",
+                :password=> "manager",
+                :column_store=> "true",
+                :schema=>"abcddde"
+            }
+
+            ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
         
             # ActiveRecord::Migrator.run(:down, "db/migrate/", version)   
+            
             ActiveRecord::Migrator.migrate("db/migrate/", nil)
             
             p "deploy udo success"
@@ -959,7 +973,7 @@ ENDD
         
         sf3 = ""
         udo["fields"].each{|f|
-            sf3 += "\t\t t.#{f['type']} :#{f['name']} \n" 
+            sf3 += "\t\t t.#{f['type']} :#{f['name']} :default=>#{f['default_value']}\n" 
         }    
         # t = Time.now
         #    time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s

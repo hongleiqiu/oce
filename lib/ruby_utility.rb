@@ -46,3 +46,28 @@ def http_post(url, p, https=false, port=nil)
 	 puts "===>http code #{resp}"
 	 return data
 end
+=begin pastable code
+begin
+    raise Exception.new
+rescue Exception=>e
+    stack = 100
+    if e.backtrace.size >=2 
+        stack  += 1
+        stack = e.backtrace.size-1 if stack >= e.backtrace.size
+        p e.backtrace[1..stack].join("\n") 
+    end
+end
+=end
+def show_stack(stack = nil)
+	stack = 99999 if stack == nil || stack <= 0
+	begin
+	    raise Exception.new
+	rescue Exception=>e
+	    if e.backtrace.size >=2 
+	        stack  += 1
+	        stack = e.backtrace.size-1 if stack >= e.backtrace.size
+	        return e.backtrace[1..stack].join("\n") 
+	    end
+	end
+	return ""
+end

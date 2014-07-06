@@ -114,9 +114,22 @@ ruby script/server -p 3002
 # create hana odbc adapter
 /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/
 
+# haha sql
+# describe table
+SELECT COLUMN_NAME,DATA_TYPE_NAME,LENGTH FROM TABLE_COLUMNS WHERE TABLE_NAME ='NSUDOMETA' and schema_NAME='I027910_MASTER' order by position
+in odbc, you have to use 
+'schema_name'.'table_name'
+but in hdbsql, you have to use
+"schema_name"."table_name"
 
 tips:
 find /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0 -name "*.rb" |xargs grep "drop_table"
 find ~/.gem/ruby/ -name "*.rb" |xargs grep "drop_table"
+find ~/.gem/ruby/ -name "*.rb" |xargs grep initialize_schema_migrations_table
 sudo vi /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/lib/active_record/vendor/odbcext_hdb.rb
 vi /home/jackie/.gem/ruby/1.8/gems/activerecord-2.3.5/lib/active_record/schema.rb
+vi /home/jackie/.gem/ruby/1.8/gems/activerecord-2.3.5/lib/active_record/connection_adapters/abstract/schema_statements.rb
+
+
+1.select seq
+2. insert udometadata

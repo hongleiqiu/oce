@@ -18,8 +18,67 @@ class Bomigration < ActiveRecord::Migration
     #     
     # end
     
+    def self.create_udo(name, hash={}, &block)
+        schema = Base.connection.schema
+        # get next id for NSUDOMETA
+        ret = Base.connection.execute("  
+        select '#{schema}'.'NSUDOMETA_SEQ.nextval' from dummy
+        ")
+        p ret[0]
+        id = ret[0]
+        p "id=#{id}"
+        
+        # get impltable
+        sql = "select max(id) from '#{schema}'.'NSUDOTABLEALLOCINFO'"
+        res = Base.connection.execute(sql)
+        impltable = res[0][0]+1
+        p "impltable=#{impltable}"
+        
+        # insert record into table NSUDOMETA
+#         sql=<<ENDD  
+#         insert into '#{schema}'.'NSUDOMETA' ("ID", "NAME", "NAMESPACE", "LABEL", "PLURALLABEL", "BOSETNAME", "IMPLTABLE", "DISPLAYONMENU", "VERSION", "OWNERCODE", "CREATEDATE", "USERSIGN", "UPDATEDATE", "USERSIGN2", "INSTANCE") values (#{id}, "#{name}", "#{Migrator.appid}", "#{hash['label']}", "#{hash['PLURALLABEL']}", "#{hash['BOSETNAME']"}, "#{impltable}", #{hash['DISPLAYONMENU']}, 0, "#{hash['OWNERCODE']}", "", "", "", "", "", "", "")
+# ENDD
+#         p "sql=#{sql}"
+#         res = Base.connection.execute(sql)
+        um = UdoMeta.new({
+            :id=>id,
+            :name=>name,
+            :namespace=>#{Migrator.appid},
+            :label=>name, # TODO
+            :impltable=>impltable
+        })
+        um.save!
+        
+        # get columns used by udo
+        sql = "select tablename, strcolumns, txtcolumns from '#{schema}'.'NSUDOTABLEALLOCINFO' where tablename='#{name}'"
+        p "sql=#{sql}"
+        res = Base.connection.execute(sql)
+        used_str_column = res[0][0]
+        used_txt_colun = res[0][1]
+   
+        # sql = "select ID,NAMESPACE,NAME,TYPE,SIZE,DESCRIPTION,DEFAULTVALUE,LABEL,TOOLTIP,COLUMNNAME,MANDATORY,ENABLED,READONLY,ISUNIQUE,VALIDATIONRULE,BONAMESPACE,\
+        # BONAME,BONODETYPENAME,OBSFIELDID,OBSTABLENAME,PACKAGENAME,ACTIVATE,LINKEDBONAME,LINKEDBONAMESPACE,CUSTOMERRORMESSAGE,FREETEXTALLOWED,SEARCHRE\
+        # SULTIDENTIFIER,VERSION,OWNERCODE,CREATEDATE,USERSIGN,UPDATEDATE,USERSIGN2,INSTANCE"
+   
+        u = UdoDef.new
+        yield(u)
+    end
     
-    def create_udo(name, hash={}, &block)
+    class UdoDef
+        def method_missing(name, *args, &block) # :nodoc:
+            fname = args[0]
+            hash = args[1]
+            up = UserProperty.new({
+                :id=>null,
+                :namespace=>#{Migrator.appid}
+                :name=>fname,
+                :type=>name
+            }).save
+        end
+    end
+
+=begin    
+    def self.create_udo(name, hash={}, &block)
         ActiveRecord::AnwSchema.define(:version => self.version) do
 
           create_table name, :force => false do |t|
@@ -41,6 +100,7 @@ class Bomigration < ActiveRecord::Migration
 
         end
     end
+=end
     def add_column(do_name, column_name, column_type)
     end
     
