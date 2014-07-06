@@ -313,9 +313,25 @@ end
 
             ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
         
+load "migration.rb"
+load "schema_statements.rb"
+load "anwschema.rb"
+load "bomigration.rb"
+
+            config={
+                :adapter=> "odbc",
+                :dsn=> "DSN1",
+                :username=> "system",
+                :password=> "manager",
+                :column_store=> "true",
+                :schema=>"abcddde"
+            }
+
+            ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
+       
             # ActiveRecord::Migrator.run(:down, "db/migrate/", version)   
-            
-            ActiveRecord::Migrator.migrate("db/migrate/", nil)
+
+            ActiveRecord::Migrator.migrate(appid, "#{repo_ws_path(appid)}/app/migrate", nil)
             
             p "deploy udo success"
             

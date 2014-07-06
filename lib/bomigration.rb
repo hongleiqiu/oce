@@ -2,7 +2,7 @@ require 'anwschema.rb'
 class Bomigration < ActiveRecord::Migration
     @@version =-1
     # attr_accessor :version
-    def version
+    def self.version
         if @@version == nil
             return -1
         end
@@ -78,6 +78,7 @@ class Bomigration < ActiveRecord::Migration
     end
 
 =begin    
+
     def self.create_udo(name, hash={}, &block)
         ActiveRecord::AnwSchema.define(:version => self.version) do
 
@@ -112,6 +113,7 @@ class Bomigration < ActiveRecord::Migration
     # ============
     # = override =
     # ============
+=begin
     def initialize(appid, direction, migrations_path, target_version = nil )
       #raise StandardError.new("This database does not yet support migrations") unless Base.connection.supports_migrations?
       #Base.connection.initialize_schema_migrations_table
@@ -120,7 +122,7 @@ class Bomigration < ActiveRecord::Migration
       @appid = appid
       # @udo_name = udo_name  
     end
-    
+=end
     def get_all_versions
       Base.connection.select_values("SELECT \"version\" FROM #{schema_migrations_table_name}").map(&:to_i).sort
     end
@@ -160,13 +162,13 @@ class Bomigration < ActiveRecord::Migration
                      end
                      klasses.push({
                          :name=>name.camelize,
-                         :cls =>name,
+                         #:cls =>name,
                          :version=>version,
                          :filename=>file
                      })
 
                  end
-                 _migrations = _migrations.sort_by{|h| h[:version]}
+                 _migrations = _migrations.sort_by{|h| h[:version]}.reverse
 
              
              end # if FileTest::exists?(dir) 
@@ -180,4 +182,16 @@ class Bomigration < ActiveRecord::Migration
          end
          return _migrations
     end
+      def record_version_state_after_migrating(version)
+        sm_table = self.class.schema_migrations_table_name
+
+        @migrated_versions ||= []
+        if down?
+          @migrated_versions.delete(version.to_i)
+          Base.connection.update("DELETE FROM #{Base.connection.schema}.#{sm_table} WHERE version = '#{version}'")
+        else
+          @migrated_versions.push(version.to_i).sort!
+          Base.connection.insert("INSERT INTO #{Base.connection.schema}.#{sm_table} (version) VALUES ('#{version}')")
+        end
+      end
 end   
