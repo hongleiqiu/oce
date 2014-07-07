@@ -416,11 +416,12 @@ module ActiveRecord
       end
 
       def schema_migrations_table_name
-        Base.table_name_prefix + 'schema_migrations' + Base.table_name_suffix
+        r =  Base.table_name_prefix + 'schema_migrations' + Base.table_name_suffix
+        return r.upcase
       end
 
       def get_all_versions
-        Base.connection.select_values("SELECT \"version\" FROM \"#{Base.connection.schema}\".\"#{schema_migrations_table_name}\" where \"appid\"='#{@@appid}'").map(&:to_i).sort
+        Base.connection.select_values("SELECT \"VERSION\" FROM \"#{Base.connection.schema}\".\"#{schema_migrations_table_name}\" where \"APPID\"='#{@@appid}'").map(&:to_i).sort
       end
 
       def current_version
@@ -563,7 +564,7 @@ p "migration path #{@migrations_path}"
           Base.connection.update("DELETE FROM \"#{Base.connection.schema}\".\"#{sm_table}\" WHERE version = '#{version}'")
         else
           @migrated_versions.push(version.to_i).sort!
-          Base.connection.insert("INSERT INTO '#{Base.connection.schema}'.'#{sm_table}' VALUES ('#{Migrator.appid}', '#{version}')")
+          Base.connection.insert("INSERT INTO \"#{Base.connection.schema}\".\"#{sm_table}\" VALUES ('#{Migrator.appid}', '#{version}')")
         end
       end
 

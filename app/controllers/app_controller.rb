@@ -302,16 +302,6 @@ end
             #     end
             # }
             
-            config={
-                :adapter=> "odbc",
-                :dsn=> "DSN1",
-                :username=> "system",
-                :password=> "manager",
-                :column_store=> "true",
-                :schema=>"abcddde"
-            }
-
-            ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
         
 load "migration.rb"
 load "schema_statements.rb"
@@ -324,11 +314,14 @@ load "bomigration.rb"
                 :username=> "system",
                 :password=> "manager",
                 :column_store=> "true",
-                :schema=>"abcddde"
+            #    :schema=>"abcddde"
+                :schema=>"I027910_MASTER"
             }
 
             ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
        
+#ActiveRecord::Base.connection.execute("INSERT INTO \"I027910_MASTER\".\"schema_migrations\" VALUES ('dd', '2014070620141747944')")
+#p "done !!"
             # ActiveRecord::Migrator.run(:down, "db/migrate/", version)   
 
             ActiveRecord::Migrator.migrate(appid, "#{repo_ws_path(appid)}/app/migrate", nil)
@@ -996,9 +989,9 @@ ENDD
              else
                     dfv = "#{f['default_value']}"
              end
-                sf3 += " :default=>#{dfv}"
+                sf3 += ", :default=>#{dfv}"
             end
-            sfe +="\n"
+            sf3 +="\n"
         }    
         # t = Time.now
         #    time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s
