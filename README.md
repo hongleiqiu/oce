@@ -107,7 +107,11 @@ oce
 ruby script/server -p 3000 -e production
 review
 ruby script/server -p 3002
-
+<!-- ======== -->
+<!-- = HANA = -->
+<!-- ======== -->
+#NOTICE
+hana table column is case-sensitive (all b1 TABLE column name upcase )
 # hana command line tool
 /home/jackie/sap/hdbclient/hdbsql -n 10.58.114.210:30015 -u system -p manager
 
@@ -141,6 +145,8 @@ find ~/.gem/ruby/ -name "*.rb" |xargs grep initialize_schema_migrations_table
 sudo vi /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/lib/active_record/vendor/odbcext_hdb.rb
 vi /home/jackie/.gem/ruby/1.8/gems/activerecord-2.3.5/lib/active_record/schema.rb
 vi /home/jackie/.gem/ruby/1.8/gems/activerecord-2.3.5/lib/active_record/connection_adapters/abstract/schema_statements.rb
+on mac
+vi /usr/local/lib/ruby/gems/1.8/gems/activerecord-2.3.5/lib/active_record/base.rb
 
 
 1.select seq
