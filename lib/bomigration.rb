@@ -105,7 +105,13 @@ class Bomigration < ActiveRecord::Migration
                 "zipcode"
 ]
         end
+        
+
+        
+
+        
         def method_missing(name, *args, &block) # :nodoc:
+            
             p "name=>#{name}, args:#{args.inspect}"
 p types.inspect
             if !types.include?(name.to_s)
@@ -113,8 +119,11 @@ p types.inspect
             end
             fname = args[0]
             hash = args[1]
+            
+
+              
             up = UserProperty.new({
-                :ID=>nil,
+                :ID=>UserProperty.max_id,
                 :NAMESPACE=>ActiveRecord::Migrator.appid,
                 :NAME=>fname,
                 :TYPE=>name
