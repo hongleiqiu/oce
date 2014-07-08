@@ -281,7 +281,7 @@ end
                 FileUtils.copy_entry(ext_root_dir, "#{dest}/")
             rescue Exception => e
                 p e.inspect
-                p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+                p e.backtrace[0..e.backtrace.size-1].join("\n\r")
                 error("Deploy failed:<pre>"+ e.message+"</pre>")
                 return
             end
@@ -330,7 +330,7 @@ load "bomigration.rb"
             
         rescue Exception => e
             p e.inspect
-            p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+            p e.backtrace[0..e.backtrace.size-1].join("\n\r")
             error("Deploy failed:<pre>"+ e.message+"</pre>")
             return
         end
