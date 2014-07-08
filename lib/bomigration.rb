@@ -47,12 +47,12 @@ class Bomigration < ActiveRecord::Migration
 #         p "sql=#{sql}"
 #         res = Base.connection.execute(sql)
         um = UdoMeta.new({
-            :id=>id,
-            :name=>name,
-            :namespace=>ActiveRecord::Migrator.appid,
-            :label=>name, # TODO
-            :impltable=>impltable,
-            :bosetname=>name
+            :ID=>id,
+            :NAME=>name,
+            :NAMESPACE=>ActiveRecord::Migrator.appid,
+            :LABEL=>name, # TODO
+            :IMPLTABLE=>impltable,
+            :BOSETNAME=>name
         })
         um.id = id
         um.save!
@@ -77,33 +77,7 @@ class Bomigration < ActiveRecord::Migration
     
     class UdoDef
         def types
-            [
-                "boolean",
-                "date",
-                "time",
-                "datetime",
-                "integer",
-                "long",
-                "double",
-                "decimal",
-                "rate",
-                "price",
-                "sum",
-                "quantity",
-                "percent",
-                "measure",
-                "tax",
-                "string",
-                "text",
-                "link",
-                "address",
-                "phone",
-                "binary",
-                "memo",
-                "email",
-                "fax",
-                "zipcode"
-            ]
+
 [                "boolean",
                 "date",
                 "time",
