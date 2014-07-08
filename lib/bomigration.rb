@@ -19,23 +19,24 @@ class Bomigration < ActiveRecord::Migration
     # end
     
     def self.create_udo(name, hash={}, &block)
-        schema = Base.connection.schema
+        schema = ActiveRecord::Base.connection.schema
         # get next id for NSUDOMETA
         # in hdbsql
         # select "I027910_MASTER"."schema_migrations_seq".currval from dummy
-        ret = Base.connection.execute("  
-        select '#{schema}'.'NSUDOMETA_SEQ.nextval' from dummy
-        ")
-        p ret
+
+        #ret = ActiveRecord::Base.connection.run("select #{schema}.NSUDOMETA_SEQ.nextval from dummy")
+        ret = ActiveRecord::Base.connection.select_one("select #{schema}.NSUDOMETA_SEQ.nextval from dummy", "")
+#p ret.fetch_all[0].to_i
+        p ret.class
         p ret.size
-        p ret[0]
-        p ret[1]
-        id = ret[0]
+    p ret.inspect
+        id = ret.values[0]
         p "id=#{id}"
         
         # get impltable
-        sql = "select max(id) from '#{schema}'.'NSUDOTABLEALLOCINFO'"
-        res = Base.connection.execute(sql)
+       # sql = "select max(id) from '#{schema}'.'NSUDOTABLEALLOCINFO'"
+        sql = "select max(id) from \"#{schema}\".\"NSUDOTABLEALLOCINFO\""
+        res = ActiveRecord::Base.connection.execute(sql)
         impltable = res[0][0]+1
         p "impltable=#{impltable}"
         
@@ -48,16 +49,21 @@ class Bomigration < ActiveRecord::Migration
         um = UdoMeta.new({
             :id=>id,
             :name=>name,
-            :namespace=>#{Migrator.appid},
+            :namespace=>ActiveRecord::Migrator.appid,
             :label=>name, # TODO
-            :impltable=>impltable
+            :impltable=>impltable,
+            :bosetname=>name
         })
+        um.id = id
         um.save!
         
         # get columns used by udo
+
+        #sql = "select TABLENAME, STRCOLUMNS, TXTCOLUMNS from '#{schema}'.'NSUDOTABLEALLOCINFO' where tablename='#{name}'"
         sql = "select TABLENAME, STRCOLUMNS, TXTCOLUMNS from \"#{schema}\".\"NSUDOTABLEALLOCINFO\" where TABLENAME='#{name}'"
+
         p "sql=#{sql}"
-        res = Base.connection.execute(sql)
+        res = ActiveRecord::Base.connection.execute(sql)
         used_str_column = res[0][0]
         used_txt_colun = res[0][1]
    
@@ -75,7 +81,7 @@ class Bomigration < ActiveRecord::Migration
             hash = args[1]
             up = UserProperty.new({
                 :id=>null,
-                :namespace=>#{Migrator.appid}
+                :namespace=>ActiveRecord::Migrator.appid,
                 :name=>fname,
                 :type=>name
             }).save
@@ -129,7 +135,7 @@ class Bomigration < ActiveRecord::Migration
     end
 =end
     def get_all_versions
-      Base.connection.select_values("SELECT \"version\" FROM #{schema_migrations_table_name}").map(&:to_i).sort
+      ActiveRecord::Base.connection.select_values("SELECT \"VERSION\" FROM #{schema_migrations_table_name}").map(&:to_i).sort
     end
     def migrations
         
@@ -193,10 +199,10 @@ class Bomigration < ActiveRecord::Migration
         @migrated_versions ||= []
         if down?
           @migrated_versions.delete(version.to_i)
-          Base.connection.update("DELETE FROM #{Base.connection.schema}.#{sm_table} WHERE version = '#{version}'")
+          ActiveRecord::Base.connection.update("DELETE FROM #{ActiveRecord::Base.connection.schema}.#{sm_table} WHERE version = '#{version}'")
         else
           @migrated_versions.push(version.to_i).sort!
-          Base.connection.insert("INSERT INTO #{Base.connection.schema}.#{sm_table} (version) VALUES ('#{version}')")
+          ActiveRecord::Base.connection.insert("INSERT INTO #{ActiveRecord::Base.connection.schema}.#{sm_table} (version) VALUES ('#{version}')")
         end
       end
 end   
