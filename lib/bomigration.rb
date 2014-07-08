@@ -104,19 +104,46 @@ class Bomigration < ActiveRecord::Migration
                 "Fax",
                 "ZipCode"
             ]
+[                "boolean",
+                "date",
+                "time",
+                "datetime",
+                "integer",
+                "long",
+                "double",
+                "decimal",
+                "rate",
+                "price",
+                "sum",
+                "quantity",
+                "percent",
+                "measure",
+                "tax",
+                "string",
+                "text",
+                "link",
+                "address",
+                "phone",
+                "binary",
+                "memo",
+                "email",
+                "fax",
+                "zipcode"
+]
         end
         def method_missing(name, *args, &block) # :nodoc:
-            if !types.include?(name)
-                return (delegate || superclass.delegate).send(name, *args, &block)
-            end
             p "name=>#{name}, args:#{args.inspect}"
+p types.inspect
+            if !types.include?(name.to_s)
+                return super.send(name, *args, &block)
+            end
             fname = args[0]
             hash = args[1]
             up = UserProperty.new({
-                :id=>nil,
-                :namespace=>ActiveRecord::Migrator.appid,
-                :name=>fname,
-                :type=>name
+                :ID=>nil,
+                :NAMESPACE=>ActiveRecord::Migrator.appid,
+                :NAME=>fname,
+                :TYPE=>name
             }).save
         end
     end
