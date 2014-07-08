@@ -76,12 +76,44 @@ class Bomigration < ActiveRecord::Migration
     end
     
     class UdoDef
+        def types
+            [
+                "Boolean",
+                "Date",
+                "Time",
+                "DateTime",
+                "Integer",
+                "Long",
+                "Double",
+                "Decimal",
+                "Rate",
+                "Price",
+                "Sum",
+                "Quantity",
+                "Percent",
+                "Measure",
+                "Tax",
+                "String",
+                "Text",
+                "Link",
+                "Address",
+                "Phone",
+                "Binary",
+                "Memo",
+                "Email",
+                "Fax",
+                "ZipCode"
+            ]
+        end
         def method_missing(name, *args, &block) # :nodoc:
+            if !types.include?(name)
+                return (delegate || superclass.delegate).send(name, *args, &block)
+            end
             p "name=>#{name}, args:#{args.inspect}"
             fname = args[0]
             hash = args[1]
             up = UserProperty.new({
-                :id=>null,
+                :id=>nil,
                 :namespace=>ActiveRecord::Migrator.appid,
                 :name=>fname,
                 :type=>name
