@@ -46,7 +46,7 @@ class Bomigration < ActiveRecord::Migration
 # ENDD
 #         p "sql=#{sql}"
 #         res = Base.connection.execute(sql)
-        um = UdoMeta.new({
+        um = NSUdoMeta.new({
             :ID=>id,
             :NAME=>name,
             :NAMESPACE=>ActiveRecord::Migrator.appid,
@@ -123,7 +123,7 @@ p types.inspect
 
               
             up = UserProperty.new({
-                :ID=>UserProperty.max_id,
+                :ID=>UserProperty.max_id+1,
                 :NAMESPACE=>ActiveRecord::Migrator.appid,
                 :NAME=>fname,
                 :TYPE=>name
