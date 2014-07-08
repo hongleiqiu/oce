@@ -989,7 +989,7 @@ ENDD
         
         sf3 = ""
         udo["fields"].each{|f|
-            sf3 += "\t\t t.#{f['type']} :#{f['name']} :default=>#{f['default_value']}\n" 
+            sf3 += "\t\t t.#{f['type'].downcase} :#{f['name']} :default=>#{f['default_value']}\n" 
         }    
         # t = Time.now
         #    time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s

@@ -122,6 +122,18 @@ in odbc, you have to use
 but in hdbsql, you have to use
 "schema_name"."table_name"
 
+# in hdbsql
+schema name, sequence name are case-sensitive
+select "I027910_MASTER"."schema_migrations_seq1".nextval from dummy
+select "I027910_MASTER"."schema_migrations_seq1".currval from dummy
+CREATE SEQUENCE "I027910_MASTER"."schema_migrations_seq1" INCREMENT BY 1 START WITH 1 NO CYCLE
+drop sequence "I027910_MASTER"."schema_migrations_seq"
+drop table "I027910_MASTER"."schema_migrations"
+drop sequence "I027910_MASTER"."SCHEMA_MIGRATIONS_SEQ"
+drop table "I027910_MASTER"."SCHEMA_MIGRATIONS"
+select I027910_MASTER.NSUDOMETA_SEQ.nextval from dummy
+INSERT INTO "I027910_MASTER"."NSUDOMETA" ("UPDATEDATE", "NAME", "BOSETNAME", "OWNERCODE", "CREATEDATE", "USERSIGN2", "INSTANCE", "NAMESPACE", "IMPLTABLE", "ID", "LABEL", "DISPLAYONMENU", "PLURALLABEL", "VERSION", "USERSIGN") VALUES(NULL, 'fd', NULL, NULL, NULL, NULL, NULL, 'dd', 2, 2, 'fd', NULL, NULL, NULL, NULL)
+
 tips:
 find /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0 -name "*.rb" |xargs grep "drop_table"
 find ~/.gem/ruby/ -name "*.rb" |xargs grep "drop_table"

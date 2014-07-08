@@ -21,10 +21,15 @@ class Bomigration < ActiveRecord::Migration
     def self.create_udo(name, hash={}, &block)
         schema = Base.connection.schema
         # get next id for NSUDOMETA
+        # in hdbsql
+        # select "I027910_MASTER"."schema_migrations_seq".currval from dummy
         ret = Base.connection.execute("  
         select '#{schema}'.'NSUDOMETA_SEQ.nextval' from dummy
         ")
+        p ret
+        p ret.size
         p ret[0]
+        p ret[1]
         id = ret[0]
         p "id=#{id}"
         
@@ -50,7 +55,7 @@ class Bomigration < ActiveRecord::Migration
         um.save!
         
         # get columns used by udo
-        sql = "select tablename, strcolumns, txtcolumns from '#{schema}'.'NSUDOTABLEALLOCINFO' where tablename='#{name}'"
+        sql = "select TABLENAME, STRCOLUMNS, TXTCOLUMNS from \"#{schema}\".\"NSUDOTABLEALLOCINFO\" where TABLENAME='#{name}'"
         p "sql=#{sql}"
         res = Base.connection.execute(sql)
         used_str_column = res[0][0]
