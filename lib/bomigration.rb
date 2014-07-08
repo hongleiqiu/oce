@@ -77,6 +77,7 @@ class Bomigration < ActiveRecord::Migration
     
     class UdoDef
         def method_missing(name, *args, &block) # :nodoc:
+            p "name=>#{name}, args:#{args.inspect}"
             fname = args[0]
             hash = args[1]
             up = UserProperty.new({
