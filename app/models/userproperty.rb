@@ -1,3 +1,5 @@
+#class UserProperty < ActiveRecord::Base#HanaRecord
 class UserProperty < HanaRecord
-# set_table_name "USERPROPERTY"
+#include HanaRecord
+ set_table_name "USERPROPERTY"
 end
