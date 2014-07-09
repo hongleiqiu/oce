@@ -332,7 +332,6 @@ load "bomigration.rb"
             p e.inspect
             p e.backtrace[0..e.backtrace.size-1].join("\n\r")
             error("Deploy failed:<pre>"+ e.message+"</pre>")
-            ActiveRecord::Migrator.rollback(appid)
             return
         end
         p "deploy ok"
