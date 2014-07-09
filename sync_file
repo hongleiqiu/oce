@@ -1,0 +1,20 @@
+#!/bin/sh
+#echo rsync lib/active_record/vendor/odbcext_hdb.rb  root@10.58.113.181:/usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/lib/active_record/vendor/odbcext_hdb.rb 
+pwd1=`pwd`
+pwd1=$pwd1/
+pwd1="/Users/i027910/Desktop/SAP/src/oce/"
+echo current path:$pwd1
+#echo "sed -E 's/$pwd1//g' $1"
+#rpath=`sed -E 's/$pwd1//g' $1` 
+rpath=${1#$pwd1}
+echo $rpath
+expect -c "
+spawn rsync -v $1 root@10.58.113.181:/var/www/oce/$rpath
+expect {
+	\"*assword\" {set timeout 300; send \"Initial0\r\";}
+	 \"yes/no\" {send \"yes\r\"; exp_continue;}
+}
+expect eof"
+
+# command in textmate
+# $TM_PROJECT_DIRECTORY/sync_file $TM_FILEPATH 

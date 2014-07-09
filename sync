@@ -1,0 +1,17 @@
+#!/bin/sh
+#echo rsync lib/active_record/vendor/odbcext_hdb.rb  root@10.58.113.181:/usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/lib/active_record/vendor/odbcext_hdb.rb 
+
+expect -c "
+spawn rsync -av app/controllers root@10.58.113.181:/var/www/oce/app/controllers
+expect {
+	\"*assword\" {set timeout 300; send \"Initial0\r\";}
+	 \"yes/no\" {send \"yes\r\"; exp_continue;}
+}
+expect eof"
+expect -c "
+spawn rsync -av lib root@10.58.113.181:/var/www/oce/lib64
+expect {
+	\"*assword\" {set timeout 300; send \"Initial0\r\";}
+	 \"yes/no\" {send \"yes\r\"; exp_continue;}
+}
+expect eof"
