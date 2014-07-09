@@ -137,6 +137,10 @@ drop sequence "I027910_MASTER"."SCHEMA_MIGRATIONS_SEQ"
 drop table "I027910_MASTER"."SCHEMA_MIGRATIONS"
 select I027910_MASTER.NSUDOMETA_SEQ.nextval from dummy
 INSERT INTO "I027910_MASTER"."NSUDOMETA" ("UPDATEDATE", "NAME", "BOSETNAME", "OWNERCODE", "CREATEDATE", "USERSIGN2", "INSTANCE", "NAMESPACE", "IMPLTABLE", "ID", "LABEL", "DISPLAYONMENU", "PLURALLABEL", "VERSION", "USERSIGN") VALUES(NULL, 'fd', NULL, NULL, NULL, NULL, NULL, 'dd', 2, 2, 'fd', NULL, NULL, NULL, NULL)
+# describe table
+SELECT COLUMN_NAME, DEFAULT_VALUE, DATA_TYPE_NAME, IS_NULLABLE FROM TABLE_COLUMNS WHERE SCHEMA_NAME='I027910_MASTER' AND TABLE_NAME='SCHEMA_MIGRATIONS'
+
+
 
 tips:
 find /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0 -name "*.rb" |xargs grep "drop_table"
@@ -144,7 +148,9 @@ find ~/.gem/ruby/ -name "*.rb" |xargs grep "drop_table"
 find ~/.gem/ruby/ -name "*.rb" |xargs grep initialize_schema_migrations_table
 sudo vi /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/lib/active_record/vendor/odbcext_hdb.rb
 vi /home/jackie/.gem/ruby/1.8/gems/activerecord-2.3.5/lib/active_record/schema.rb
+sudo vi /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0/lib/active_record/connection_adapters/odbc_adapter.rb
 vi /home/jackie/.gem/ruby/1.8/gems/activerecord-2.3.5/lib/active_record/connection_adapters/abstract/schema_statements.rb
+sudo vi /home/jackie/.gem/ruby/1.8/gems/activerecord-2.3.5/lib/active_record/base.rb
 on mac
 vi /usr/local/lib/ruby/gems/1.8/gems/activerecord-2.3.5/lib/active_record/base.rb
 

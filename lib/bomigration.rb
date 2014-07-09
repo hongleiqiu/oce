@@ -46,7 +46,7 @@ class Bomigration < ActiveRecord::Migration
 # ENDD
 #         p "sql=#{sql}"
 #         res = Base.connection.execute(sql)
-        um = UdoMeta.new({
+        um = NSUdoMeta.new({
             :ID=>id,
             :NAME=>name,
             :NAMESPACE=>ActiveRecord::Migrator.appid,
@@ -71,11 +71,17 @@ class Bomigration < ActiveRecord::Migration
         # BONAME,BONODETYPENAME,OBSFIELDID,OBSTABLENAME,PACKAGENAME,ACTIVATE,LINKEDBONAME,LINKEDBONAMESPACE,CUSTOMERRORMESSAGE,FREETEXTALLOWED,SEARCHRE\
         # SULTIDENTIFIER,VERSION,OWNERCODE,CREATEDATE,USERSIGN,UPDATEDATE,USERSIGN2,INSTANCE"
    
-        u = UdoDef.new
+        u = UdoDef.new(name, hash)
         yield(u)
+        p "==>udo #{name} created"
     end
     
     class UdoDef
+        attr_accessor :name, :prop
+        def initialize(name, hash)
+            @name = name
+            @prop = hash
+        end
         def types
 
 [                "boolean",
@@ -113,21 +119,29 @@ class Bomigration < ActiveRecord::Migration
         def method_missing(name, *args, &block) # :nodoc:
             
             p "name=>#{name}, args:#{args.inspect}"
-p types.inspect
+# p types.inspect
             if !types.include?(name.to_s)
                 return super.send(name, *args, &block)
             end
             fname = args[0]
             hash = args[1]
+            hash = {} if !hash
             
-
+            p "fname:#{fname}"
+            p "hash:#{hash.inspect}"
+#"UPDATEDATE", "COLUMNNAME", "SEARCHRESULTIDENTIFIER", "ISUNIQUE", 
+#"TYPE", "PACKAGENAME", "LINKEDBONAME", "VERSION", "CREATEDATE", "DEFAULTVALUE", 
+#{}"BONAME", "OWNERCODE", "OBSFIELDID", "ACTIVATE", "USERSIGN2", "CUSTOMERRORMESSAGE", "LABEL", "ENABLED", "READONLY", "NAME", "NAMESPACE", "OBSTABLENAME", "ID", "FREETEXTALLOWED", "BONODETYPENAME", "VALIDATIONRULE", "USERSIGN", "INSTANCE", "BONAMESPACE", "SIZE", "DESCRIPTION", "TOOLTIP", "LINKEDBONAMESPACE", "MANDATORY"
               
             up = UserProperty.new({
                 :ID=>UserProperty.max_id+1,
                 :NAMESPACE=>ActiveRecord::Migrator.appid,
+                :DEFAULTVALUE=>hash[:default],
                 :NAME=>fname,
+                :BONAME=>self.name,
                 :TYPE=>name
             }).save
+            p "==>udf #{fname} created"
         end
     end
 

@@ -9,7 +9,8 @@ class HanaRecord < ActiveRecord::Base
     end
     def self.max_id
         sql = "select max(ID) from \"#{schema}\".\"#{table_name}\""
-        res = ActiveRecord::Base.connection.execute(sql)
-        id = res[0][0]+1
+        # res = ActiveRecord::Base.connection.run(sql)
+        # id = res[0][0]+1
+        ActiveRecord::Base.connection.select_value(sql)
     end
 end

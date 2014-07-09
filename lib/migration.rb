@@ -491,10 +491,10 @@ p "runnable size #{runnable.size}"
       
       runnable.each do |migration|
         Base.logger.info "Migrating to #{migration.name} (#{migration.version})"
-p "Migrating to #{migration.name} (#{migration.version})"
-
+p "migrated:#{migrated.inspect}"
         # On our way up, we skip migrating the ones we've already migrated
         next if up? && migrated.include?(migration.version.to_i)
+        p "Migrating up to #{migration.name} (#{migration.version})"
 
         # On our way down, we skip reverting the ones we've never migrated
         if down? && !migrated.include?(migration.version.to_i)
@@ -504,8 +504,11 @@ p "Migrating to #{migration.name} (#{migration.version})"
 
         begin
           ddl_transaction do
+              p "migrating #{@direction}..."
             migration.migrate(@direction)
+            p "migrating complete"
             record_version_state_after_migrating(migration.version)
+            p "Version recorded (#{migration.version})"
           end
         rescue => e
           canceled_msg = Base.connection.supports_ddl_transactions? ? "this and " : ""
