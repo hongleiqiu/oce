@@ -123,7 +123,7 @@ p types.inspect
 
               
             up = UserProperty.new({
-                :ID=>UserProperty.max_id+1,
+                :ID=>UserProperty.max_id,
                 :NAMESPACE=>ActiveRecord::Migrator.appid,
                 :NAME=>fname,
                 :TYPE=>name
