@@ -1,0 +1,626 @@
+=========== reference ==========
+
+Setup linux env for sap anywhere
+https://jam4.sapjam.com/wiki/show/6EPt6N591wEZ7Pdt5zmPPI
+
+suse download
+https://download.suse.com/index.jsp
+
+sap anywhere release
+ftp://10.58.5.101/B1ANY/dev/901.000.00_CNPVGVB1W3103_SBO_EMEA_dev_080414_160051_1317249/
+==============================
+
+======= preparation =======
+export myrepo_root=http://10.59.148.49
+
+# install gcc(4.7.1) && make(3.8.2)
+mkdir gcc4.7
+sftp ftpuser@10.58.9.229:gcc4.7/* gcc4.7
+cd gcc4.7
+./_resolve_conflict.sh
+./_install.sh
+
+
+# install hana client
+wget $myrepo_root/tools/HANA_ver70/CLIENT/hana_client_linux_x86_64.targ.gz
+tar -xzvf hana_client_linux_x86_64.targ.gz
+chmod -R 777 Linux_on_x86_64_64bit/
+cd Linux_on_x86_64_64bit
+./hdbinst
+
+# Check SAP-wide DNS integration
+sudo vi /etc/resolv.conf
+# make sure that the below line is included
+search wdf.sap.corp dhcp.pvgl.sap.corp
+# or 
+sudo sh -c "echo search wdf.sap.corp dhcp.pvgl.sap.corp >> /etc/resolv.conf"
+
+# set config file for p4
+sudo vi /etc/profile
+# pv4 config file path
+#
+if test -z "$P4CONFIG" ; then
+        export P4CONFIG=/usr/p4config/p4.configfile
+fi
+
+or
+
+sudo sh -c "cat <<- ENDEND >> /etc/profile
+# pv4 config file path
+#
+if test -z "$P4CONFIG" ; then
+        export P4CONFIG=/usr/p4config/p4.configfile
+fi
+ENDEND
+"
+
+# create p4 config
+sudo vi /usr/p4config/p4.configfile
+P4CLIENT=p4root
+P4PASSWD=Sap.com1
+P4PORT=perforce3230:3230
+P4USER=i027910
+
+or
+sudo sh -c "cat <<- ENDEND >> /usr/p4config/p4.configfile1
+P4CLIENT=p4root
+P4PASSWD=Sap.com1
+P4PORT=perforce3230:3230
+P4USER=i027910
+ENDEND
+"
+
+# set p4 client
+p4 login -p
+# enter your password and got a ticknumber
+jackie@cnpvgvb1w3181:~> p4 login -p
+Enter password: 
+90FC53C67F695B5636AB902244C9496C
+
+# then in /usr/p4config/p4.configfile, set P4PASSWD=<tick number>
+
+p4 client
+# remove host
+# set view
+View:
+	//BUSMB_B1/B1anywhere/1.1_COR/c/9.01/sbo... //p4root/BUSMB_B1/B1anywhere/1.1_COR/c/9.01/sbo...
+
+# NOTICE: every time you need to change p4 client you have to get new ticknumber as P4PASSWD
+	
+# get b1 source code	
+p4 sync
+
+
+# install wine and others
+sftp ftpuser@10.58.9.229
+cd b1od_linux
+get apache-tomcat-7.0.42.zip
+get cabextract-1.2-121.2.x86_64.rpm
+get capi4linux-2009.9.16-2.8.x86_64.rpm
+get capi4linux-32bit-2009.9.16-2.8.x86_64.rpm
+get i4l-base-2009.9.16-2.8.x86_64.rpm
+get libexif-32bit-0.6.17-5.2.x86_64.rpm
+get libgphoto2-32bit-2.4.7.1-2.3.1.x86_64.rpm
+get libgsm1-1.0.13-36.1.x86_64.rpm
+get libgsm1-32bit-1.0.13-3.2.x86_64.rpm
+get libiniparser0-2.17-88.2.x86_64.rpm
+get libiniparser0-32bit-2.17-88.2.x86_64.rpm
+get libusb-0_1-4-32bit-0.1.13-2.2.x86_64.rpm
+get libusb-1_0-0-32bit-1.0.2-2.2.x86_64.rpm
+get libuuid-devel-2.21.2-4.5.1.x86_64.rpm
+get linux-kernel-headers-2.6.32-1.4.13.noarch.rpm
+get msxml3.msi
+get ppp-userpass-2009.9.16-2.8.x86_64.rpm
+get samba-krb-printing-3.4.2-1.1.3.1.x86_64.rpm
+get samba-winbind-3.4.2-1.1.3.1.x86_64.rpm
+get samba-winbind-32bit-3.4.2-1.1.3.1.x86_64.rpm
+get wine-1.7.10-310.1.x86_64.rpm
+get wine-32bit-1.7.10-310.1.x86_64.rpm
+get wine-gecko-2.24-44.1.noarch.rpm
+get wine-mono-4.5.2-1.1.noarch.rpm
+get xalan_c-1.11-src.tar.gz
+get xerces-c-3.1.1-x86_64-linux-gcc-3.4.tar.gz
+# then install all rpm
+find . -name "*.rpm" -exec rpm -i --nodeps {} \; -print
+
+
+
+====== build =========
+export SBO_BASE=/home/jackie/p4root/BUSMB_B1/B1anywhere/dev/c/9.01/sbo 
+export ODBC_LIB=/usr/sap/hdbclient/libodbcHDB.so
+
+# copy wine installed (only if wine is install for another user)
+sudo cp -fr /home/builder/.wine /home/jackie/
+
+# modify reports.xml
+cd /home/jackie/p4root/sbo/Source/Client/XmlResources/
+vi Reports.xml
+
+# install resource build result from windows
+# build corresponding version of b1 on windows, location is Source/Observer.sln
+# then copy the dir BUSMB_B1/B1anywhere/dev/c/9.01/sbo/Intermediate.x64/B1_XmlResources.Release to linux or a http server
+cd
+wget $myrepo_root/download/b1_linux/B1_XmlResources.Release.zip
+unzip B1_XmlResources.Release.zip
+mkdir -p $SBO_BASE/Intermediate.linux
+cp -vfr B1_XmlResources.Release $SBO_BASE/Intermediate.linux/
+ln -sf $SBO_BASE/Intermediate.linux/B1_XmlResources.Release $SBO_BASE/B1_XmlResources
+# NOTICE  If the resource has change, need to rebuild x64 version of b1 on windows OS
+# NOTICE If you do make observer clean you need to do above cp and ln again
+
+wget --no-proxy  $myrepo_root/download/b1_linux/GUI.zip 
+unzip GUI.zip
+mkdir -p $SBO_BASE/Output.linux/GUI
+cp GUI/* $SBO_BASE/Output.linux/GUI
+
+cd $SBO_BASE/Source/LinuxProjects/
+
+# clean 
+make observer clean
+rm -rf include/
+
+# build resource first, skip if you copyed resource from windows
+make -rf B1_XmlRes.mak
+
+# build observer
+cd $SBO_BASE/Source/LinuxProjects/
+make observer CFG=Debug ARCH=x64  HAS_RES=1 -j8
+make OBServerJNI CFG=Debug ARCH=x64  HAS_RES=1 -j8
+su -
+ldconfig
+exit
+
+# when encounter error like 
+
+====== B1_BaseObjects {OBServer_Debug|x64} ends ======
+====== BusinessOne {OBServer_Debug|x64} starts ======
+make -rf BusinessOne.mak CFG=OBServer_Debug 
+common.mak:17: include/BusinessOne.inc: No such file or directory
+./parse_vc10.pl ../Client/Application/BusinessOne.vcxproj auto
+=== parse ../Client/Application/BusinessOne.vcxproj
+=== generate include/BusinessOne.inc
+make[1]: *** No rule to make target `/home/jackie/p4root/BUSMB_B1/B1anywhere/1.1_COR/c/9.01/sbo/B1_XmlResources/MODULES_MAP.txt', needed by `Intermediate-x64/BusinessOne/OBServer_Debug/res.o'.  Stop.
+make[1]: *** Waiting for unfinished jobs....
+=== compile ../Client/Application/OZDev/Mgr/stdafx.h
+../Client/Application/OZDev/Mgr/stdafx.h:1:9: warning: #pragma once in main file [enabled by default]
+make: *** [BusinessOne] Error 2
+
+# just remove include folder and doing the step again
+rm -fr include/
+make -rf BusinessOne.mak CFG=OBServer_Debug HAS_RES=1
+if still not work, try redo the two lines
+cp -fr ~/B1_XmlResources.Release $SBO_BASE/Intermediate.linux/
+ln -sf $SBO_BASE/Intermediate.linux/B1_XmlResources.Release $SBO_BASE/B1_XmlResources
+
+# if get error like
+/home/jackie/p4root/BUSMB_B1/B1anywhere/dev/c/9.01/sbo/Source/Infrastructure/Engines/Hdr/__CORE_RESOURCE.h:2:18: fatal error: RLNG.h: No such file or directory
+don't worry, it won't break build
+
+============ build SAP ANYWHERE ========
+
+
+# install sap jvm
+wget $myrepo_root/tools/dev_tools/jdk/sapjvm7-7.1.012.linux.x86_64.tar.gz
+tar -xzvf sapjvm7-7.1.012.linux.x86_64.tar.gz
+export JAVA_HOME=/home/jackie/sapjvm_7 
+echo "export JAVA_HOME=/home/jackie/sapjvm_7" >> ~/.profile
+export PATH=$PATH:$JAVA_HOME/bin
+echo "export PATH=\$PATH:\$JAVA_HOME/bin" >> ~/.bashrc
+
+# or install jdk 1.7
+#wget http://10.59.148.49/tools/jdk-7u55-linux-x64.tar.gz
+#tar -xzvf jdk-7u55-linux-x64.tar.gz 
+
+wget http://10.59.148.49/tools/jdk1.7.0_09.tar.gz
+tar -xzvf jdk1.7.0_09.tar.gz 
+sudo mv jdk1.7.0_09 /usr/local/
+sudo ln -s /usr/local/jdk1.7.0_09/bin/java /usr/local/bin/java
+
+export JAVA_HOME=/usr/local/jdk1.7.0_09
+export PATH=$JAVA_HOME/bin:$PATH
+
+
+# install maven
+wget $myrepo_root/tools/dev_tools/maven/apache-maven-3.0.5-bin.zip
+unzip apache-maven-3.0.5-bin.zip 
+export M2_HOME=/home/jackie/apache-maven-3.0.5
+echo "export M2_HOME=/home/jackie/apache-maven-3.0.5" >> ~/.bashrc
+export PATH=$PATH:/home/jackie/apache-maven-3.0.5/bin
+echo "export PATH=\$PATH:/home/jackie/apache-maven-3.0.5/bin" >> ~/.bashrc
+wget $myrepo_root/tools/dev_tools/maven/settings.xml
+mkdir ~/.m2
+mv settings.xml ~/.m2
+
+# get source
+# install ssh key
+wget $myrepo_root/ju/id_rsa
+chmod 700 id_rsa 
+mv id_rsa ~/.ssh/
+cd
+mkdir sap_anywhere
+cd sap_anywhere
+git clone ssh://i027910@git.wdf.sap.corp:29418/com.sap.sbo.anw.app.server.git
+git clone ssh://i027910@git.wdf.sap.corp:29418/com.sap.sbo.anw.app.ui.git
+# for scripting
+export SA_HOME=`pwd`
+export ANW_HOME=`pwd`/com.sap.sbo.anw.app.server/app/anw-web
+export ANW_UI_HOME=`pwd`/com.sap.sbo.anw.app.ui
+export | grep HOME | grep sap_anywhere | awk '{print $3}' >> ~/.bashrc
+cat <<- ENDEND >> ~/.bashrc
+export SA_HOME
+export ANW_HOME
+export ANW_UI_HOME
+ENDEDN
+
+# build projects
+cd com.sap.sbo.anw.app.server/
+mvn install -Dmaven.test.skip=true
+cd ../com.sap.sbo.anw.app.ui/sfa-anw/
+mvn install -Dmaven.test.skip=true
+
+
+
+
+
+============= deploy on jetty ===========
+# java.library.path is usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib 
+# create link under any place in the java.library.path
+# (or set LD_LIBRARY_PATH in profile)
+
+export LD_LIBRARY_PATH=`pwd`/b1_output
+echo "export LD_LIBRARY_PATH=`pwd`/b1_output" >> ~/.profile
+
+# copy all so into b1_output see b1_solist.txt
+
+# copy hand jdbc client jar
+cp $ANW_HOME/target/dependency/com.sap.db.ngdbc-1.00.68.384084.jar $ANW_HOME/target/sbo/WEB-INF/lib/
+
+# copy all other so and resource file/dir under B1ANY/dev/901.000.00_CNPVGVB1W3103_SBO_EMEA_dev_080414_160051_1317249/SAPAnywhere1200.0_1317249/common/observer_linux 
+# or 
+# Output.x64/ 
+# to the same place of libOBServerJNI.so and libOBServerDLL.so
+cd ~/b1_output
+ln -sf $SBO_BASE/Source/LinuxProjects/bin-x64/libOBServerDLLD.so libOBServerDLL.so
+ln -sf $SBO_BASE/Source/LinuxProjects/bin-x64/libOBServerJNID.so libOBServerJNI.so
+ln -sf $SBO_BASE/Output.linux/GUI  GUI
+# NOTICE there should be some lrf file under GUI
+
+# optional - enable log #
+wget $myrepo_root/release/10.58.5.101/B1ANY/dev/901.000.00_CNPVGVB1W3103_SBO_EMEA_dev_080414_160051_1317249/observer_linux.zip --no-proxy
+unzip observer_linux.zip -d observer_linux
+$which java 
+$/usr/local/bin/java
+sudo cp -fr observer_linux/Conf /usr/local/bin/
+
+mkdir -p "~/AppData/Local/SAP/SAP Business One"
+cd "~/AppData/Local/SAP/SAP Business One"
+wget $myrepo_root/download/b1_linux/config.zip --no-proxy
+unzip config.zip
+
+
+# prepare sbo webapp
+# file copy_ui
+# location: sap_anywhere
+mv com.sap.sbo.anw.app.ui/sfa-anw/target/sfa-anw/WEB-INF tmp_WEB-INF
+mv com.sap.sbo.anw.app.ui/sfa-anw/target/sfa-anw/META-INF tmp_META_INF
+cp -r com.sap.sbo.anw.app.ui/sfa-anw/target/sfa-anw/* com.sap.sbo.anw.app.server/app/anw-web/target/sbo/
+cp ~/p4root/BUSMB_B1/B1anywhere/1.1_COR/js/sfa-anw/src/main/webapp/js/localization/ui*.txt /home/jackie/sap_anywhere/com.sap.sbo.anw.app.server/app/anw-web/target/sbo/js/localization/
+
+# install jetty
+cd
+wget $myrepo_root/tools/jetty-hightide-8.1.9.v20130131.tar.gz
+tar -xzvf jetty-hightide-8.1.9.v20130131.tar.gz 
+export JETTY_HOME=~/jetty-hightide-8.1.9.v20130131
+echo "export JETTY_HOME=`pwd`/jetty-hightide-8.1.9.v20130131" >> ~/.profile
+# edit etc/webdefault.xml add *.json to default servlet-mapping
+
+or jetty 9.1
+wget http://10.59.148.49/tools/jetty-distribution-9.1.4.v20140401.tar.gz
+tar -xzvf jetty-distribution-9.1.4.v20140401.tar.gz
+export JETTY_HOME=`pwd`/jetty-distribution-9.1.4.v20140401
+echo "export JETTY_HOME=`pwd`/jetty-distribution-9.1.4.v20140401" >> ~/.profile
+sudo mkdir -p "/var/log/AppData/Local/SAP/SAP Business One/Log/SFA/"
+sudo chmod -R 777 /var/log/AppData/Local/SAP/
+
+# Jetty 8
+create sap.xml under contexts/
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+  <Set name="contextPath">/sbo</Set>
+  <Set name="war">/mnt/hgfs/SAP/sap_anywhere/com.sap.sbo.anw.app.server/app/anw-web/target/sbo</Set>
+</Configure>
+
+#jetty 9
+create sbo.xml under webapps
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+  <Set name="contextPath">/sbo</Set>
+  <!--Set name="war">/home/jackie/sap_anywhere/com.sap.sbo.anw.app.server/app/anw-web/target/sbo</Set-->
+  <!--Set name="war">/home/jackie/sap_anywhere/com.sap.sbo.anw.app.ui/sfa-anw/target/sfa-anw</Set-->
+ <Set name="war">/home/jackie/sap_anywhere/com.sap.sbo.anw.app.server/app/anw-web/target/sbo</Set>
+</Configure>
+
+# optiional #
+# change log level to debug #
+cd $ANW_HOME
+sed -i "s/INFO\|WARN/DEBUG/g" $ANW_HOME/target/sbo/WEB-INF/classes/logback-env.xml
+
+# optional #
+# create easy-start script
+cat <<- ENDEND >> go
+killall tail
+rm -f logs/*
+bin/jetty.sh restart &
+sleep 6
+tail -f logs/* &
+tail -f /var/log/AppData/Local/SAP/SAP\ Business\ One/Log/SFA/sfa-*-00.log &
+ENDEND
+
+chmod +x go
+# then you can start jetty by monitoring it's log automatically
+
+
+
+
+edit $ANW_HOME/target/sbo/WEB-INF/classes/META-INF/configuration.xml
+<?xml version='1.0' encoding='UTF-8'?>
+<Configuration>
+    <DBServers>
+        <DBServer>
+            <Name>10.58.114.210:30315</Name>
+            <Type>HANADB</Type>
+            <User>SYSTEM</User>
+            <Password>Manager1</Password>
+        </DBServer>
+    </DBServers>
+    <Tenants>
+        <Tenant>
+            <Name>abc</Name>
+            <DBServerName>10.58.114.210:30315</DBServerName>
+            <DBName>J1BHRXBCU0MTX50Q</DBName>
+        </Tenant>
+    </Tenants>
+</Configuration>
+
+
+if you encounter problem "You don't have permission for this resource", temporarily you can change the /anw-web/src/main/webapp/WEB-INF/web.xm: 
+remove following line (security filter)
+<filter> 
+	<filter-name>securityFilter</filter-name> 
+	<filter-class>com.sap.sbo.sl.spring.interceptors.SecurityFilter</filter-class> 
+</filter> 
+<filter-mapping> 
+	<filter-name>securityFilter</filter-name> <url-pattern>/*</url-pattern> 
+</filter-mapping>
+
+
+# disable sso (using sld), this is default, so no need to be done
+under project anw-web
+edit sso.properties
+ssoenabled=false
+
+# optional # 
+# config attachment
+edit
+com.sap.sbo.anw.app.server/app/app-ns/src/main/resources/META-INF/attachment/attachment.properties
+#===== file attachment.properties ====
+mode=development
+
+adapter=nfs
+developmentRoute=/home/jackie/sfa_attach
+productionRoute=/opt/shared/
+
+tmpFileRoute=/home/jackie/sfa_attach
+cm_bucket_name=testattachment
+proxy_host=proxy.sin.sap.corp
+proxy_port=8080
+#===== file attachment.properties end ====
+
+=== jetty configuration ==
+copy extractg sbo.war to webapps/sap
+
+
+You have name the context(path) to /sbo
+
+#====================================
+#        change and rebuld
+#====================================
+# get updated code
+cd com.sap.sbo.anw.app.server      && git pull && cd ..
+cd com.sap.sbo.anw.app.ui          && git pull && cd ..
+cd com.sap.sbo.anw.build.tool      && git pull && cd ..
+cd com.sap.sbo.anw.ccc             && git pull && cd ..
+cd com.sap.sbo.anw.installer       && git pull && cd ..
+cd com.sap.sbo.anw.sld             && git pull && cd ..
+cd com.sap.sbo.anw.sp              && git pull && cd ..
+
+====== update java part ====
+~/build_b1java
+~/go 
+
+##======= file ~/build_b1java 
+cd $SA_HOME
+echo ==== build app server ===
+cd com.sap.sbo.anw.app.server/
+echo mvn $1 install -Dmaven.test.skip=true
+mvn $1 install -Dmaven.test.skip=true
+if [ $? -ne 0 ]
+then
+    echo error $? when build java code
+    exit 1
+fi
+if [ $# -eq 1 ] && [ $1 != 'server' ]; then
+    echo ==== build ui ===
+    cd ../com.sap.sbo.anw.app.ui/sfa-anw/
+    echo mvn $1 install -Dmaven.test.skip=true
+    mvn $1 install -Dmaven.test.skip=true
+    if [ $? -ne 0 ]
+    then
+        echo error $? when build java code
+        exit 1
+    fi
+fi
+# deploy
+deploy_java
+
+echo ====== DONE =====
+
+#======= file ~/deploy_java =======
+cd $SA_HOME
+rm -fr tmp_WEB-INF
+mv -f com.sap.sbo.anw.app.ui/sfa-anw/target/sfa-anw/WEB-INF tmp_WEB-INF
+rm -fr tmp_META_INF
+mv -f com.sap.sbo.anw.app.ui/sfa-anw/target/sfa-anw/META-INF tmp_META_INF
+cp -r com.sap.sbo.anw.app.ui/sfa-anw/target/sfa-anw/* com.sap.sbo.anw.app.server/app/anw-web/target/sbo/
+#cp $ANW_HOME/target/dependency/com.sap.db.ngdbc-1.00.68.384084.jar $ANW_HOME/target/sbo/WEB-INF/lib/
+cp ~/.m2/repository/com/sap/db/hdb/com.sap.db.ngdbc/1.00.68.384084/com.sap.db.ngdbc-1.00.68.384084.jar $ANW_HOME/target/sbo/WEB-INF/lib/
+cp ~/p4root/BUSMB_B1/B1anywhere/1.1_COR/js/sfa-anw/src/main/webapp/js/localization/ui*.txt /home/jackie/sap_anywhere/com.sap.sbo.anw.app.server/app/anw-web/target/sbo/js/localization/
+
+
+#======= file ~/go ========
+# rebuild so and restart jetty
+./build_b1so
+cd $JETTY_HOME
+./go
+tail -f ~/sa.log &
+
+#======= file $JETTY_HOME/go ========
+# just restart jetty
+killall tail
+rm -f logs/*
+bin/jetty.sh restart &
+sleep 6
+tail -f logs/* &
+tail -f /var/log/AppData/Local/SAP/SAP\ Business\ One/Log/SFA/sfa-*-00.log &
+
+====== update c part ====
+./go
+#======= file ~/build_b1so ========
+# rebuild observer
+cd $SBO_BASE/Source/LinuxProjects/
+#make observer CFG=Debug ARCH=x64 -j8 HAS_RES=1 # comment out because make OBServerJNI will build observer if it has changes
+make OBServerJNI CFG=Debug ARCH=x64 -j8 HAS_RES=1
+
+===== trounble shooting =====
+1. If you got BusinessException with a Strange string looks like an Id, which is thrown by ConnectionManager class login() method,
+this exception actually have message "invalid tenant name", but BaseException override the constructor which didn't assign the string to 
+"errcode" instead of the var detailMessage of this Exception. But the servlet container or other 3rd party framework dunno this and only
+ output the exception.
+Reason: Use wrong tenant name
+Fix: Try to use correct tenant name when login
+
+2. invalid table name:  Could not find table/view DOTA in schema SYSTEM
+Call: SELECT "AbsEntry", "AssgnTable", "MappingKey", "ObjectCode" FROM DOTA
+Reason: The DB content is wrong or out of date
+Fix: change the DB server in configuration.xml
+
+3. Cannot find LRF file
+entry: OBServerJNI/OBServerInterface.cpp::Java_com_sap_sbo_bofrw_jaw_observer_OBServerInterface_init 
+BEGIN_OBSERVER_EXCEPTION_CHECK
+        err =  m_pObsI->Init(&params);
+        if(err == -8023)
+        {
+                CHECK_OBSERVER_EXCEPTION(err, _T("Invalid username or password!"));
+        }
+        else if(err == -8020)
+        {
+                CHECK_OBSERVER_EXCEPTION(err, _T("1Can not find resource LRF file!"));
+        }
+-8020 is defined in 		Source/Client/Application/ObjMgr/Hdr/_OBserverInterfaceA.h 
+#define	obsLanguageInitErr				-8020
+
+Init is implemented:
+Source/Client/Application/ObjMgr/OBServer/_OBserverInterfaceA.cpp::_OBserverInterfaceA_Imp::Init
+->CSBOApplication::GetInstance()->CreateEnv
+
+OBSDB_ERR _OBserverInterfaceA_Imp::SetCurrentLanguage (long language)
+{
+printf("===>SetCurrentLanguage\n");
+        try
+        {
+                ResourceManager::GetHandle()->SetRequestedLanguage ((_CORE_LanguageCode)language, FALSE, m_pBizEnv);
+        }
+        catch (...)
+        {
+printf("====>init language %d failed\n", language);
+                return obsLanguageInitErr;
+        }
+
+        return noErr;
+}
+
+SetRequestedLanguage is defined in Source/Infrastructure/Engines/Hdr/__CORE_RESOURCE.h 
+
+ ./Source/Client/Application/ObjMgr/Core/_Application.cpp::CreateEnv(with 16 params)
+./Source/Infrastructure/Engines/CORE/__CORE_RESOURCE.c::SetRequestedLanguage ->GetResourcePtr()...->OpenLanguage()->GetLanguageList->
+./Source/Infrastructure/Engines/CORE/__CORE_FILE.c::_FILE_GetApplPath(,)->./Source/Infrastructure/Engines/CORE/__CORE_GUI_LINUX.c::_GUI_GetModuleFileName(,,)
+reason: 
+1.Under /home/jackie/b1_output is soft link to /home/jackie/p4root/BUSMB_B1/B1anywhere/dev/c/9.01/sbo/Source/LinuxProjects/bin-x64/libOBServerDLLD.so,
+this cause it search GUI under /home/jackie/p4root/BUSMB_B1/B1anywhere/dev/c/9.01/sbo/Source/LinuxProjects/bin-x64/libOBServerDLLD.so
+2. the file ext name must be LRF not lrf
+fix: 
+1). create a link under Source/LinuxProjects/bin-x64 to Output.xxx/GUI
+2). rename lrf file to LRF file
+
+4. java.lang.IllegalStateException: Conflicting persistence unit definitions for name 'socialgraph': file:/home/jackie/sap_anywhere/com.sap.sbo.anw.app.server/app/anw-web/target/sbo/WEB-INF/lib/feed-1.2.0-SNAPSHOT.jar, file:/home/jackie/sap_anywhere/com.sap.sbo.anw.app.server/app/anw-web/target/sbo/WEB-INF/lib/feed-1.2.0-20140422.145104-3285.jar
+reason:
+2 different version of feed jar
+fix: 
+remove one, or do a clean build
+
+5. if you got error like
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# pthread_getattr_np
+# An error report file with more information is saved as:
+# /home/jackie/jetty-distribution-9.1.4.v20140401/hs_err_pid13278.log
+cannot allocate memory for thread-local data: ABORT
+
+add java options -Xms512m 
+
+
+6. invalid user/password
+table ousr
+
+cd com.sap.sbo.anw.app.server      && git pull && cd ..
+cd com.sap.sbo.anw.app.ui          && git pull && cd ..
+cd com.sap.sbo.anw.build.tool      && git pull && cd ..
+cd com.sap.sbo.anw.ccc             && git pull && cd ..
+cd com.sap.sbo.anw.installer       && git pull && cd ..
+cd com.sap.sbo.anw.sld             && git pull && cd ..
+cd com.sap.sbo.anw.sp              && git pull && cd ..
+
+
+
+
+7. useing schema booking
+if you got email
+
+CodeBranch:	master
+P4BuildChangeList:	1338828
+HANAInstance:	10.58.114.228:30115
+SchemaName:	I027910_MASTER
+HANAUserName:	SYSTEM
+HANAPassword:	manager
+
+You $ANW_HOME/target/sbo/WEB-INF/classes/META-INF/configuration.xml
+<?xml version='1.0' encoding='UTF-8'?>
+<Configuration>
+    <DBServers>
+        <DBServer>
+            <Name>10.58.114.210:30115</Name>
+            <Type>HANADB</Type>
+            <User>SYSTEM</User>
+            <Password>manager</Password>
+        </DBServer>
+    </DBServers>
+    <Tenants>
+        <Tenant>
+            <Name>abc</Name>
+            <DBServerName>10.58.114.210:30115</DBServerName>
+            <DBName>I027910_MASTER</DBName>
+        </Tenant>
+    </Tenants>
+</Configuration>

@@ -338,6 +338,10 @@ load "bomigration.rb"
         p "deploy ok"
         dev_server_b1_url = @user.dev_server_b1_url
         success("Deploy successfully", {:url=>"#{dev_server_b1_url}"})
+        
+        
+    #    /opt/share/sfaattachment/
+     #   \T1\rtspace\com.cid.oms\src\resources\UI-INF
     end
     
     # open file
@@ -912,7 +916,7 @@ load "bomigration.rb"
         migrations.reverse!
             migrations.each{|m|
                 p "migrate '#{m[:filename]}'"
-            }
+                }
             migrations.each{|m|
             begin
                 p "load '#{m[:filename]}'"
@@ -925,9 +929,9 @@ load "bomigration.rb"
                 p e.inspect
                 p e.backtrace[1..e.backtrace.size-1].join("\n\r")                    
             end
-            p "udo mig version:#{obj.version}" if obj
+            p "udo mig version:#{obj.class.version}" if obj
             p "udo version #{udo['version'].to_i}"
-            if obj && obj.version < udo['version'].to_i
+            if obj && obj.class.version < udo['version'].to_i
                 return obj
             end
             }
@@ -947,7 +951,7 @@ load "bomigration.rb"
         script = ""
         if old_udo  # if found
             # find difference
-            p "find old udo version #{old_udo.version}"
+            p "find old udo version #{old_udo.class.version}"
             old_udo_json = JSON.parse(old_udo.udo_json)
             # p old_udo_json.inspect
             script += generate_migration_diff(udo, old_udo_json)

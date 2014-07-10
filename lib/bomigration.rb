@@ -9,6 +9,10 @@ class Bomigration < ActiveRecord::Migration
         return @@version
     end
     
+    def version
+        self.class.version
+    end
+    
     # def udo_raw
     #     if self.@@udo_json == nil
     #         return nil
@@ -73,6 +77,11 @@ class Bomigration < ActiveRecord::Migration
    
         u = UdoDef.new(name, hash)
         yield(u)
+        sql = "UPDATE \"#{schema}\".\"METADATAVERSION\" SET VERSION=VERSION"
+        res = ActiveRecord::Base.connection.execute(sql)
+        if res == 0
+            p "update metadataversion failed"
+        end
         p "==>udo #{name} created"
     end
     
