@@ -346,6 +346,11 @@ create sbo.xml under webapps
 # change log level to debug #
 cd $ANW_HOME
 sed -i "s/INFO\|WARN/DEBUG/g" $ANW_HOME/target/sbo/WEB-INF/classes/logback-env.xml
+then set print.log.console to true
+create 2 dir
+cd
+mkdr -p "SAP/SAP Business One/Log"
+mkdr -p  "AppData/Local/SAP/SAP Business One/Log"
 
 # optional #
 # create easy-start script
@@ -399,7 +404,7 @@ remove following line (security filter)
 # disable sso (using sld), this is default, so no need to be done
 under project anw-web
 edit sso.properties
-ssoenabled=false
+ssoenabled=False # case sensitive!
 
 # optional # 
 # config attachment

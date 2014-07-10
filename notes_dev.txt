@@ -121,6 +121,8 @@ hana table column is case-sensitive (all b1 TABLE column name upcase )
 # haha sql
 # describe table
 SELECT COLUMN_NAME,DATA_TYPE_NAME,LENGTH FROM TABLE_COLUMNS WHERE TABLE_NAME ='NSUDOMETA' and schema_NAME='I027910_MASTER' order by position
+SELECT COLUMN_NAME,DATA_TYPE_NAME,LENGTH FROM TABLE_COLUMNS WHERE TABLE_NAME ='USERPROPERTY' and schema_NAME='I027910_MASTER' order by position
+
 in odbc, you have to use 
 'schema_name'.'table_name'
 but in hdbsql, you have to use

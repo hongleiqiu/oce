@@ -325,7 +325,8 @@ load "bomigration.rb"
             # ActiveRecord::Migrator.run(:down, "db/migrate/", version)   
 
             ActiveRecord::Migrator.migrate(appid, "#{repo_ws_path(appid)}/app/migrate", nil)
-            
+            # p "update \"config[:schema]\".\"METADATAVERSION\" SET VERSION=VERSION+1"
+            # ActiveRecord::Base.connection.exectue("update \"config[:schema]\".\"METADATAVERSION\" SET VERSION=VERSION+1")
             p "deploy udo success"
             
         rescue Exception => e
@@ -1098,13 +1099,13 @@ TEMPLATE_END
         
         diffs.each{|d|
             field = udo["fields"].detect{|f|f['name'] == d[:name]}
-            script << "add_column \"#{udo['name']}\", \"#{d[:name]}\", :#{field['type']}"
-            script_down << "delete_column \"#{udo['name']}\", \"#{d[:name]}\""
+            script << "add_udf \"#{udo['name']}\", \"#{d[:name]}\", :#{field['type']}"
+            script_down << "delete_udf \"#{udo['name']}\", \"#{d[:name]}\""
         }
         class_name = udo['name'].camelize
          version = udo["version"]
         template = <<TEMPLATE_END
-require 'Bomigration.rb'
+require 'bomigration.rb'
 class #{class_name} < Bomigration
   @@version=#{version}
   @@udo_json=<<JSONEND

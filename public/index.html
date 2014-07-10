@@ -1536,6 +1536,8 @@ end
 		}
 		
 		function add_file_to_tree(node, parent, tree_node){
+			
+			alert("add "+ inspect(node));
 			// alert(typeof(node));
 			// if (typeof(node) != 'string'){
 			if (typeof(node) == 'object'){ // node is a folder
@@ -1601,12 +1603,14 @@ end
 					type:type,
 				});
 			}
+				alert("added "+ inspect(node));
 		}
 		// init tree from fs structure
 		function init_tree2(data_root){
 			// alert(inspect(data_root.bo_list));
 		
 			// alert(inspect(data_root));
+			
 			if (data_root != null){
 				// data_root,root[0].children= [];
 				for (var i = 0;i <  data_root.length; i++){
@@ -3302,11 +3306,11 @@ end
 <!-- <div id="dropbox" style="width:250px;height:250px;border:1px red solid;z-index:100000;"></div>
 <input id="multiple" type="file" multiple>
 <script>
-	<!-- $("#dropbox, #multiple").html5Uploader({
+ 	$("#dropbox, #multiple").html5Uploader({
     name: "haha",
     postUrl: "/app/upload"    
 });
-alert("upalod"); -->
+alert("upalod"); 
 </script> -->
   </body>
 </html>

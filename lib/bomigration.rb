@@ -23,6 +23,7 @@ class Bomigration < ActiveRecord::Migration
     # end
     
     def self.create_udo(name, hash={}, &block)
+        p "===>create udo #{name} #{name.class}"
         schema = ActiveRecord::Base.connection.schema
         # get next id for NSUDOMETA
         # in hdbsql
@@ -40,8 +41,10 @@ class Bomigration < ActiveRecord::Migration
         # get impltable
        # sql = "select max(id) from '#{schema}'.'NSUDOTABLEALLOCINFO'"
         sql = "select max(id) from \"#{schema}\".\"NSUDOTABLEALLOCINFO\""
-        res = ActiveRecord::Base.connection.execute(sql)
-        impltable = res[0][0]+1
+        res = ActiveRecord::Base.connection.select_value(sql)
+        res = 0 if !res
+        # impltable = res[0][0]+1
+        impltable = res+1
         p "impltable=#{impltable}"
         
         # insert record into table NSUDOMETA
@@ -50,13 +53,24 @@ class Bomigration < ActiveRecord::Migration
 # ENDD
 #         p "sql=#{sql}"
 #         res = Base.connection.execute(sql)
+    t = Time.now
+    time = t.strftime("%Y-%m-%d %H:%M:%S.000000000")
         um = NSUdoMeta.new({
             :ID=>id,
-            :NAME=>name,
+            :NAME=>name.to_s,
             :NAMESPACE=>ActiveRecord::Migrator.appid,
-            :LABEL=>name, # TODO
-            :IMPLTABLE=>impltable,
-            :BOSETNAME=>name
+            :LABEL=>name.to_s, # TODO
+            :PLURALLABEL=>name.to_s,
+            :IMPLTABLE=>"NSUDO#{impltable}",
+            :CREATEDATE=>Time.now,
+            :UPDATEDATE=>Time.now,
+            :DISPLAYONMENU=>1,
+            :VERSION=>2,
+            :OWNERCODE=>1,
+            :USERSIGN=>1,
+            :USERSIGN2=>1,
+            :INSTANCE=>0
+            # :BOSETNAME=>name
         })
         um.id = id
         um.save!
@@ -77,7 +91,7 @@ class Bomigration < ActiveRecord::Migration
    
         u = UdoDef.new(name, hash)
         yield(u)
-        sql = "UPDATE \"#{schema}\".\"METADATAVERSION\" SET VERSION=VERSION"
+        sql = "UPDATE \"#{schema}\".\"METADATAVERSION\" SET VERSION=VERSION+1"
         res = ActiveRecord::Base.connection.execute(sql)
         if res == 0
             p "update metadataversion failed"
@@ -148,11 +162,13 @@ class Bomigration < ActiveRecord::Migration
                 :DEFAULTVALUE=>hash[:default],
                 :NAME=>fname,
                 :BONAME=>self.name,
-                :TYPE=>name
+                :TYPE=>name,
+                :CREATEDATE=>Time.now,
+                :UPDATEDATE=>Time.now,
             }).save
             p "==>udf #{fname} created"
         end
-    end
+    end # class UdoDef
 
 =begin    
 
@@ -179,14 +195,19 @@ class Bomigration < ActiveRecord::Migration
         end
     end
 =end
-    def add_column(do_name, column_name, column_type)
+    class << self
+        def add_udf(do_name, column_name, column_type)
+        end
+        def delete_udf(do_name, column_name, column_type)
+        end
+    
+        def drop_udo(name)
+    #p self
+    #p self.class.superclass.superclass.connection
+            ActiveRecord::Migration.connection.drop_table(name)
+        end
     end
     
-    def drop_udo(name)
-#p self
-#p self.class.superclass.superclass.connection
-        ActiveRecord::Migration.connection.drop_table(name)
-    end
     # ============
     # = override =
     # ============

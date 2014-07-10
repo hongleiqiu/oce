@@ -11,6 +11,11 @@ class HanaRecord < ActiveRecord::Base
         sql = "select max(ID) from \"#{schema}\".\"#{table_name}\""
         # res = ActiveRecord::Base.connection.run(sql)
         # id = res[0][0]+1
-        ActiveRecord::Base.connection.select_value(sql)
+        ret = ActiveRecord::Base.connection.select_value(sql)
+        if ret != nil
+            return ret
+        else
+           return 0
+        end
     end
 end
