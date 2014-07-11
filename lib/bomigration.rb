@@ -44,7 +44,8 @@ class Bomigration < ActiveRecord::Migration
         res = ActiveRecord::Base.connection.select_value(sql)
         res = 0 if !res
         # impltable = res[0][0]+1
-        impltable = res+1
+        impltable_index = res+1
+        impltable = "NSUDO#{impltable_index}"
         p "impltable=#{impltable}"
         
         # insert record into table NSUDOMETA
@@ -58,10 +59,11 @@ class Bomigration < ActiveRecord::Migration
         um = NSUdoMeta.new({
             :ID=>id,
             :NAME=>name.to_s,
-            :NAMESPACE=>ActiveRecord::Migrator.appid,
+            # :NAMESPACE=>ActiveRecord::Migrator.appid,
+            :NAMESPACE=>"ext.default",
             :LABEL=>name.to_s, # TODO
             :PLURALLABEL=>name.to_s,
-            :IMPLTABLE=>"NSUDO#{impltable}",
+            :IMPLTABLE=>impltable,
             :CREATEDATE=>Time.now,
             :UPDATEDATE=>Time.now,
             :DISPLAYONMENU=>1,
@@ -76,20 +78,41 @@ class Bomigration < ActiveRecord::Migration
         um.save!
         
         # get columns used by udo
-
+=begin
         #sql = "select TABLENAME, STRCOLUMNS, TXTCOLUMNS from '#{schema}'.'NSUDOTABLEALLOCINFO' where tablename='#{name}'"
-        sql = "select TABLENAME, STRCOLUMNS, TXTCOLUMNS from \"#{schema}\".\"NSUDOTABLEALLOCINFO\" where TABLENAME='#{name}'"
-
+        sql = "select TABLENAME, STRCOLUMNS, TXTCOLUMNS from \"#{schema}\".\"NSUDOTABLEALLOCINFO\" where TABLENAME='#{impltable}'"
         p "sql=#{sql}"
-        res = ActiveRecord::Base.connection.execute(sql)
-        used_str_column = res[0][0]
-        used_txt_colun = res[0][1]
-   
+        res = ActiveRecord::Base.connection.select_values(sql)
+        p "res:#{res.inspect}"
+        if res == nil || res.size == 0
+            sql = "INSERT INTO \"#{schema}\".\"NSUDOTABLEALLOCINFO\" VALUES(#{impltable_index}, '#{impltable}', '', '')"
+            ActiveRecord::Base.connection.execute(sql)
+        end
+        # used_str_column = res[0][0]
+        # used_txt_colun = res[0][1]
+=end
+        utais = UdoTableAllocInfo.find_by_sql("select TABLENAME, STRCOLUMNS, TXTCOLUMNS from \"#{schema}\".\"NSUDOTABLEALLOCINFO\" where TABLENAME='#{impltable}'")
+        if utais.size == 0
+            utai = UdoTableAllocInfo.new({
+                :ID=>impltable_index,
+                :TABLENAME=>impltable,
+                :STRCOLUMNS=>"",
+                :TXTCOLUMNS=>"",
+            })
+            utai.save!
+        else
+            utai = utais[0]
+        end
+        
+        
+        
+        
         # sql = "select ID,NAMESPACE,NAME,TYPE,SIZE,DESCRIPTION,DEFAULTVALUE,LABEL,TOOLTIP,COLUMNNAME,MANDATORY,ENABLED,READONLY,ISUNIQUE,VALIDATIONRULE,BONAMESPACE,\
         # BONAME,BONODETYPENAME,OBSFIELDID,OBSTABLENAME,PACKAGENAME,ACTIVATE,LINKEDBONAME,LINKEDBONAMESPACE,CUSTOMERRORMESSAGE,FREETEXTALLOWED,SEARCHRE\
         # SULTIDENTIFIER,VERSION,OWNERCODE,CREATEDATE,USERSIGN,UPDATEDATE,USERSIGN2,INSTANCE"
+    
    
-        u = UdoDef.new(name, hash)
+        u = UdoDef.new(name, hash, utai)
         yield(u)
         sql = "UPDATE \"#{schema}\".\"METADATAVERSION\" SET VERSION=VERSION+1"
         res = ActiveRecord::Base.connection.execute(sql)
@@ -101,37 +124,38 @@ class Bomigration < ActiveRecord::Migration
     
     class UdoDef
         attr_accessor :name, :prop
-        def initialize(name, hash)
+        def initialize(name, hash, utai)
             @name = name
             @prop = hash
+            @utai = utai
         end
         def types
 
-[                "boolean",
-                "date",
-                "time",
-                "datetime",
-                "integer",
-                "long",
-                "double",
-                "decimal",
-                "rate",
-                "price",
-                "sum",
-                "quantity",
-                "percent",
-                "measure",
-                "tax",
-                "string",
-                "text",
-                "link",
-                "address",
-                "phone",
-                "binary",
-                "memo",
-                "email",
-                "fax",
-                "zipcode"
+[                "Boolean",
+                "Date",
+                "Time",
+                "Datetime",
+                "Integer",
+                "Long",
+                "Double",
+                "Decimal",
+                "Rate",
+                "Price",
+                "Sum",
+                "Quantity",
+                "Percent",
+                "Measure",
+                "Tax",
+                "String",
+                "Text",
+                "Link",
+                "Address",
+                "Phone",
+                "Binary",
+                "Memo",
+                "Email",
+                "Fax",
+                "Zipcode"
 ]
         end
         
@@ -140,10 +164,10 @@ class Bomigration < ActiveRecord::Migration
 
         
         def method_missing(name, *args, &block) # :nodoc:
-            
+            type = name.to_s.capitalize
             p "name=>#{name}, args:#{args.inspect}"
 # p types.inspect
-            if !types.include?(name.to_s)
+            if !types.include?(type)
                 return super.send(name, *args, &block)
             end
             fname = args[0]
@@ -155,16 +179,47 @@ class Bomigration < ActiveRecord::Migration
 #"UPDATEDATE", "COLUMNNAME", "SEARCHRESULTIDENTIFIER", "ISUNIQUE", 
 #"TYPE", "PACKAGENAME", "LINKEDBONAME", "VERSION", "CREATEDATE", "DEFAULTVALUE", 
 #{}"BONAME", "OWNERCODE", "OBSFIELDID", "ACTIVATE", "USERSIGN2", "CUSTOMERRORMESSAGE", "LABEL", "ENABLED", "READONLY", "NAME", "NAMESPACE", "OBSTABLENAME", "ID", "FREETEXTALLOWED", "BONODETYPENAME", "VALIDATIONRULE", "USERSIGN", "INSTANCE", "BONAMESPACE", "SIZE", "DESCRIPTION", "TOOLTIP", "LINKEDBONAMESPACE", "MANDATORY"
-              
+            if @utai
+                if ["Text", "Binary"].include?(type)
+                    
+                    str = @utai.TXTCOLUMNS
+                    if str.strip != ""
+                        ar = str.split(",")
+                        index = ar.last.scan(/TXT(\d+)/).first
+                        @utai.TXTCOLUMNS ="#{str},TXT#{index.to_i+1}"
+                    else
+                        @utai.TXTCOLUMNS = "TXT1"
+                    end
+                    @utai.save!
+                else
+                    str = @utai.STRCOLUMNS
+                    if str.strip != ""
+                        ar = str.split(",")
+                        p "str=#{str}, ar=#{ar.inspect}"
+                        index = ar.last.scan(/STR(\d+)/).first
+                        @utai.STRCOLUMNS ="#{str},STR#{index.to_i+1}"
+                    else
+                        @utai.STRCOLUMNS = "STR1"
+                    end
+                    @utai.save!
+                end
+            end
             up = UserProperty.new({
                 :ID=>UserProperty.max_id+1,
-                :NAMESPACE=>ActiveRecord::Migrator.appid,
+                # :NAMESPACE=>ActiveRecord::Migrator.appid,
+                :NAMESPACE=>"ext.default",
+                :ISUNIQUE=>hash[:isUnique],
                 :DEFAULTVALUE=>hash[:default],
-                :NAME=>fname,
-                :BONAME=>self.name,
-                :TYPE=>name,
+                :NAME=>fname.to_s,
+                :BONAME=>self.name.to_s,
+                :TYPE=>type,
                 :CREATEDATE=>Time.now,
                 :UPDATEDATE=>Time.now,
+                :ENABLED=>1,
+                :DESCRIPTION=>hash[:desc],
+                :LABEL=>fname.to_s,
+                :COLUMNNAME=>"",
+                :SIZE=>hash[:size],
             }).save
             p "==>udf #{fname} created"
         end

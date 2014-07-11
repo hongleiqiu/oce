@@ -770,7 +770,7 @@
 						<div class="prop_name">Type</div><div class="prop_v"><input id="fprop_v_type"></input></div>
 					</div>
 					<div class="prop_line" style="height:30px;">
-						<div class="prop_name">unique</div><div class="prop_v"><input type="checkbox" id="prop_v_readonly"></input></div>
+						<div class="prop_name">unique</div><div class="prop_v"><input type="checkbox" id="prop_v_unique"></input></div>
 					</div>
 				</div>
 			</div>
@@ -1124,7 +1124,7 @@ end
 		*/
 		alert(inspect(g_bos));
 		
-		for (i=0; i<g_bos.data.length; i++){
+		for (var i=0; i<g_bos.data.length; i++){
 			b = g_bos.data[i];
 			if (b){
 				alert(inspect(b));
@@ -1386,7 +1386,7 @@ end
 				
 				if (data_root.bo_list != null && data_root.bo_list.lenght>0)
 				var i = 0;
-				for (i = 0;i <  data_root.bo_list.length; i++){
+				for (var i = 0;i <  data_root.bo_list.length; i++){
 					item = data_root.bo_list[i];
 					item=item.substr(item.lastIndexOf('/')+1);
 					// alert("bo:"+inspect(item));
@@ -1397,7 +1397,7 @@ end
 					});
 				}
 				if (data_root.ext_list != null)
-				for (i = 0;i <  data_root.ext_list.length; i++){
+				for (var i = 0;i <  data_root.ext_list.length; i++){
 					item = data_root.ext_list[i];
 					
 					// alert("code:"+inspect(item));
@@ -1409,7 +1409,7 @@ end
 					});
 				}
 				if (data_root.service_list != null)
-						for (i = 0;i <  data_root.service_list.length; i++){
+						for (var i = 0;i <  data_root.service_list.length; i++){
 								item = data_root.service_list[i];
 								// alert("code:"+inspect(item));
 								item=item.substr(item.lastIndexOf('/')+1);
@@ -1420,7 +1420,7 @@ end
 								});
 							}
 					if (data_root.ui_universal != null)
-						for (i = 0;i <  data_root.ui_universal.length; i++){
+						for (var i = 0;i <  data_root.ui_universal.length; i++){
 							item = data_root.ui_universal[i];
 							// alert("code:"+inspect(item));
 							item=item.substr(item.lastIndexOf('/')+1);
@@ -1431,7 +1431,7 @@ end
 													});
 						}
 					if (data_root.ui_mobile != null)
-					for (i = 0;i <  data_root.ui_mobile.length; i++){
+					for (var i = 0;i <  data_root.ui_mobile.length; i++){
 						item = data_root.ui_mobile[i];
 						// alert("code:"+inspect(item));
 						item=item.substr(item.lastIndexOf('/')+1);
@@ -1537,7 +1537,7 @@ end
 		
 		function add_file_to_tree(node, parent, tree_node){
 			
-			alert("add "+ inspect(node));
+			// alert("add "+ inspect(node));
 			// alert(typeof(node));
 			// if (typeof(node) != 'string'){
 			if (typeof(node) == 'object'){ // node is a folder
@@ -1588,9 +1588,12 @@ end
 					tree_node.children.push(tnode);
 				}
 			
-				list = node.v;
-				for (var i =0; i< list.length; i++){
-					add_file_to_tree(list[i], node, tnode);
+				var list = node.v;
+					// alert("length:"+list.length);
+				for (var k =0; k< list.length; k++){
+					// alert(k+"th:"+ list[k]);
+					add_file_to_tree(list[k], node, tnode);
+					// alert(k +"th in "+list.length+" added" );
 				}
 			}else{
 				type = "code";
@@ -1603,7 +1606,7 @@ end
 					type:type,
 				});
 			}
-				alert("added "+ inspect(node));
+				// alert("added "+ inspect(node));
 		}
 		// init tree from fs structure
 		function init_tree2(data_root){
@@ -2003,7 +2006,7 @@ end
 						g_startLogline = data.start_line;
 						g_lastLogLine = data.start_line -1;
 						count = c.split("<br/>").length;
-						for (i = 0; i<count; i++){
+						for (var i = 0; i<count; i++){
 							g_lastLogLine += 1;
 							_num = g_lastLogLine+1;
 							$("#log_ln").append(_num+"<br/>");
@@ -2053,7 +2056,7 @@ end
 						$("#log_c").html(data+$("#log_c").html);
 						count = data.split("<br/>").length;
 						if (count > 0){
-							for (i = 0; i<count; i++){
+							for (var i = 0; i<count; i++){
 								g_startLogline -= 1;
 								_num = g_startLogline+1;
 								$("#log_ln").html(_num+"<br/>"+$("#log_ln").html());
@@ -2104,7 +2107,7 @@ end
 					$("#log_c").append(data);
 					count = data.split("<br/>").length;
 					if (count > 0){
-						for (i = 0; i<count; i++){
+						for (var i = 0; i<count; i++){
 							g_lastLogLine += 1;
 									_num = g_lastLogLine+1;
 									$("#log_ln").append(_num+"<br/>");
@@ -2353,7 +2356,7 @@ end
 						
 						g_bos = data.data;
 						_html = "";
-						for (i =0; i< data.data.data.length; i++){
+						for (var i =0; i< data.data.data.length; i++){
 							// alert(inspect(data.data.data[i]));
 							// _html += render_bo(data.data.data[i]);
 							inserted = $("#canvas").append(render_bo(data.data.data[i]));
@@ -2412,7 +2415,7 @@ end
 			// alert("test name "+_name);
 			// alert("array:"+inspect(excl));
 			// alert(children.length);
-			for (i = 0; i< excl.length; i++){
+			for (var i = 0; i< excl.length; i++){
 				// alert(i+":"+inspect(exc[i]));
 				if (excl[i] == null)
 					continue;
@@ -2864,6 +2867,7 @@ end
 							name:"",
 							type:"",
 							desc:"",
+							size:1,
 							ui:_id,
 							fields:[{
 								name:"id",
@@ -3104,7 +3108,7 @@ end
 	function render_bo_fields(bo){
 		ret = "";
 		// alert(inspect(bo.fields.length));
-		for (i =0; i< bo.fields.length;i++){
+		for (var i =0; i< bo.fields.length;i++){
 			f = bo.fields[i];
 			ret += "<div class=\"field\" style=\"border-bottom:1px solid grey;margin-top:5px;\" i='"+i+"'onclick=\"show_field_prop(event);\";>\
 				<span class='field_name' >"+f.name+"</span> <span class='field_type' style=\"color:grey\">("+f.type+")</span></div>";
@@ -3145,7 +3149,7 @@ end
 		opt = "";
 		
 		
-		for (i=0;i<g_type_options.length;i++){
+		for (var i=0;i<g_type_options.length;i++){
 			op = g_type_options[i];
 			if (op.toLowerCase() == f.type.toLowerCase())
 				opt += "<option selected>"+op+"</option>";

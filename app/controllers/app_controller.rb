@@ -996,9 +996,18 @@ ENDD
              else
                     dfv = "#{f['default_value']}"
              end
-                sf3 += ", :default=>#{dfv}"
+             sf3 += ", :default=>#{dfv}"
             end
+            
+            if f['unique'] == "true" || f['unique'] == "true"
+              sf3 += ", :isUnique=>1"
+             end
+             
+             if f['size'] 
+               sf3 += ", :size=>#{f['size'] }"
+              end             
             sf3 +="\n"
+        
         }    
         # t = Time.now
         #    time = t.strftime("%Y%m%d%H%M%S")+t.usec.to_s

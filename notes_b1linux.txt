@@ -629,3 +629,6 @@ You $ANW_HOME/target/sbo/WEB-INF/classes/META-INF/configuration.xml
         </Tenant>
     </Tenants>
 </Configuration>
+
+8. If you got eof exception when loginfilter, maybe sld problem
+check sso.properties, and set ssoenabled=False (case sensitive)
