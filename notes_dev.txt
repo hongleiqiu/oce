@@ -145,6 +145,7 @@ SELECT COLUMN_NAME, DEFAULT_VALUE, DATA_TYPE_NAME, IS_NULLABLE FROM TABLE_COLUMN
 
 
 tips:
+find /usr/lib64/ruby/gems -name "*.rb" |xargs grep "convertOdbcValToGenericVal"
 find /usr/lib64/ruby/gems/1.8/gems/activerecord-odbc-adapter-2.0 -name "*.rb" |xargs grep "drop_table"
 find ~/.gem/ruby/ -name "*.rb" |xargs grep "drop_table"
 find ~/.gem/ruby/ -name "*.rb" |xargs grep initialize_schema_migrations_table

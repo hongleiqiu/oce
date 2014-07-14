@@ -9,7 +9,7 @@ echo current path:$pwd1
 rpath=${1#$pwd1}
 echo $rpath
 expect -c "
-spawn rsync -v $1 root@10.58.113.181:/var/www/oce/$rpath
+spawn rsync -v $1 root@10.58.9.209:/var/www/oce/$rpath
 expect {
 	\"*assword\" {set timeout 300; send \"Initial0\r\";}
 	 \"yes/no\" {send \"yes\r\"; exp_continue;}

@@ -343,6 +343,7 @@ module ActiveRecord
       end
 
       def method_missing(method, *arguments, &block)
+          p "method_missing #{method}"
         arg_list = arguments.map(&:inspect) * ', '
 
         say_with_time "#{method}(#{arg_list})" do
@@ -376,20 +377,28 @@ module ActiveRecord
 
   end
 
+
+
+        
+
+
   class Migrator#:nodoc:
     class << self
         def appid
             return @@appid
-     end
-      def migrate(appid, migrations_path, target_version = nil)
+        end
+        
+        def migrate(appid, migrations_path, target_version = nil)
     p "mpath #{migrations_path}"
     p "appid #{appid}"
         @@appid = appid
-        case
-          when target_version.nil?              then up(migrations_path, target_version)
-          when current_version > target_version then down(migrations_path, target_version)
-          else                                       up(migrations_path, target_version)
-        end
+   
+            case
+              when target_version.nil?              then up(migrations_path, target_version)
+              when current_version > target_version then down(migrations_path, target_version)
+              else                                       up(migrations_path, target_version)
+            end
+        
       end
 
       def rollback(migrations_path, steps=1)
@@ -403,8 +412,14 @@ module ActiveRecord
       end
 
       def up(migrations_path, target_version = nil)
-    p "mig1 path #{migrations_path}"
-        self.new(:up, migrations_path, target_version).migrate
+        # begin
+            p "mig1 path #{migrations_path}"
+            self.new(:up, migrations_path, target_version).migrate
+        # rescue Exception=>e
+        #     p e.inspect
+        #     p e.backtrace[0..e.backtrace.size-1].join("\n\r")
+        #     self.new(:up, migrations_path, target_version).migrate
+        # end
       end
 
       def down(migrations_path, target_version = nil)
@@ -437,23 +452,24 @@ module ActiveRecord
         # Use the Active Record objects own table_name, or pre/suffix from ActiveRecord::Base if name is a symbol/string
         name.table_name rescue "#{ActiveRecord::Base.table_name_prefix}#{name}#{ActiveRecord::Base.table_name_suffix}"
       end
-    end
+      
+    end # class << self
 
     def initialize(direction, migrations_path, target_version = nil)
       raise StandardError.new("This database does not yet support migrations") unless Base.connection.supports_migrations?
       Base.connection.initialize_schema_migrations_table
       @direction, @migrations_path, @target_version = direction, migrations_path, target_version      
-p "mig path #{@migrations_path}"
-begin
-    raise Exception.new
-rescue Exception=>e
-    stack = 100
-    if e.backtrace.size >=2 
-        stack  += 1
-        stack = e.backtrace.size-1 if stack >= e.backtrace.size
-        p e.backtrace[1..stack].join("\n") 
-    end
-end
+        p "mig path #{@migrations_path}"
+        begin
+            raise Exception.new
+        rescue Exception=>e
+            stack = 100
+            if e.backtrace.size >=2 
+                stack  += 1
+                stack = e.backtrace.size-1 if stack >= e.backtrace.size
+                p e.backtrace[1..stack].join("\n") 
+            end
+        end
     end
 
     def current_version
@@ -503,14 +519,21 @@ p "migrated:#{migrated.inspect}"
         end
 
         begin
-          ddl_transaction do
+          # ddl_transaction do
+          # Base.connection.begin_db_transaction
+          ActiveRecord::Base.connection.transaction :joinable=>true do
               p "migrating #{@direction}..."
             migration.migrate(@direction)
             p "migrating complete"
             record_version_state_after_migrating(migration.version)
             p "Version recorded (#{migration.version})"
-          end
+            end
+            # Base.connection.commit_db_transaction
+          # end
         rescue => e
+            p e.inspect
+            p e.backtrace[0..e.backtrace.size-1].join("\n\r")
+            Base.connection.rollback_db_transaction
           canceled_msg = Base.connection.supports_ddl_transactions? ? "this and " : ""
           raise StandardError, "An error has occurred, #{canceled_msg}all later migrations canceled:\n\n#{e}", e.backtrace
         end

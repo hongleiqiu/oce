@@ -318,7 +318,7 @@ p "===>create sql:"+create_sql
         sm_table = ActiveRecord::Migrator.schema_migrations_table_name
 p "initialize_schema_migrations_table1 #{sm_table}"
         tables.each{|t|
-            p "==>#{t}"
+            # p "==>#{t}"
 }
         unless tables.detect { |t| t == sm_table }
 p "schema table not found"

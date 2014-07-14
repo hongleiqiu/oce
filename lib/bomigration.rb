@@ -1,4 +1,7 @@
 require 'anwschema.rb'
+require 'nsudometa.rb'
+require 'nsudotableallocinfo.rb'
+require 'userproperty.rb'
 class Bomigration < ActiveRecord::Migration
     @@version =-1
     # attr_accessor :version
@@ -91,9 +94,9 @@ class Bomigration < ActiveRecord::Migration
         # used_str_column = res[0][0]
         # used_txt_colun = res[0][1]
 =end
-        utais = UdoTableAllocInfo.find_by_sql("select TABLENAME, STRCOLUMNS, TXTCOLUMNS from \"#{schema}\".\"NSUDOTABLEALLOCINFO\" where TABLENAME='#{impltable}'")
+        utais = NSUdoTableAllocInfo.find_by_sql("select TABLENAME, STRCOLUMNS, TXTCOLUMNS from \"#{schema}\".\"NSUDOTABLEALLOCINFO\" where TABLENAME='#{impltable}'")
         if utais.size == 0
-            utai = UdoTableAllocInfo.new({
+            utai = NSUdoTableAllocInfo.new({
                 :ID=>impltable_index,
                 :TABLENAME=>impltable,
                 :STRCOLUMNS=>"",
@@ -197,7 +200,7 @@ class Bomigration < ActiveRecord::Migration
                         ar = str.split(",")
                         p "str=#{str}, ar=#{ar.inspect}"
                         index = ar.last.scan(/STR(\d+)/).first
-                        @utai.STRCOLUMNS ="#{str},STR#{index.to_i+1}"
+                        @utai.STRCOLUMNS ="#{str},STR#{index[0].to_i+1}"
                     else
                         @utai.STRCOLUMNS = "STR1"
                     end
@@ -212,6 +215,7 @@ class Bomigration < ActiveRecord::Migration
                 :DEFAULTVALUE=>hash[:default],
                 :NAME=>fname.to_s,
                 :BONAME=>self.name.to_s,
+                :BONAMESPACE=>self.name.to_s,
                 :TYPE=>type,
                 :CREATEDATE=>Time.now,
                 :UPDATEDATE=>Time.now,
@@ -220,7 +224,8 @@ class Bomigration < ActiveRecord::Migration
                 :LABEL=>fname.to_s,
                 :COLUMNNAME=>"",
                 :SIZE=>hash[:size],
-            }).save
+            })
+            up.save!
             p "==>udf #{fname} created"
         end
     end # class UdoDef

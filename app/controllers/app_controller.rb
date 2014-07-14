@@ -333,7 +333,7 @@ load "bomigration.rb"
             p e.inspect
             p e.backtrace[0..e.backtrace.size-1].join("\n\r")
             error("Deploy failed:<pre>"+ e.message+"</pre>")
-            ActiveRecord::Migrator.rollback(appid)
+            # ActiveRecord::Migrator.rollback(appid)
             return
         end
         p "deploy ok"
@@ -767,6 +767,7 @@ load "bomigration.rb"
     end
     # genereate bo migration script
     def gbm
+        p "===>gbm"
         appid = params[:appid]
         path = params[:fname]
     
@@ -963,6 +964,7 @@ load "bomigration.rb"
         return script
     end
     def generate_migration_source(udo)
+        p "generate_migration_source"
         sf = ""
         _sf = ""
         udo["fields"].each{|f|
@@ -990,8 +992,11 @@ ENDD
         udo["fields"].each{|f|
 
             sf3 += "\t\t t.#{f['type']} :#{f['name']}" 
+            p "112default value #{f['default_value']}"
+            
             if f['default_value']
-             if ["string"].include?(f['type'].downcase)
+                p "111default value #{f['default_value']}"
+             if ["string"].include?(f['type'].downcase) || f['default_value'].downcase=="null"
                     dfv = "\"#{f['default_value']}\""
              else
                     dfv = "#{f['default_value']}"

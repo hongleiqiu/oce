@@ -1122,15 +1122,15 @@ end
 		});
 		alert(inspect(ret));
 		*/
-		alert(inspect(g_bos));
+		// alert(inspect(g_bos));
 		
 		for (var i=0; i<g_bos.data.length; i++){
 			b = g_bos.data[i];
 			if (b){
-				alert(inspect(b));
-				alert("#"+b.ui);
+				// alert(inspect(b));
+				// alert("#"+b.ui);
 				pos = $("#"+b.ui).offset();
-				alert(pos);
+				// alert(pos);
 				b.x = pos.left-$("#main").offset().left;
 				b.y = pos.top-$("#main").offset().top;
 			}
@@ -3004,7 +3004,7 @@ end
 								<img src=\"/images/button-add.png\" class=\"toolbar_btn\">\
 							</div>";
 		$("#balloon_field_list").html(html);
-		alert(html);
+		// alert(html);
 		$("#balloon").animate({height: 'toggle', opacity: 'toggle'}, "slow");
 		if (e){
 			$("#balloon").css("left", e.clientX);
@@ -3048,7 +3048,7 @@ end
 	
 	g_selected_bo_field = null;
 	function render_bo(bo){
-		alert(inspect(bo));
+		// alert(inspect(bo));
 		str = "<div style='position:absolute;left:"+bo.x+"px; top: "+bo.y+"px;' id='"+bo.ui+"' class='draggable_obj ui-draggable bo'>\
 			<img src='/images/block2.png' style='height:50px;'>\
 			<div class='draggable_obj_name'>"
@@ -3237,11 +3237,11 @@ end
 		$("#fprops").html(_html);
 		*/
 		i = g_selected_bo_field.attr("i");
-		alert(i);
+		// alert(i);
 		f  = g_bo.prop("ref").fields[i];
-		alert(inspect(f));
+		// alert(inspect(f));
 		_html = render_bo_field_props(f);
-		alert(_html);
+		// alert(_html);
 		$("#fprops").html(_html);
 		$("#prop_pad").css("display", "none");
 		$("#field_prop_pad").css("display", "block");
@@ -3307,14 +3307,14 @@ end
 		
 </script>
 
-<!-- <div id="dropbox" style="width:250px;height:250px;border:1px red solid;z-index:100000;"></div>
+<!--<div id="dropbox" style="width:250px;height:250px;border:1px red solid;z-index:100000;"></div>
 <input id="multiple" type="file" multiple>
 <script>
  	$("#dropbox, #multiple").html5Uploader({
     name: "haha",
     postUrl: "/app/upload"    
 });
-alert("upalod"); 
-</script> -->
+// alert("upalod"); 
+</script--> 
   </body>
 </html>
