@@ -872,7 +872,6 @@ var toObject = function (o) {
 
 define('ace/mode/javascript_worker', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/worker/mirror', 'ace/mode/javascript/jshint'], function(require, exports, module) {
 
-
 var oop = require("../lib/oop");
 var Mirror = require("../worker/mirror").Mirror;
 var lint = require("./javascript/jshint").JSHINT;

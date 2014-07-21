@@ -265,6 +265,13 @@ end
           success()
     end
     
+    def migrated
+        appid = params[:appid]
+        @list = []
+        list = ActiveRecord::Migrator.get_all_versions
+        @list = @list.concat(list).reverse
+        
+    end
     # deploy to dev environment
     # appid 
     def deploy
@@ -337,6 +344,45 @@ load "bomigration.rb"
             return
         end
         p "deploy ok"
+        
+        
+        
+        # deploy ui
+        ui_root_dir = "#{app_root_dir}/app/ui_root"
+        tenantid=1
+        if FileTest::exists?(ui_root_dir) 
+            dest = "#{$SETTINGS[:ui_root_dir]%[tenantid]}/#{appid}"
+            p "uid dest path =#{dest}"
+            begin
+                FileUtils.mkdir_p(dest)
+                p "copy #{ui_root_dir} to #{dest}"
+                FileUtils.copy_entry(ui_root_dir, "#{dest}/")
+            rescue Exception => e
+                p e.inspect
+                p e.backtrace[0..e.backtrace.size-1].join("\n\r")
+                error("Deploy failed:<pre>"+ e.message+"</pre>")
+                return
+            end
+        end
+        new_id = ActiveRecord::Base.connection.select_value("select SELECT  EXTENSIONAPPREGISTRYSEQ.NEXTVAL from dummy")
+        # table EXTENSIONAPPREGISTRY
+        # hdbsql H00=> SELECT COLUMN_NAME,DATA_TYPE_NAME,LENGTH FROM TABLE_COLUMNS WHERE TABLE_NAME ='EXTENSIONAPPREGISTRY' and schema_NAME='I027910_MASTER' order by position        
+        # COLUMN_NAME,DATA_TYPE_NAME,LENGTH
+        # "ID","BIGINT",19
+        # "EXTENSIONID","NVARCHAR",50
+        # "EXTENSIONVERSION","NVARCHAR",50
+        # "OWNERCODE","INTEGER",10
+        # "CREATEDATE","TIMESTAMP",27
+        # "USERSIGN","BIGINT",19
+        # "UPDATEDATE","TIMESTAMP",27
+        # "USERSIGN2","BIGINT",19
+        # "INSTANCE","BIGINT",19
+        sql = "insert into EXTENSIONAPPREGISTRY values(#{new_id}, '#{appid}', '1', '', Time.now, 1, Time.now, 2, 1 )"
+        ActiveRecord::Base.connection.execute(sql)
+        p "deploy UI ok"      
+        
+        
+        
         dev_server_b1_url = @user.dev_server_b1_url
         success("Deploy successfully", {:url=>"#{dev_server_b1_url}"})
         
@@ -344,7 +390,114 @@ load "bomigration.rb"
     #    /opt/share/sfaattachment/
      #   \T1\rtspace\com.cid.oms\src\resources\UI-INF
     end
-    
+ 
+        def undeployto
+            appid = params[:appid]
+            version = params[:v]
+            
+            app_root_dir = repo_ws_path(appid)
+            ext_root_dir = "#{app_root_dir}/app/#{$FS_EXT_ROOT}"
+
+            # deploy script
+            if FileTest::exists?(ext_root_dir) 
+                dest = "#{$FS_RT_EXT_ROOT}/#{appid}"
+                begin
+                    p "rm #{ext_root_dir}"
+                    
+                    FileUtils.rm_rf(dest)
+                rescue Exception => e
+                    p e.inspect
+                    p e.backtrace[0..e.backtrace.size-1].join("\n\r")
+                    error("Deploy failed:<pre>"+ e.message+"</pre>")
+                    return
+                end
+            end
+            p "undeploy script ok"
+
+            p "undeploy udo"
+            begin
+                # migrations = all_migrations(appid)
+                #         
+                # migrations.each{|m|
+                #     begin
+                #         eval "load '#{m[:filename]}'"
+                #         eval "#{m[:cls]}.new().up"
+                #     rescue Exception=>e
+                #         p e.inspect
+                #         p e.backtrace[1..e.backtrace.size-1].join("\n\r")
+                #     end
+                # }
+
+
+    load "migration.rb"
+    load "schema_statements.rb"
+    load "anwschema.rb"
+    load "bomigration.rb"
+
+                config={
+                    :adapter=> "odbc",
+                    :dsn=> "DSN1",
+                    :username=> "system",
+                    :password=> "manager",
+                    :column_store=> "true",
+                #    :schema=>"abcddde"
+                    :schema=>"I027910_MASTER"
+                }
+
+                ActiveRecord::Base.establish_connection(ActiveRecord::Base::ConnectionSpecification.new(config, "odbc_connection"))
+
+    #ActiveRecord::Base.connection.execute("INSERT INTO \"I027910_MASTER\".\"schema_migrations\" VALUES ('dd', '2014070620141747944')")
+    #p "done !!"
+                # ActiveRecord::Migrator.run(:down, "db/migrate/", version)   
+
+                ActiveRecord::Migrator.migrate(appid, "#{repo_ws_path(appid)}/app/migrate", version.to_i)
+                # p "update \"config[:schema]\".\"METADATAVERSION\" SET VERSION=VERSION+1"
+                # ActiveRecord::Base.connection.exectue("update \"config[:schema]\".\"METADATAVERSION\" SET VERSION=VERSION+1")
+                p "deploy udo success"
+
+            rescue Exception => e
+                p e.inspect
+                p e.backtrace[0..e.backtrace.size-1].join("\n\r")
+                error("Deploy failed:<pre>"+ e.message+"</pre>")
+                # ActiveRecord::Migrator.rollback(appid)
+                return
+            end
+            p "undeploy ok"
+
+
+
+            # deploy ui
+            ui_root_dir = "#{app_root_dir}/app/ui_root"
+            tenantid=1
+            if FileTest::exists?(ui_root_dir) 
+                dest = "#{$SETTINGS[:ui_root_dir]%[tenantid]}/#{appid}"
+                p "uid dest path =#{dest}"
+                begin
+                    p "rm #{dest}"
+                    FileUtils.rm_rf(dest)
+
+                rescue Exception => e
+                    p e.inspect
+                    p e.backtrace[0..e.backtrace.size-1].join("\n\r")
+                    error("Deploy failed:<pre>"+ e.message+"</pre>")
+                    return
+                end
+            end
+            new_id = ActiveRecord::Base.connection.select_value("SELECT  EXTENSIONAPPREGISTRYSEQ.NEXTVAL from dummy")
+
+            sql = "delete from EXTENSIONAPPREGISTRY where extensionid='#{appid}'"
+            ActiveRecord::Base.connection.execute(sql)
+            p "undeploy UI ok"      
+
+
+
+            dev_server_b1_url = @user.dev_server_b1_url
+            success("Deploy successfully", {:url=>"#{dev_server_b1_url}"})
+
+
+        #    /opt/share/sfaattachment/
+         #   \T1\rtspace\com.cid.oms\src\resources\UI-INF
+        end   
     # open file
     def of
         appid = params[:appid]

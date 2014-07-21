@@ -240,6 +240,7 @@
 			<div id='main_tb_left' style="position:relatvie;float:left;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
 				<a href="javascript:gosubmit();" style="display:block;float:left;margin-left:5px;"> <img src="/images/Lightning.png" title="App Store" class="toolbar_btn" style="width:35px;height:35px;"></a>
 				<a href="javascript:deploy();" style="display:block;float:left;margin-left:5px;"> <img src="/images/deploy.png" title="Deploy" class="toolbar_btn" style="width:35px;height:35px;"></a>
+				<a href="javascript:void();" style="display:block;float:left;margin-left:5px;" onclick="show_balloon_for_mig(event);"> <img src="/images/deploy.png" title="Undeploy" class="toolbar_btn" style="width:35px;height:35px;"></a>
 
 			</div>
 			<div id='main_tb_btns' style="position:relatvie;float:right;top:0px;margin-right:10px;margin-top:-15px;border:0px solid red;">
@@ -285,8 +286,27 @@
 					<button id = "btn_open_editor"  class='btn1' onclick="show_editor()" >Editor</button>
 				</div>
 			</div>
-			<div id="editor" name="body" class="droppable" style="display:none;width:99%;height:580px;">
-			</div>
+			<div id="editor_wrapper" style="width:100%;height:580px;display:none;">
+				<div id="editor" name="body" class="droppable" style="display:block;width:99%;height:560px;">
+				</div>
+				<div id="editor_bottombar" class="" name="editor_bottombar" style="font-size:8pt;height:35px;float:bottom;;bottom:0px;border-top:1px solid #d8d8d8;position:static;bottom:0px;float:bottom;">
+					<!-- <div onclick="show_mode();" style="cursor:default;border-left:1px solid #c8c8c8;float:right;width:100px;padding-left:5px;">▼Mode</div>
+					<div id="mode_list" style="display:none;z-index:100;border:1px solid #c8c8c8;font-size:8pt;position:absolute;float:bottom;">
+						<div style="border-bottom:1px solid #c8c8c8;padding:2px 5px;">TextMate</div>
+						<div style="border-bottom:1px solid #c8c8c8;padding:2px 5px;">TextMate</div>
+						<div style="border-bottom:1px solid #c8c8c8;padding:2px 5px;">TextMate</div>
+					</div> -->
+					<div id="btn_select_theme" onclick="show_themes();"  style="cursor:default;border-left:1px solid #c8c8c8;float:right;width:100px;padding-left:5px;">▼Theme</div>
+					<div id="theme_list" style="min-width:100px;display:none;z-index:100;border-left:1px solid #c8c8c8;border-right:1px solid #c8c8c8;font-size:8pt;position:absolute;">
+						<div onclick="on_select_theme('textmate');" style="cursor:default;border-top:1px solid #c8c8c8;padding:2px 5px;">TextMate</div>
+						<div onclick="on_select_theme('ambiance');" style="cursor:default;border-top:1px solid #c8c8c8;padding:2px 5px;">Ambiance</div>
+						<div onclick="on_select_theme('xcode');" style="cursor:default;border-top:1px solid #c8c8c8;padding:2px 5px;">XCode</div>
+						<div onclick="on_select_theme('twilight');" style="cursor:default;border-top:1px solid #c8c8c8;padding:2px 5px;">Twilight</div>
+						<div onclick="on_select_theme('eclipse');" style="cursor:default;border-top:1px solid #c8c8c8;padding:2px 5px;">Eclipse</div>
+						<div onclick="on_select_theme('terminal');" style="cursor:default;border-top:1px solid #c8c8c8;padding:2px 5px;">Terminal</div>
+					</div>
+				</div>
+			</div><!-- editor_wrapper -->
 			<div id="log" name="body" class="droppable" style="display:none;width:99%;height:580px;background:white;overflow:scroll;">
 					<div id="bt_plog" style="height:20px;width:100%;text-align:center;color:#9999ff;" onclick="retrieve_previous_log();">
 						<a><i><span style="color:#9999ff;cursor:pointer;"> Previous Log</span></i></a>
@@ -366,294 +386,8 @@
 				    </div>
 				  </div>
 				</div>
-			<script>
-				function commit_file(){
-					type = g_selected_node.type;
-					// fname = g_selected_node.name;
-					fname = getNodePath(g_selected_node);
-					// alert(fname);
-					// alert(isnew);
-					msg = $("#commit-description-textarea").val();
-					if (type != 'bo' && type !='code')
-						return;
-					$.ajax({
-						type: "post",
-						url: "/app/commit?t="+ new Date().getTime(),
-						dataType: 'json',
+				<script src="/javascripts/git.js" ></script>
 
-						data: {
-							appid:g_appid,
-							fname:fname,
-							type:type,
-							m:msg
-							
-							// sid: '<%=@sid%>',
-							// authenticity_token:window._token
-						}, 
-						success: function(data, textStatus){
-							// alert( "Data Saved: " + data +","+ textStatus);
-
-							showWaiting(false);
-							if (data.error){
-								popup(data.error);
-							}else{
-								// $("#applist").html(data);
-								popup('Commit successfully');
-								show_editor();
-							}
-
-						},
-						error: function(xhr, textStatus, errorThrow){
-							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
-							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
-
-							showWaiting(false);
-
-						}
-					}); // $ajax
-				showWaiting(true);
-				}
-				function select_commit(){
-					$("#git_commit").css("display", "block");
-					$("#diff").css("display", "none");
-					$("#push").css("display", "none");
-					$("#pull").css("display", "none");
-					$("#history").css("display", "none");
-										
-					$("#btn_tab_commit").addClass("selected");
-					$("#btn_tab_diff").removeClass("selected");
-					$("#btn_tab_push").removeClass("selected");
-					$("#btn_tab_pull").removeClass("selected");
-				}
-				function select_diff(){
-					$("#diff").css("display", "block");
-					$("#git_commit").css("display", "none");
-					$("#push").css("display", "none");
-					$("#pull").css("display", "none");
-					$("#history").css("display", "none");
-										
-					$("#btn_tab_diff").addClass("selected");
-					$("#btn_tab_commit").removeClass("selected");
-					$("#btn_tab_push").removeClass("selected");
-					$("#btn_tab_pull").removeClass("selected");
-					
-					show_diff();
-				}
-				function select_hisotry(){
-					$("#diff").css("display", "block");
-					$("#git_commit").css("display", "none");
-					$("#push").css("display", "none");
-					$("#pull").css("display", "none");
-					$("#history").css("display", "none");
-										
-					$("#btn_tab_diff").addClass("selected");
-					$("#btn_tab_commit").removeClass("selected");
-					$("#btn_tab_push").removeClass("selected");
-					$("#btn_tab_pull").removeClass("selected");
-					
-					$.ajax({
-						type: "post",
-						url: "/app/history?f="+fname+"&t="+ new Date().getTime(),
-						// dataType: 'json',
-
-						data: {
-							appid:g_appid,
-
-
-							// sid: '<%=@sid%>',
-							// authenticity_token:window._token
-						}, 
-						success: function(data, textStatus){
-							// alert( "Data Saved: " + data +","+ textStatus);
-
-							showWaiting(false);
-							// if (data.error){
-							// 					popup(data.error);
-							// 					diff_editor.setValue(data.data);
-							// 
-							// 				}else{
-							// 					// alert(data.data);
-							// 					// $("#diff").text(data);
-							// 					popup(data.OK);
-
-								diff_editor.setValue(data);
-							// }
-
-						},
-						error: function(xhr, textStatus, errorThrow){
-							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
-							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
-
-							showWaiting(false);
-
-						}
-					}); // $ajax
-					showWaiting(true);
-				}
-				function select_pull(){
-					$("#diff").css("display", "block");
-					$("#push").css("display", "none");
-					// $("#pull").css("display", "block");
-					$("#git_commit").css("display", "none");
-					$("#history").css("display", "none");
-					
-					$("#btn_tab_pull").addClass("selected");
-					$("#btn_tab_commit").removeClass("selected");
-					$("#btn_tab_push").removeClass("selected");
-					$("#btn_tab_diff").removeClass("selected");
-					$.ajax({
-						type: "post",
-						url: "/app/pull?f="+fname+"&t="+ new Date().getTime(),
-						dataType: 'json',
-
-						data: {
-							appid:g_appid,
-
-
-							// sid: '<%=@sid%>',
-							// authenticity_token:window._token
-						}, 
-						success: function(data, textStatus){
-							// alert( "Data Saved: " + data +","+ textStatus);
-
-							showWaiting(false);
-							if (data.error){
-								popup(data.error);
-								diff_editor.setValue(data.data);
-							
-							}else{
-								// alert(data.data);
-								// $("#diff").text(data);
-								popup(data.OK);
-								
-								diff_editor.setValue(data.data);
-							}
-							
-						},
-						error: function(xhr, textStatus, errorThrow){
-							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
-							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
-
-							showWaiting(false);
-
-						}
-					}); // $ajax
-					showWaiting(true);
-				}
-				
-				function select_push(){
-					$("#diff").css("display", "block");
-					$("#push").css("display", "none");
-					$("#pull").css("display", "none");
-					$("#git_commit").css("display", "none");
-					$("#history").css("display", "none");
-					
-					$("#btn_tab_push").addClass("selected");
-					$("#btn_tab_commit").removeClass("selected");
-					$("#btn_tab_pull").removeClass("selected");
-					$("#btn_tab_diff").removeClass("selected");
-					$.ajax({
-						type: "post",
-						url: "/app/push?f="+fname+"&t="+ new Date().getTime(),
-						dataType: 'json',
-
-						data: {
-							appid:g_appid,
-
-
-							// sid: '<%=@sid%>',
-							// authenticity_token:window._token
-						}, 
-						success: function(data, textStatus){
-							// alert( "Data Saved: " + data +","+ textStatus);
-
-							showWaiting(false);
-							if (data.error){
-								popup(data.error);
-								diff_editor.setValue(data.data);
-
-							}else{
-								// alert(data.data);
-								// $("#diff").text(data);
-								popup(data.OK);
-
-								diff_editor.setValue(data.data);
-							}
-
-						},
-						error: function(xhr, textStatus, errorThrow){
-							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
-							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
-
-							showWaiting(false);
-
-						}
-					}); // $ajax
-					showWaiting(true);
-				}
-				
-				
-				function gen_bo_mig(){
-						// type = g_selected_node.type;
-					// fname = g_selected_node.name;
-					if (g_current_bo_node == null)
-						return;
-					fname = getNodePath(g_current_bo_node);
-
-					$.ajax({
-						type: "post",
-						url: "/app/gbm?t="+ new Date().getTime(),
-						dataType: 'json',
-
-						data: {
-							appid:g_appid,
-							fname:fname,
-							// type:type,
-
-							// sid: '<%=@sid%>',
-							// authenticity_token:window._token
-						}, 
-						success: function(data, textStatus){
-							// alert( "Data Saved: " + data +","+ textStatus);
-
-							showWaiting(false);
-							if (data.error){
-								popup(data.error);
-							}else{
-								 // alert(data.data);
-								var parent_node = $tree.tree('getNodeById', 111);
-								for (var i =0; i< data.migrate.length; i++){
-									mig = data.migrate[i];
-									target = find_node_by_name(parent_node, mig);
-									if (target == null)
-										target = $('#tree').tree(
-									    	'appendNode',
-										    {
-										        label: mig,
-										        type:'code',
-										    },
-										    parent_node
-										);
-										// $(target.element).find("div").click();
-								}
-								// alert(inspect(target));
-								$(target.element).find("div").click();
-								// $("#applist").html(data);
-								appendToConsole('Generate migration script successfully');
-
-							}
-
-						},
-						error: function(xhr, textStatus, errorThrow){
-							// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
-							popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
-
-							showWaiting(false);
-
-						}
-					}); // $ajax
-				}
-			</script>
 			</div>
 			
 			<div id="bo_designer" class="droppable" name="body" style="display:none;width:99%;height:580px;background:#fefefe;">
@@ -675,7 +409,27 @@
 					<!-- <div id="canvas_end">
 									</div> -->
 				</div>
-			</div>
+			</div><!-- bo_designer -->
+
+
+<script>
+function on_select_theme(theme){
+	ace_editor.setTheme("ace/theme/"+theme);	
+	$("#theme_list").css("display", "none");
+}
+function show_themes(){
+	$("#theme_list").css("display", "block");
+	var pos = $("#btn_select_theme").offset();
+	var m_pos = $("#main").offset();
+	var x = pos.left - m_pos.left;
+	// alert($("#btn_select_theme").height());
+	var y = pos.top - m_pos.top - $("#theme_list").height();
+	// alert(inspect(m_pos));
+	// alert($("#btn_select_theme").offset().left);
+	$("#theme_list").css("left", x);
+	$("#theme_list").css("top", y);
+}
+</script>
 		</div><!-- code_pane -->
 	</div> <!-- main -->
 
@@ -686,10 +440,11 @@
 	</div>
 	<div id="popup" class="round_border_b" style="display:none;opacity:0.3;background-color:black;color:white;text-align:center;padding:28px;position:absolute;left:500px;top:180px;z-index:800;width:300px;height:168px;font-size:13pt;min-height:57px;max-height:300px;overflow:auto;word-wrap: break-word;word-break: normal;/*background-size:243px 93px;*/border:0px red solid;" onclick="close_popup();">
 	</div>
-	<div id="balloon" style="display:none;left:200px;top:200px;width:300px;height:300px;position:absolute;z-index:200;">
-		<img style="float:right;width:20px;" src="/images/close.png" onclick="show_balloon(false);" />
+	<div id="balloon" class="commit-form1" style="display:none;left:200px;top:200px;width:300px;min-height:300px;position:absolute;z-index:200;">
+		<div id="balloon_title" style="float:left;"></div>
+		<img style="float:right;width:20px;z-index:1000;" src="/images/close.png" onclick="show_balloon(false);" />
 		<!-- <div id="ballon_c"> -->
-		<div id="balloon_field_list" style="margin-top:10px;scroll:auto;">
+		<div id="balloon_field_list" style="margin-top:22px;scroll:auto;">
 			<!--div class="field" style="border-bottom:1px solid grey;margin-top:5px;">
 				Id <span style="color:grey">(Integer)</span>
 			</div>
@@ -1035,13 +790,13 @@ end
 	// var ace = require("lib/ace");
 	var ace_editor = ace.edit("editor");
 	
-	// editor.setTheme("ace/theme/twilight");
+	// ace_editor.setTheme("ace/theme/twilight");
 	
 	// editor.getSession().setMode("ace/mode/javascript");
 	ace_editor.getSession().setMode("ace/mode/ruby");
-	
+	ace_editor.getSession().setUseWorker(true);
 	ace_editor.getSession().setTabSize(4);
-	
+	ace_editor.setTheme("ace/theme/textmate");
 	document.getElementById('editor').style.fontSize='18px';
 	
 	ace_editor.getSession().setUseWrapMode(false);
@@ -1064,19 +819,31 @@ end
     	readOnly: false // 如果不需要使用只读模式，这里设置false
     });
 	function set_ace_mode(file_ext){
-		if (file_ext == "rb")
+		// alert("setmode for "+file_ext);
+		if (file_ext == "rb"){
 			ace_editor.getSession().setMode("ace/mode/ruby");
-		else if (file_ext == "js")
-			ace_editor.getSession().setMode("ace/mode/js");
+		}
+		else if (file_ext == "js"){
+			ace_editor.getSession().setMode("ace/mode/javascript");			
+		}
 		else if (file_ext == "css")
 			ace_editor.getSession().setMode("ace/mode/css");
 		else if (file_ext == "html")
 			ace_editor.getSession().setMode("ace/mode/html");
+		else if (file_ext == "json")
+			ace_editor.getSession().setMode("ace/mode/json");
+		else if (file_ext == "php")
+			ace_editor.getSession().setMode("ace/mode/php");
+		else if (file_ext == "less")
+			ace_editor.getSession().setMode("ace/mode/less");
+		else
+			ace_editor.getSession().setMode("ace/mode/test");
+		
 	}
 
 
 	var diff_editor = ace.edit("diff");
-	diff_editor.getSession().setMode("ace/mode/ruby");
+	diff_editor.getSession().setMode("ace/mode/javascript");
 	diff_editor.getSession().setTabSize(4);	
 	document.getElementById('editor').style.fontSize='18px';
 	diff_editor.getSession().setUseWrapMode(false);
@@ -1144,6 +911,67 @@ end
 		// return toJSON(g_bos);
 		
 	}
+	function gen_bo_mig(){
+			// type = g_selected_node.type;
+		// fname = g_selected_node.name;
+		if (g_current_bo_node == null)
+			return;
+		fname = getNodePath(g_current_bo_node);
+
+		$.ajax({
+			type: "post",
+			url: "/app/gbm?t="+ new Date().getTime(),
+			dataType: 'json',
+
+			data: {
+				appid:g_appid,
+				fname:fname,
+				// type:type,
+
+				// sid: '<%=@sid%>',
+				// authenticity_token:window._token
+			}, 
+			success: function(data, textStatus){
+				// alert( "Data Saved: " + data +","+ textStatus);
+
+				showWaiting(false);
+				if (data.error){
+					popup(data.error);
+				}else{
+					 // alert(data.data);
+					var parent_node = $tree.tree('getNodeById', 111);
+					for (var i =0; i< data.migrate.length; i++){
+						mig = data.migrate[i];
+						target = find_node_by_name(parent_node, mig);
+						if (target == null)
+							target = $('#tree').tree(
+						    	'appendNode',
+							    {
+							        label: mig,
+							        type:'code',
+							    },
+							    parent_node
+							);
+							// $(target.element).find("div").click();
+					}
+					// alert(inspect(target));
+					$(target.element).find("div").click();
+					// $("#applist").html(data);
+					appendToConsole('Generate migration script successfully');
+
+				}
+
+			},
+			error: function(xhr, textStatus, errorThrow){
+				// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+				popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+				showWaiting(false);
+
+			}
+		}); // $ajax
+	}
+	
 	function save(){
 		if (g_currentView == "bo_designer"){
 			
@@ -1259,6 +1087,52 @@ end
 		}); // $ajax
 		// alert(content);
 		showWaiting(true);
+	    
+	}
+	function do_undeployto(ver){
+		
+		// alert(getNodePath(g_selected_node));
+		if (isEditorChanged()){
+			popup("Pleave save your file first");
+			return;
+		}
+		
+	
+		$.ajax({
+			type: "post",
+			url: "/app/undeployto?t="+ new Date().getTime(),
+			dataType: 'json',
+
+			data: {
+				appid:g_appid,
+				v:ver
+		
+				// sid: '<%=@sid%>',
+				// authenticity_token:window._token
+			}, 
+			success: function(data, textStatus){
+				// alert( "Data Saved: " + data +","+ textStatus);
+
+				showWaiting(false);
+				if (data.error){
+					popup(data.error);
+				}else{
+					// $("#applist").html(data);
+					popup('Undeploy successfully.<br />Please click <a target="_blank" href="'+data.url+'" >here</a> to view.');
+				}
+
+			},
+			error: function(xhr, textStatus, errorThrow){
+				// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+				popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+				
+				showWaiting(false);
+
+			}
+		}); // $ajax
+		// alert(content);
+		showWaiting(true);
+		show_balloon(false);
 	    
 	}
 	function gosubmit(){
@@ -1571,11 +1445,12 @@ end
 		// view: "editor", "bo_designer", "git", "log"
 		// node: if triggered by click this node
 		function switch_view(view, node){ 
-			$("#editor").css("display", "none");	
+			$("#editor_wrapper").css("display", "none");	
 			$("#bo_designer").css("display", "none");
 			$("#git").css("display", "none");
 			$("#log").css("display", "none");															
 			$("#prop_pad").css("display", "none");
+			
 			if (view != "bo_designer")
 				g_current_bo_node = null;
 			else if (node != null)
@@ -1583,7 +1458,10 @@ end
 				
 			g_currentView = view;
 			
-			$("#"+view).css("display", "block");
+			if (view == "editor")
+				$("#editor_wrapper").css("display", "block");
+			else
+				$("#"+view).css("display", "block");
 			
 		}
 		function show_editor(){
@@ -1806,6 +1684,8 @@ end
 			// alert();
 			// $("#console").attr("scrollTop", $("#console").prop('scrollHeight'));
 		}
+		
+
 // =======
 // = git =
 // =======				
@@ -1983,7 +1863,7 @@ end
 							// 							function(){
 							// 								$(this).animate({height: 'toggle', opacity: 'toggle'}, "slow");
 							// 							});	
-							show_balloon(true, event);
+							show_balloon_for_bo(true, event);
 							g_bo = inserted;
 							
 						});		
@@ -2215,32 +2095,79 @@ function retrieve_log(){
 // 	});
 	// alert(111);
 	
-	function show_balloon(t, e){
-	/*	fl = g_bo.find("div.field_list");
-		bal = $("#balloon_field_list");
-		bal.html(fl.html());
-		
-		inputs = fl.find("input");
-		forEach(i in inputs){
-			bal.find(i.prop('id')).val(i.val());
-		}*/
-		
-		html = render_bo_fields(g_bo.prop('ref'));
-		html += "					<div class=\"btn_add_bf\" style=\"border-bottom:1px solid grey;margin-top:5px;\" onclick=\"add_bo_field();\">\
-								<img src=\"/images/button-add.png\" class=\"toolbar_btn\">\
-							</div>";
-		$("#balloon_field_list").html(html);
+	function show_balloon_for_bo(t, e ){
+		/*	fl = g_bo.find("div.field_list");
+			bal = $("#balloon_field_list");
+			bal.html(fl.html());
+
+			inputs = fl.find("input");
+			forEach(i in inputs){
+				bal.find(i.prop('id')).val(i.val());
+			}*/
+			html = render_bo_fields(g_bo.prop('ref'));
+			html += "<div class=\"btn_add_bf\" style=\"border-bottom:1px solid grey;margin-top:5px;\" onclick=\"add_bo_field();\">\
+						<img src=\"/images/button-add.png\" class=\"toolbar_btn\">\
+					</div>";
+				show_balloon(t, e, html, "Fields");
+	
+			// alert(g_bo.html());
+			// alert(inspect(g_bo));	
+	}
+	// t: true to show, false to close
+	function show_balloon(t, e, content, title){
+		title = title || "";
+		content = content || "";
+		$("#balloon_field_list").html(content);
 		// alert(html);
+		$("#balloon_title").html(title);
+
 		$("#balloon").animate({height: 'toggle', opacity: 'toggle'}, "slow");
+		// alert(inspect(e));
 		if (e){
 			$("#balloon").css("left", e.clientX);
 			$("#balloon").css("top", e.clientY);
 		}
-		// alert(g_bo.html());
-		// alert(inspect(g_bo));
 	}
 	$("#balloon").draggable();
 	
+	function show_balloon_for_mig(e){
+		$.ajax({
+			type: "post",
+			url: "/app/migrated?t="+ new Date().getTime(),
+			// dataType: 'json',
+
+			data: {
+				appid:g_appid,
+
+				// sid: '<%=@sid%>',
+				// authenticity_token:window._token
+			}, 
+			success: function(data, textStatus){
+				// alert( "Data Saved: " + data +","+ textStatus);
+
+				showWaiting(false);
+				// if (data.error){
+				// 			popup(data.error);
+				// 		}else{
+					show_balloon(true, e, data, "Undeploy to");
+
+				//	popup('Deploy successfully.<br />Please click <a target="_blank" href="'+data.url+'" >here</a> to view.');
+				// }
+			},
+			error: function(xhr, textStatus, errorThrow){
+				// alert("error"+errorThrow+","+textStatus+","+xhr.responseText);
+				popup("error"+errorThrow+","+textStatus+","+xhr.responseText);
+
+				showWaiting(false);
+
+			}
+		}); // $ajax
+
+		// alert(html);
+
+		// alert(g_bo.html());
+		// alert(inspect(g_bo));
+	}
 // ================
 // = BO functions =
 // ================	
@@ -2404,7 +2331,7 @@ function retrieve_log(){
 			// 							function(){
 			// 								$(this).animate({height: 'toggle', opacity: 'toggle'}, "slow");
 			// 							});	
-			show_balloon(true, event);
+			show_balloon_for_bo(true, event);
 			g_bo = inserted;
 			
 		});		

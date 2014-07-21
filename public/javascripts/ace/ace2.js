@@ -6063,7 +6063,6 @@ var EditSession = function(text, mode) {
         } else {
             path = mode || "ace/mode/text";
         }
-
         if (!this.$modes["ace/mode/text"])
             this.$modes["ace/mode/text"] = new TextMode();
 
@@ -6072,18 +6071,12 @@ var EditSession = function(text, mode) {
             cb && cb();
             return;
         }
-
-
         this.$modeId = path;
-		// alert("modeid="+this.$modeId);
         config.loadModule(["mode", path], function(m) {
-			// alert(0);
-	
             if (this.$modeId !== path)
                 return cb && cb();
             if (this.$modes[path] && !options)
                 return this.$onChangeMode(this.$modes[path]);
-		// alert("m="+m);
             if (m && m.Mode) {
                 m = new m.Mode(options);
                 if (!options) {
@@ -6094,7 +6087,6 @@ var EditSession = function(text, mode) {
                 cb && cb();
             }
         }.bind(this));
-// alert(1);
         if (!this.$mode)
             this.$onChangeMode(this.$modes["ace/mode/text"], true);
     };
@@ -6102,14 +6094,12 @@ var EditSession = function(text, mode) {
     this.$onChangeMode = function(mode, $isPlaceholder) {
         if (!$isPlaceholder)
             this.$modeId = mode.$id;
-// alert("mode "+ mode);
         if (this.$mode === mode) 
             return;
 
         this.$mode = mode;
 
         this.$stopWorker();
-		// alert(inspect(this.$mode));
 
         if (this.$useWorker)
             this.$startWorker();

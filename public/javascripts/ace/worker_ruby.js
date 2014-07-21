@@ -870,7 +870,7 @@ var toObject = function (o) {
 
 });
 
-define('ace/mode/php_worker', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/worker/mirror', 'ace/mode/php/php'], function(require, exports, module) {
+define('ace/mode/ruby_worker', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/worker/mirror', 'ace/mode/php/php'], function(require, exports, module) {
 
 
 var oop = require("../lib/oop");

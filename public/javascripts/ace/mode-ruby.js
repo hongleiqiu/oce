@@ -37,7 +37,21 @@ var RubyHighlightRules = require("./ruby_highlight_rules").RubyHighlightRules;
 var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutdent;
 var Range = require("../range").Range;
 var FoldMode = require("./folding/coffee").FoldMode;
+var WorkerClient = require("../worker/worker_client").WorkerClient;
+this.createWorker = function(session) {
+    var worker = new WorkerClient(["ace"], "ace/mode/javascript_worker", "WorkerModule");
+    worker.attachToDocument(session.getDocument());
 
+    worker.on("lint", function(results) {
+        session.setAnnotations(results.data);
+    });
+
+    worker.on("terminate", function() {
+        session.clearAnnotations();
+    });
+
+    return worker;
+};
 var Mode = function() {
     this.HighlightRules = RubyHighlightRules;
     this.$outdent = new MatchingBraceOutdent();

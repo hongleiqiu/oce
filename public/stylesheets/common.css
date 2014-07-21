@@ -35,3 +35,28 @@
 	-moz-border-radius: 10px;  
 	-webkit-border-radius: 10px;
 }
+
+#balloon:before {
+border-right-color: #dddddd;
+border-width: 8px;
+}
+#balloon:after, #balloon:before{
+	position: absolute;
+	top: 11px;
+	left: -16px;
+	right: 100%;
+	width: 0;
+	height: 0;
+	display: block;
+	content: " ";
+	border-color: transparent;
+	border-style: solid solid outset;
+	pointer-events: none;
+}
+#balloon:after{
+	border-width: 7px;
+	border-right-color: #efefef;
+/*	border-right-color: white;	*/
+	margin-top: 1px;
+	margin-left: 2px;
+}
