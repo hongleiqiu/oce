@@ -104,10 +104,8 @@ function autoPos(a, b){
 //	alert(c_w+","+c_h);
 }
 function inspect(obj) {
+    var props = "";
 
-	
-     var props = "";
-	
 	var type = typeof(obj);
 	if (type == "string" || type == "number" || type == "boolean")
 		return obj+"["+typeof(obj)+"]";

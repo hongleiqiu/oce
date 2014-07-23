@@ -38,20 +38,7 @@ var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutd
 var Range = require("../range").Range;
 var FoldMode = require("./folding/coffee").FoldMode;
 var WorkerClient = require("../worker/worker_client").WorkerClient;
-this.createWorker = function(session) {
-    var worker = new WorkerClient(["ace"], "ace/mode/javascript_worker", "WorkerModule");
-    worker.attachToDocument(session.getDocument());
 
-    worker.on("lint", function(results) {
-        session.setAnnotations(results.data);
-    });
-
-    worker.on("terminate", function() {
-        session.clearAnnotations();
-    });
-
-    return worker;
-};
 var Mode = function() {
     this.HighlightRules = RubyHighlightRules;
     this.$outdent = new MatchingBraceOutdent();
@@ -97,7 +84,21 @@ oop.inherits(Mode, TextMode);
         if (indent.slice(-tab.length) == tab)
             doc.remove(new Range(row, indent.length-tab.length, row, indent.length));
     };
+	this.createWorker = function(session) {
+		console.log("create ruby worker");
+	    var worker = new WorkerClient(["ace"], "ace/mode/ruby_worker", "RubyWorker");
+	    worker.attachToDocument(session.getDocument());
 
+	    worker.on("lint", function(results) {
+	        session.setAnnotations(results.data);
+	    });
+
+	    worker.on("terminate", function() {
+	        session.clearAnnotations();
+	    });
+
+	    return worker;
+	};
     this.$id = "ace/mode/ruby";
 }).call(Mode.prototype);
 
