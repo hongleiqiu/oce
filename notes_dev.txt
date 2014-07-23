@@ -160,3 +160,26 @@ vi /usr/local/lib/ruby/gems/1.8/gems/activerecord-2.3.5/lib/active_record/base.r
 
 1.select seq
 2. insert udometadata
+
+
+
+# syntax check 
+cd /Users/i027910/Desktop/SAP/src/jison/examples
+jison ruby.jison
+1. copy content worker-ruby.js
+2. commect follow lines
+ if (typeof this.yy.parseError === 'function') {
+     this.parseError = this.yy.parseError;
+ } else {
+     this.parseError = Object.getPrototypeOf(this).parseError;
+ }
+
+3, add one line 
++ errStr = 'Unexpected ' + (symbol == EOF ? 'end of input' : '\'' + (this.terminals_[symbol] || symbol) + '\''+'\nExpecting ' + expected.join(', ') );
+  this.parseError(errStr, {
+      text: this.lexer.match,
+      token: this.terminals_[symbol] || symbol,
+      line: this.lexer.yylineno,
+      loc: yyloc,
+      expected: expected
+  });

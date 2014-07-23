@@ -890,7 +890,7 @@ oop.inherits(PhpWorker, Mirror);
     };
    
     this.onUpdate = function() {
-	console.log("onupdate");
+	console.log("onupdate php");
         var value = this.doc.getValue();
         var errors = [];
         if (this.inlinePhp)
@@ -900,6 +900,7 @@ oop.inherits(PhpWorker, Mirror);
         try {
             new PHP.Parser(tokens);
         } catch(e) {
+	console.log("php error line "+e.line);
             errors.push({
                 row: e.line - 1,
                 column: null,
